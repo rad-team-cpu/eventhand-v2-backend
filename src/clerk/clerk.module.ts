@@ -23,6 +23,7 @@ export const {
   .setClassMethodName('forRoot')
   .build();
 
+//Clerk Guard
 @Injectable()
 export class ClerkGuard implements CanActivate {
   constructor(@Inject(CLERK) private readonly clerk: ClerkService) {}
@@ -44,6 +45,7 @@ export class ClerkGuard implements CanActivate {
   }
 }
 
+//Clerk Required Guard
 @Injectable()
 export class ClerkRequiredGuard implements CanActivate {
   constructor(@Inject(CLERK) private readonly clerk: ClerkService) {}
@@ -68,6 +70,7 @@ export class ClerkRequiredGuard implements CanActivate {
   }
 }
 
+//Clerk Module
 @Module({})
 export class ClerkModule extends ConfigurableModuleClass {
   private static hydrateModule(module: DynamicModule): DynamicModule {
