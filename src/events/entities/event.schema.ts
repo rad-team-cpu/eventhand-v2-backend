@@ -1,30 +1,30 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type UserDocument = HydratedDocument<User>;
+export type EventDocument = HydratedDocument<Event>;
 
 @Schema()
-class User {
+export class Event {
   @Prop({ required: true })
-  lastName: string;
-
-  @Prop({ required: true })
-  firstName: string;
-
-  @Prop({ required: true })
-  contactNumber: string;
+  name: string;
 
   @Prop({ required: true })
   type: string;
 
   @Prop({ required: true })
-  role: string;
+  attendees: number;
+
+  @Prop({ required: true })
+  Date: Date;
+
+  @Prop({ required: true })
+  budget: number;
 
   @Prop({ required: true, default: Date.now() })
   createdAt: Date;
 
   @Prop({ required: true })
-  updatedAt: Date;
+  updatedOn: Date;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const EventSchema = SchemaFactory.createForClass(Event);
