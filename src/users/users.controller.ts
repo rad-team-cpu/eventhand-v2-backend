@@ -10,6 +10,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { SearchClerkIdDto } from './dto/search-clerk.dto';
 
 @Controller('users')
 export class UsersController {
@@ -23,6 +24,11 @@ export class UsersController {
   @Get()
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @Get('clerk=:clerkId')
+  findUserByClerkId(@Param() params: SearchClerkIdDto) {
+    return this.usersService.findByClerkId(params.clerkId);
   }
 
   @Get(':id')

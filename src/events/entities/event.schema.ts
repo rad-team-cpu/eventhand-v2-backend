@@ -1,10 +1,18 @@
+import { User } from '@clerk/clerk-sdk-node';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
 export type EventDocument = HydratedDocument<Event>;
 
 @Schema()
 export class Event {
+  @Prop({
+    required: true,
+    type: MongooseSchema.Types.ObjectId,
+    ref: User.name,
+  })
+  organizer: string;
+
   @Prop({ required: true })
   name: string;
 

@@ -1,10 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
-class User {
+export enum Gender {
+  MALE = 'Male',
+  FEMALE = 'Female',
+}
+
+@Schema({ timestamps: true })
+export class User {
+  @Prop({ required: true })
+  clerkId: string;
+
   @Prop({ required: true })
   lastName: string;
 
@@ -14,17 +22,43 @@ class User {
   @Prop({ required: true })
   contactNumber: string;
 
-  @Prop({ required: true })
-  type: string;
+  @Prop({ required: true, enum: Object.values(Gender) })
+  gender: Gender;
 
-  @Prop({ required: true })
-  role: string;
+  @Prop([
+    {
+      _id: { type: MongooseSchema.Types.ObjectId, required: true, auto: true },
+      name: { type: String, required: true },
+      type: { type: String, required: true },
+      attendees: { type: Number, required: true },
+      budget: { type: Number, required: true },
+      date: { type: Date, required: true },
+    },
+  ])
+  events: {
+    _id: MongooseSchema.Types.ObjectId;
+    name: string;
+    type: string;
+    attendees: number;
+    budget: number;
+    date: Date;
+  }[];
 
-  @Prop({ required: true, default: Date.now() })
-  createdAt: Date;
+  @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'User' }])
+  chats: MongooseSchema.Types.ObjectId[];
 
-  @Prop({ required: true })
-  updatedAt: Date;
+  @Prop({
+    _id: { type: MongooseSchema.Types.ObjectId, required: true, auto: true },
+    name: { type: String, required: true },
+    type: { type: String, required: true },
+    address: { type: String, required: true },
+  })
+  vendor: {
+    _id: MongooseSchema.Types.ObjectId;
+    name: string;
+    type: string;
+    address: string;
+  };
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
