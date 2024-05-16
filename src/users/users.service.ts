@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { SearchClerkIdDto } from './dto/search-clerk.dto';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +22,7 @@ export class UsersService {
     return `This action returns a #${id} user`;
   }
 
-  async findByClerkId(clerkId: string): Promise<User> {
+  async findByClerkId(clerkId: SearchClerkIdDto): Promise<User> {
     return this.userModel
       .findOne({
         clerkId: clerkId,

@@ -28,7 +28,7 @@ export class UsersController {
 
   @Get('clerk=:clerkId')
   findUserByClerkId(@Param() params: SearchClerkIdDto) {
-    return this.usersService.findByClerkId(params.clerkId);
+    return this.usersService.findByClerkId(params);
   }
 
   @Get(':id')
