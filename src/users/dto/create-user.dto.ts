@@ -3,7 +3,6 @@ import { Gender } from '../entities/user.schema';
 
 export class CreateUserDto {
   @IsString()
-  @Length(1, 20)
   clerkId: string;
 
   @IsString()

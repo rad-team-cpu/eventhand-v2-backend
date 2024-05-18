@@ -27,12 +27,12 @@ export class User {
 
   @Prop([
     {
-      _id: { type: MongooseSchema.Types.ObjectId, required: true, auto: true },
-      name: { type: String, required: true },
-      type: { type: String, required: true },
-      attendees: { type: Number, required: true },
-      budget: { type: Number, required: true },
-      date: { type: Date, required: true },
+      _id: { type: MongooseSchema.Types.ObjectId },
+      name: { type: String },
+      type: { type: String },
+      attendees: { type: Number },
+      budget: { type: Number },
+      date: { type: Date },
     },
   ])
   events: {
@@ -48,10 +48,10 @@ export class User {
   chats: MongooseSchema.Types.ObjectId[];
 
   @Prop({
-    _id: { type: MongooseSchema.Types.ObjectId, required: true, auto: true },
-    name: { type: String, required: true },
-    type: { type: String, required: true },
-    address: { type: String, required: true },
+    _id: { type: MongooseSchema.Types.ObjectId },
+    name: { type: String },
+    type: { type: String },
+    address: { type: String },
   })
   vendor: {
     _id: MongooseSchema.Types.ObjectId;
