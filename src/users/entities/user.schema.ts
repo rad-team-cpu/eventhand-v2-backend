@@ -4,8 +4,8 @@ import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 export type UserDocument = HydratedDocument<User>;
 
 export enum Gender {
-  MALE = 'Male',
-  FEMALE = 'Female',
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
 }
 
 @Schema({ timestamps: true })
