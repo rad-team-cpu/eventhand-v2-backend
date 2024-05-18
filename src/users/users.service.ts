@@ -27,7 +27,10 @@ export class UsersService {
       .findOne({
         clerkId: SearchClerkIdDto.clerkId,
       })
-      .exec();
+      .exec()
+      .then(
+        console.log(`User with clerkId: ${SearchClerkIdDto.clerkId} found`),
+      );
   }
 
   // update(id: number, updateUserDto: UpdateUserDto) {
