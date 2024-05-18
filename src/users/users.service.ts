@@ -22,10 +22,10 @@ export class UsersService {
     return `This action returns a #${id} user`;
   }
 
-  async findByClerkId(SearchClerkIdDto: SearchClerkIdDto): Promise<User> {
+  async findByClerkId(clerkId: string): Promise<User> {
     const result = this.userModel
       .findOne({
-        clerkId: SearchClerkIdDto.clerkId,
+        clerkId: clerkId,
       })
       .exec();
     return result;

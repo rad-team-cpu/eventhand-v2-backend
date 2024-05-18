@@ -28,8 +28,18 @@ export class UsersController {
   }
 
   @Get('clerk=:clerkId')
-  findUserByClerkId(@Param() params: SearchClerkIdDto): Promise<User> {
-    return this.usersService.findByClerkId(params);
+  async findUserByClerkId(@Param('clerkId') clerkId: string): Promise<User> {
+    try {
+      const user = await this.usersService.findByClerkId(clerkId);
+      if (!user) {
+        // Handle the case where no user is found (e.g., throw an exception)
+        throw new NotFoundException(`User with clerkId ${clerkId} not found`);
+      }
+      return user;
+    } catch (error) {
+      // Handle any exceptions thrown by the service method
+      throw error;
+    }
   }
 
   @Get(':id')
