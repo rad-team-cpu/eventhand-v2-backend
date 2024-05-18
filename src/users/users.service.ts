@@ -23,14 +23,12 @@ export class UsersService {
   }
 
   async findByClerkId(SearchClerkIdDto: SearchClerkIdDto): Promise<User> {
-    return this.userModel
+    const result = this.userModel
       .findOne({
         clerkId: SearchClerkIdDto.clerkId,
       })
-      .exec()
-      .then(
-        console.log(`User with clerkId: ${SearchClerkIdDto.clerkId} found`),
-      );
+      .exec();
+    return result;
   }
 
   // update(id: number, updateUserDto: UpdateUserDto) {
