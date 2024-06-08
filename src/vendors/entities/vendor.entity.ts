@@ -28,9 +28,6 @@ export class Vendor {
 
   @Prop()
   credentials: [string];
-
-  @Prop()
-  reviews: 
 }
 
 export const VendorSchema = SchemaFactory.createForClass(Vendor);
