@@ -13,6 +13,9 @@ export class User {
   @Prop({ required: true })
   clerkId: string;
 
+  @Prop()
+  profilePicture: string;
+
   @Prop({ required: true })
   lastName: string;
 
