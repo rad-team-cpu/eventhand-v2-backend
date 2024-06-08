@@ -6,6 +6,8 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { UsersModule } from './users/users.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EventsModule } from './events/events.module';
+import { VendorsModule } from './vendors/vendors.module';
+import { ReviewsModule } from './reviews/reviews.module';
 import config from './config/config';
 
 @Module({
@@ -21,6 +23,8 @@ import config from './config/config';
     AuthenticationModule,
     UsersModule,
     EventsModule,
+    VendorsModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

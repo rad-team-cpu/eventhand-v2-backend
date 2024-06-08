@@ -1,4 +1,4 @@
-import { IsString, Length, IsEnum } from 'class-validator';
+import { IsString, Length, IsEnum, IsEmail } from 'class-validator';
 import { Gender } from '../entities/user.schema';
 
 export class CreateUserDto {
@@ -8,6 +8,9 @@ export class CreateUserDto {
   @IsString()
   @Length(1, 50)
   lastName: string;
+
+  @IsEmail()
+  email: string;
 
   @IsString()
   @Length(1, 50)
