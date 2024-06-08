@@ -13,16 +13,16 @@ export class UsersService {
     return this.userModel.create(createUserDto);
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(): Promise<User[]> {
+    return await this.userModel.find().exec();
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return `This action returns a #${id} user`;
   }
 
   async findByClerkId(clerkId: string): Promise<User> {
-    const result = this.userModel
+    const result = await this.userModel
       .findOne({
         clerkId: clerkId,
       })
@@ -34,7 +34,12 @@ export class UsersService {
   //   return `This action updates a #${id} user`;
   // }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(clerkId: string): Promise<User> {
+    const result = await this.userModel
+      .findByIdAndDelete({
+        clerkId: clerkId,
+      })
+      .exec();
+    return result;
   }
 }
