@@ -11,9 +11,9 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    // if (result) {
-    //   throw new ConflictException(`${result} already exists`);
-    // }
+    if (await this.userModel.exists(createUserDto)) {
+      throw new ConflictException(`${createUserDto} already exists`);
+    }
 
     return this.userModel.create(createUserDto);
   }
