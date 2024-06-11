@@ -4,7 +4,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { stringify } from 'querystring';
 
 @Injectable()
 export class UsersService {
@@ -27,11 +26,7 @@ export class UsersService {
   }
 
   async findByClerkId(clerkId: string): Promise<User> {
-    const result = await this.userModel
-      .findOne({
-        clerkId: clerkId,
-      })
-      .exec();
+    const result = await this.userModel.findOne({ clerkId: clerkId });
     return result;
   }
 
@@ -40,11 +35,9 @@ export class UsersService {
   // }
 
   async remove(clerkId: string): Promise<User> {
-    const result = await this.userModel
-      .findByIdAndDelete({
-        clerkId: clerkId,
-      })
-      .exec();
+    const result = await this.userModel.findOneAndDelete({
+      clerkId: clerkId,
+    });
     return result;
   }
 }
