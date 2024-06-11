@@ -28,11 +28,11 @@ export class Event {
   @Prop({ required: true })
   budget: number;
 
-  @Prop({ required: true, default: Date.now() })
+  @Prop({ default: Date.now() })
   createdAt: Date;
 
-  @Prop({ required: true })
-  updatedOn: Date;
+  @Prop()
+  updatedAt: Date;
 }
 
 export const EventSchema = SchemaFactory.createForClass(Event);
