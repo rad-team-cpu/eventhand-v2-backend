@@ -6,18 +6,11 @@ export type EventDocument = HydratedDocument<Event>;
 
 @Schema()
 export class Event {
-  @Prop({
-    required: true,
-    type: MongooseSchema.Types.ObjectId,
-    ref: User.name,
-  })
-  organizer: string;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
+  userId: User;
 
   @Prop({ required: true })
-  name: string;
-
-  @Prop({ required: true })
-  type: string;
+  clerkId: string;
 
   @Prop({ required: true })
   attendees: number;
