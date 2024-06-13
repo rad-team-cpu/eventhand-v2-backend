@@ -27,12 +27,14 @@ export class EventsController {
   }
 
   @Get('clerk=:clerkId')
-  async findAllByUserClerkId(@Param('clerkId') clerkId: string) {
-    return await this.eventsService.findOne({ clerkId });
+  async findAllByUserClerkId(
+    @Param('clerkId') clerkId: string,
+  ): Promise<Event[]> {
+    return await this.eventsService.getAllByUser({ clerkId });
   }
 
   @Get('userId=:id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<Event> {
     return await this.eventsService.findOne({ id });
   }
 
@@ -42,7 +44,7 @@ export class EventsController {
   // }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.eventsService.remove(+id);
+  async remove(@Param('id') id: string): Promise<Event> {
+    return await this.eventsService.remove(id);
   }
 }
