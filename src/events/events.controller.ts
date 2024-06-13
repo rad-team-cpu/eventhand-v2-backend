@@ -3,14 +3,14 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  // Patch,
   Param,
   Delete,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { Event } from './entities/event.schema';
 import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
+// import { UpdateEventDto } from './dto/update-event.dto';
 
 @Controller('events')
 export class EventsController {
@@ -22,13 +22,20 @@ export class EventsController {
   }
 
   @Get()
-  findAllByClerkId() {
+  async findAll() {
     return this.eventsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.eventsService.findOne(+id);
+  @Get('clerk=:clerkId')
+  async findAllByUserClerkId(
+    @Param('clerkId') clerkId: string,
+  ): Promise<Event[]> {
+    return await this.eventsService.getAllByUser({ clerkId });
+  }
+
+  @Get('userId=:id')
+  async findOne(@Param('id') id: string): Promise<Event> {
+    return await this.eventsService.findOne({ id });
   }
 
   // @Patch(':id')
@@ -36,8 +43,8 @@ export class EventsController {
   //   return this.eventsService.update(+id, updateEventDto);
   // }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.eventsService.remove(+id);
-  // }
+  @Delete(':id')
+  async remove(@Param('id') id: string): Promise<Event> {
+    return await this.eventsService.remove(id);
+  }
 }

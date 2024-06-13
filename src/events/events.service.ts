@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
+// import { UpdateEventDto } from './dto/update-event.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Event } from './entities/event.schema';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 @Injectable()
 export class EventsService {
@@ -17,15 +17,19 @@ export class EventsService {
     return await this.eventModel.find().exec();
   }
 
-  async findOne(filter: number): Promise<Event> {
-    return await this.eventModel.findById(filter).exec();
+  async getAllByUser(filter: FilterQuery<Event>): Promise<Event[]> {
+    return await this.eventModel.find(filter).exec();
+  }
+
+  async findOne(filter: FilterQuery<Event>): Promise<Event> {
+    return await this.eventModel.findOne(filter).exec();
   }
 
   // update(id: number, updateEventDto: UpdateEventDto) {
   //   return `This action updates a #${id} event`;
   // }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} event`;
-  // }
+  async remove(id: string): Promise<Event> {
+    return await this.eventModel.findByIdAndDelete(id);
+  }
 }
