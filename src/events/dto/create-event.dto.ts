@@ -1,4 +1,5 @@
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsDateString, IsNumber, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateEventDto {
   @IsString()
@@ -7,8 +8,9 @@ export class CreateEventDto {
   @IsNumber()
   attendees: number;
 
-  @IsDate()
-  date: string;
+  @Transform(({ value }) => new Date(value))
+  @IsDateString()
+  date: Date;
 
   @IsNumber()
   budget: number;
