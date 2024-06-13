@@ -31,7 +31,7 @@ export class Event {
   attendees: number;
 
   @Prop({ required: true })
-  Date: Date;
+  date: Date;
 
   @Prop({ required: true })
   budget: number;

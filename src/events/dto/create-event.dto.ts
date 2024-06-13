@@ -11,7 +11,7 @@ export class CreateEventDto {
   attendees: number;
 
   @IsDate()
-  Date: string;
+  date: string;
 
   @IsNumber()
   budget: number;
