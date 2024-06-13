@@ -8,7 +8,7 @@ export class CreateEventDto {
   attendees: number;
 
   @IsDate()
-  date: string;
+  date: Date;
 
   @IsNumber()
   budget: number;
