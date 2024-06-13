@@ -1,38 +1,50 @@
-import { User } from '@clerk/clerk-sdk-node';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { User } from 'src/users/entities/user.schema';
+import { Vendor } from 'src/vendors/entities/vendor.entity';
 
 export type EventDocument = HydratedDocument<Event>;
+export type BookingDocument = HydratedDocument<Booking>;
+
+@Schema()
+export class Booking {
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: Vendor.name,
+    required: true,
+  })
+  vendorId: Vendor;
+
+  @Prop({ required: true })
+  status: string;
+}
 
 @Schema()
 export class Event {
-  @Prop({
-    required: true,
-    type: MongooseSchema.Types.ObjectId,
-    ref: User.name,
-  })
-  organizer: string;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: User.name, required: true })
+  userId: User;
 
   @Prop({ required: true })
-  name: string;
-
-  @Prop({ required: true })
-  type: string;
+  clerkId: string;
 
   @Prop({ required: true })
   attendees: number;
 
   @Prop({ required: true })
-  Date: Date;
+  date: Date;
 
   @Prop({ required: true })
   budget: number;
 
-  @Prop({ required: true, default: Date.now() })
+  @Prop([{ type: Booking }])
+  bookings: [Booking];
+
+  @Prop({ default: Date.now() })
   createdAt: Date;
 
-  @Prop({ required: true })
-  updatedOn: Date;
+  @Prop()
+  updatedAt: Date;
 }
 
+export const BookingSchema = SchemaFactory.createForClass(Booking);
 export const EventSchema = SchemaFactory.createForClass(Event);
