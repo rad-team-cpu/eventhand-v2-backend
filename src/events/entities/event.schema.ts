@@ -16,7 +16,7 @@ export class Booking {
   vendorId: Vendor;
 
   @Prop({ required: true })
-  status;
+  status: string;
 }
 
 @Schema()
