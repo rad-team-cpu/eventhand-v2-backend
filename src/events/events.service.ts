@@ -30,6 +30,6 @@ export class EventsService {
   // }
 
   async remove(id: string): Promise<Event> {
-    return await this.eventModel.findByIdAndDelete(id);
+    return await this.eventModel.findByIdAndDelete(id).exec();
   }
 }

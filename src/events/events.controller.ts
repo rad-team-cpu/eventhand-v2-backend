@@ -33,7 +33,7 @@ export class EventsController {
     return await this.eventsService.getAllByUser({ clerkId });
   }
 
-  @Get('userId=:id')
+  @Get(':id')
   async findOne(@Param('id') id: string): Promise<Event> {
     return await this.eventsService.findOne({ id });
   }
