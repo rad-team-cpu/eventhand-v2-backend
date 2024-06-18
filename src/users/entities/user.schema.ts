@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Event } from 'src/events/entities/event.schema';
-import { EventsController } from 'src/events/events.controller';
 
 export type UserDocument = HydratedDocument<User>;
 
