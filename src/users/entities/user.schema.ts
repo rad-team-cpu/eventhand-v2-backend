@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { Event } from 'src/events/entities/event.schema';
+import { EventsController } from 'src/events/events.controller';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -31,26 +33,10 @@ export class User {
   @Prop({ required: true, enum: Object.values(Gender) })
   gender: Gender;
 
-  @Prop([
-    {
-      _id: { type: MongooseSchema.Types.ObjectId },
-      name: { type: String },
-      type: { type: String },
-      attendees: { type: Number },
-      budget: { type: Number },
-      date: { type: Date },
-    },
-  ])
-  events: {
-    _id: MongooseSchema.Types.ObjectId;
-    name: string;
-    type: string;
-    attendees: number;
-    budget: number;
-    date: Date;
-  }[];
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: Event.name }] })
+  events: Event[];
 
-  @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'User' }])
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   chats: MongooseSchema.Types.ObjectId[];
 
   @Prop({
