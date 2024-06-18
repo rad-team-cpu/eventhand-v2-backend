@@ -4,6 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Event } from 'src/events/entities/event.schema';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +19,7 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return await this.userModel.find().exec();
+    return await this.userModel.find().populate(Event.name).exec();
   }
 
   async findOne(id: number) {
@@ -30,6 +31,7 @@ export class UsersService {
       .findOne({
         clerkId: clerkId,
       })
+      .populate(Event.name)
       .exec();
     return result;
   }
