@@ -28,7 +28,7 @@ export class UsersController {
     return await this.usersService.findAll();
   }
 
-  @Post()
+  @Post('event')
   async createNewEvent(@Body() createEventDto: CreateEventDto): Promise<User> {
     return await this.usersService.createNewEvent(createEventDto);
   }
