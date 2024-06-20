@@ -29,7 +29,9 @@ export class UsersController {
   }
 
   @Post('event')
-  async createNewEvent(@Body() createEventDto: CreateEventDto): Promise<User> {
+  async createNewEvent(
+    @Body() createEventDto: CreateEventDto,
+  ): Promise<string> {
     return await this.usersService.createNewEvent(createEventDto);
   }
 

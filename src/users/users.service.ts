@@ -38,7 +38,7 @@ export class UsersService {
     return result;
   }
 
-  async createNewEvent(createEventDto: CreateEventDto): Promise<User> {
+  async createNewEvent(createEventDto: CreateEventDto): Promise<string> {
     const event = await this.eventModel.create(createEventDto);
 
     const result = await this.userModel
@@ -49,7 +49,7 @@ export class UsersService {
       )
       .populate('events')
       .exec();
-    return result.save();
+    return (await result.save()).id;
   }
 
   // update(id: number, updateUserDto: UpdateUserDto) {
