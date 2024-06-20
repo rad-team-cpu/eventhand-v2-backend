@@ -7,7 +7,10 @@ import { Model } from 'mongoose';
 import { CreateEventDto } from 'src/events/dto/create-event.dto';
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Event.name) private eventModel: Model<Event>,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     if (await this.userModel.exists(createUserDto)) {
@@ -36,9 +39,15 @@ export class UsersService {
   }
 
   async createNewEvent(createEventDto: CreateEventDto): Promise<User> {
-    const { clerkId, ...event } = createEventDto;
+    const event = await this.eventModel.create(createEventDto);
+
     const result = await this.userModel
-      .findOneAndUpdate({ clerkId: clerkId }, { $addToSet: { events: event } })
+      .findOneAndUpdate(
+        { clerkId: createEventDto.clerkId },
+        { $push: { events: event._id } },
+        { new: true },
+      )
+      .populate('events')
       .exec();
     return result.save();
   }

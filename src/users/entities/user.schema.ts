@@ -37,9 +37,6 @@ export class User {
   @Type(() => Array<Event>)
   events: Event[];
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
-  chats: MongooseSchema.Types.ObjectId[];
-
   @Prop({
     _id: { type: MongooseSchema.Types.ObjectId },
     name: { type: String },
