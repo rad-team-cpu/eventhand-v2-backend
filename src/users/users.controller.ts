@@ -12,6 +12,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.schema';
+import { CreateEventDto } from 'src/events/dto/create-event.dto';
 
 @Controller('users')
 export class UsersController {
@@ -25,6 +26,11 @@ export class UsersController {
   @Get()
   async findAll(): Promise<User[]> {
     return await this.usersService.findAll();
+  }
+
+  @Post()
+  async createNewEvent(@Body() createEventDto: CreateEventDto): Promise<User> {
+    return await this.usersService.createNewEvent(createEventDto);
   }
 
   @Get('clerk=:clerkId')

@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Type } from 'class-transformer';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Event } from 'src/events/entities/event.schema';
 
@@ -33,6 +34,7 @@ export class User {
   gender: Gender;
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: Event.name }] })
+  @Type(() => Array<Event>)
   events: Event[];
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
