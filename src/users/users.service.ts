@@ -13,8 +13,8 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    if (this.userModel.exists({ clerkId: createUserDto.clerkId })) {
-      throw new ConflictException();
+    if (await this.userModel.exists(createUserDto)) {
+      throw new ConflictException(`${createUserDto} already exists`);
     }
 
     return this.userModel.create(createUserDto);
@@ -57,11 +57,9 @@ export class UsersService {
   // }
 
   async remove(clerkId: string): Promise<User> {
-    const result = await this.userModel
-      .findByIdAndDelete({
-        clerkId: clerkId,
-      })
-      .exec();
+    const result = await this.userModel.findOneAndDelete({
+      clerkId: clerkId,
+    });
     return result;
   }
 }
