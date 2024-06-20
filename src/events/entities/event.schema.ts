@@ -5,7 +5,7 @@ import { Vendor } from 'src/vendors/entities/vendor.entity';
 export type EventDocument = HydratedDocument<Event>;
 export type BookingDocument = HydratedDocument<Booking>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Booking {
   @Prop({
     type: MongooseSchema.Types.ObjectId,
@@ -18,11 +18,8 @@ export class Booking {
   status: string;
 }
 
-@Schema()
+@Schema({ timestamps: true })
 export class Event {
-  @Prop({ required: true })
-  clerkId: string;
-
   @Prop({ required: true })
   attendees: number;
 
@@ -34,12 +31,6 @@ export class Event {
 
   @Prop([{ type: Booking }])
   bookings: [Booking];
-
-  @Prop({ default: Date.now() })
-  createdAt: Date;
-
-  @Prop()
-  updatedAt: Date;
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking);

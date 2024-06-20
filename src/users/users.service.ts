@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-
+import { CreateEventDto } from 'src/events/dto/create-event.dto';
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
@@ -18,7 +18,7 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return await this.userModel.find().exec();
+    return await this.userModel.find().populate('events').exec();
   }
 
   async findOne(id: number) {
@@ -26,8 +26,21 @@ export class UsersService {
   }
 
   async findByClerkId(clerkId: string): Promise<User> {
-    const result = await this.userModel.findOne({ clerkId: clerkId });
+    const result = await this.userModel
+      .findOne({
+        clerkId: clerkId,
+      })
+      .populate('events')
+      .exec();
     return result;
+  }
+
+  async createNewEvent(createEventDto: CreateEventDto): Promise<User> {
+    const { clerkId, ...event } = createEventDto;
+    const result = await this.userModel
+      .findOneAndUpdate({ clerkId: clerkId }, { $addToSet: { events: event } })
+      .exec();
+    return result.save();
   }
 
   // update(id: number, updateUserDto: UpdateUserDto) {
