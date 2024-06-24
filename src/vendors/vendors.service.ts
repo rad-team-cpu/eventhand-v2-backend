@@ -25,7 +25,7 @@ export class VendorsService {
   //   return `This action updates a #${id} vendor`;
   // }
 
-  async remove(id: number) {
-    return await this.vendorModel.findOneAndDelete({ id }).exec();
+  async remove(filter: FilterQuery<Vendor>): Promise<Vendor> {
+    return await this.vendorModel.findOneAndDelete(filter).exec();
   }
 }
