@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateVendorDto {
   @IsString()
@@ -14,7 +14,8 @@ export class CreateVendorDto {
   @IsEmail()
   email: string;
 
-  @IsPhoneNumber()
+  @IsString()
+  @Length(10, 15)
   contactNumber: string;
 
   @IsOptional()
