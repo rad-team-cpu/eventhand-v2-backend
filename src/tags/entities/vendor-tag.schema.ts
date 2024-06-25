@@ -7,7 +7,7 @@ export type VendorTagDocument = HydratedDocument<VendorTag>;
 
 @Schema()
 export class VendorTag {
-  @Prop({ type: [{ type: Types.ObjectId, ref: Vendor.name }] })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Vendor' }] })
   @Type(() => Array<Vendor>)
   vendors: Vendor[];
 
@@ -15,4 +15,4 @@ export class VendorTag {
   name: string;
 }
 
-export const VendorSchema = SchemaFactory.createForClass(VendorTag);
+export const VendorTagSchema = SchemaFactory.createForClass(VendorTag);
