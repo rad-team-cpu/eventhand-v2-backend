@@ -1,26 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { VendorTag } from './entities/vendor-tag.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class TagsService {
-  create(createTagDto: CreateTagDto) {
-    return 'This action adds a new tag';
+  constructor(
+    @InjectModel(VendorTag.name) private tagModel: Model<VendorTag>,
+  ) {}
+
+  async create(createTagDto: CreateTagDto): Promise<VendorTag> {
+    return await this.tagModel.create(createTagDto);
   }
 
-  findAll() {
-    return `This action returns all tags`;
+  async findAll(): Promise<VendorTag[]> {
+    return await this.tagModel.find().exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tag`;
+  async findOne(id: number): Promise<VendorTag> {
+    return await this.tagModel.findOne({ _id: id }).exec();
   }
 
-  update(id: number, updateTagDto: UpdateTagDto) {
-    return `This action updates a #${id} tag`;
+  async update(id: number, updateTagDto: UpdateTagDto): Promise<VendorTag> {
+    return await this.tagModel.findByIdAndUpdate(id, updateTagDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} tag`;
+  async remove(id: number): Promise<VendorTag> {
+    return await this.tagModel.findByIdAndDelete(id);
   }
 }

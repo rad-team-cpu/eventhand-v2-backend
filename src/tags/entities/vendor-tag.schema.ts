@@ -11,7 +11,7 @@ export class VendorTag {
   @Type(() => Array<Vendor>)
   vendors: Vendor[];
 
-  @Prop()
+  @Prop({ unique: true })
   name: string;
 }
 
