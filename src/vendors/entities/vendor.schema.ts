@@ -16,6 +16,9 @@ export class Vendor {
   @Prop()
   address: string;
 
+  @Prop({ required: true })
+  email: string;
+
   @Prop({ require: true })
   contactNumber: string;
 
