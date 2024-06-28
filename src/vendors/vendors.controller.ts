@@ -31,6 +31,11 @@ export class VendorsController {
     return await this.vendorsService.findOne({ id });
   }
 
+  @Get('?clerk=:clerkId')
+  async findOneByClerkId(@Param('clerkId') clerkId: string): Promise<Vendor> {
+    return await this.vendorsService.findOne({ clerkId });
+  }
+
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateVendorDto: UpdateVendorDto) {
   //   return this.vendorsService.update(+id, updateVendorDto);
