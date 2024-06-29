@@ -11,6 +11,7 @@ import { VendorsService } from './vendors.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 // import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
+import { isValidObjectId } from 'mongoose';
 
 @Controller('vendors')
 export class VendorsController {
@@ -28,12 +29,8 @@ export class VendorsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Vendor> {
-    return await this.vendorsService.findOne({ id });
-  }
-
-  @Get('?clerk=:clerkId')
-  async findOneByClerkId(@Param('clerkId') clerkId: string): Promise<Vendor> {
-    return await this.vendorsService.findOne({ clerkId });
+    const filter = isValidObjectId(id) ? { _id: id } : { clerkId: id };
+    return await this.vendorsService.findOne(filter);
   }
 
   // @Patch(':id')

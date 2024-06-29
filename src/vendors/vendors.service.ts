@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 // import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
@@ -18,7 +18,13 @@ export class VendorsService {
   }
 
   async findOne(filter: FilterQuery<Vendor>): Promise<Vendor> {
-    return await this.vendorModel.findOne(filter).exec();
+    const result = await this.vendorModel.findOne(filter).exec();
+
+    if (!result) {
+      throw new NotFoundException(`user with doesn't exist`);
+    }
+
+    return result;
   }
 
   // update(id: number, updateVendorDto: UpdateVendorDto) {

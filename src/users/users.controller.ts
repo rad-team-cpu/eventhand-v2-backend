@@ -6,13 +6,13 @@ import {
   // Patch,
   Param,
   Delete,
-  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.schema';
 import { CreateEventDto } from 'src/events/dto/create-event.dto';
+import { isValidObjectId } from 'mongoose';
 
 @Controller('users')
 export class UsersController {
@@ -35,25 +35,11 @@ export class UsersController {
     return await this.usersService.createNewEvent(createEventDto);
   }
 
-  @Get('clerk=:clerkId')
-  async findUserByClerkId(@Param('clerkId') clerkId: string): Promise<User> {
-    try {
-      const user = await this.usersService.findByClerkId(clerkId);
-      if (!user) {
-        // Handle the case where no user is found (e.g., throw an exception)
-        throw new NotFoundException(`User with clerkId ${clerkId} not found`);
-      }
-      return user;
-    } catch (error) {
-      // Handle any exceptions thrown by the service method
-      throw error;
-    }
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<User> {
+    const filter = isValidObjectId(id) ? { _id: id } : { clerkId: id };
+    return await this.usersService.findOne(filter);
   }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.usersService.findOne(+id);
-  // }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {

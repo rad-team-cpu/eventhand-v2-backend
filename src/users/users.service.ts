@@ -1,9 +1,13 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { CreateEventDto } from 'src/events/dto/create-event.dto';
 @Injectable()
 export class UsersService {
@@ -24,17 +28,11 @@ export class UsersService {
     return await this.userModel.find().populate('events').exec();
   }
 
-  async findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+  async findOne(filter: FilterQuery<User>): Promise<User> {
+    const result = this.userModel.findOne(filter).populate('events').exec();
 
-  async findByClerkId(clerkId: string): Promise<User> {
-    const result = await this.userModel
-      .findOne({
-        clerkId: clerkId,
-      })
-      .populate('events')
-      .exec();
+    if (!result) throw new NotFoundException(`User doesn't exist`);
+
     return result;
   }
 
