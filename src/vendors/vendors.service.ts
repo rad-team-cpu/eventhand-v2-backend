@@ -18,13 +18,13 @@ export class VendorsService {
   }
 
   async findOne(filter: FilterQuery<Vendor>): Promise<Vendor> {
-    const result = await this.vendorModel.findOne(filter).exec();
+    const vendor = await this.vendorModel.findOne(filter).exec();
 
-    if (!result) {
+    if (!vendor) {
       throw new NotFoundException(`user with doesn't exist`);
     }
 
-    return result;
+    return vendor;
   }
 
   // update(id: number, updateVendorDto: UpdateVendorDto) {
@@ -33,5 +33,19 @@ export class VendorsService {
 
   async remove(filter: FilterQuery<Vendor>): Promise<Vendor> {
     return await this.vendorModel.findOneAndDelete(filter).exec();
+  }
+
+  // calculate credibility of vendor
+  // we need to calculate credibility based on the following:
+  // Profile: has a Logo, has a Bio
+  async calculateCredibility(id: string): Promise<void> {
+    const vendor = await this.vendorModel.findById(id).exec();
+
+    // Branding Present
+    // const vendorHasLogo = vendor.logo;
+    // const vendorHasBanner = vendor.banner;
+
+    // TBA
+    // const emailIsValidated = false;
   }
 }
