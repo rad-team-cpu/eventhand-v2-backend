@@ -37,15 +37,22 @@ export class VendorsService {
 
   // calculate credibility of vendor
   // we need to calculate credibility based on the following:
-  // Profile: has a Logo, has a Bio
-  async calculateCredibility(id: string): Promise<void> {
-    const vendor = await this.vendorModel.findById(id).exec();
+  // Branding: has a Logo, has a banner, has a bio
 
-    // Branding Present
-    // const vendorHasLogo = vendor.logo;
-    // const vendorHasBanner = vendor.banner;
+  // async calculateCredibility(id: string): Promise<void> {
+  //   // const vendor = await this.vendorModel.findById(id).exec();
 
-    // TBA
-    // const emailIsValidated = false;
-  }
+  //   // Branding Present
+  //   // const hasLogo = vendor.logo;
+  //   // const hasBanner = vendor.banner;
+  //   // const hasBio = vendor.bio;
+
+  //   // Contact Details
+  //   // const contactNumberValidated = false; TBA
+  //   // const emailIsValidated = false; TBA
+
+  //   // Reviews
+  //   // const reviews = vendor.reviews;
+  //   //
+  // }
 }
