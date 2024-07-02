@@ -8,20 +8,27 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
-import { CreateEventDto } from 'src/events/dto/create-event.dto';
+import { OnEvent } from '@nestjs/event-emitter';
+import { PushEventToUserDto } from './dto/push-event-to-user.dto';
+
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
-    @InjectModel(Event.name) private readonly eventModel: Model<Event>,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    if (await this.userModel.exists(createUserDto)) {
-      throw new ConflictException(`${createUserDto} already exists`);
-    }
+    try {
+      if (await this.userModel.exists(createUserDto)) {
+        throw new ConflictException(`${createUserDto} already exists`);
+      }
 
-    return this.userModel.create(createUserDto);
+      return this.userModel.create(createUserDto);
+    } catch (error) {
+      // Log the error and rethrow or handle as appropriate
+      console.error('Error creating new User: ', error);
+      throw error;
+    }
   }
 
   async findAll(): Promise<User[]> {
@@ -29,25 +36,41 @@ export class UsersService {
   }
 
   async findOne(filter: FilterQuery<User>): Promise<User> {
-    const result = this.userModel.findOne(filter).populate('events').exec();
+    try {
+      const result = this.userModel.findOne(filter).populate('events').exec();
 
-    if (!result) throw new NotFoundException(`User doesn't exist`);
+      if (!result) throw new NotFoundException(`User doesn't exist`);
 
-    return result;
+      return result;
+    } catch (error) {
+      console.error('Error finding user: ', error);
+      throw error;
+    }
   }
 
-  async createNewEvent(createEventDto: CreateEventDto): Promise<string> {
-    const event = await this.eventModel.create(createEventDto);
+  @OnEvent('event.created')
+  async pushNewEvent(pushEventToUserDto: PushEventToUserDto): Promise<User> {
+    try {
+      const updatedUser = await this.userModel
+        .findOneAndUpdate(
+          { clerkId: pushEventToUserDto.clerkId },
+          { $push: { events: pushEventToUserDto.eventId } },
+          { new: true },
+        )
+        .exec();
 
-    const result = await this.userModel
-      .findOneAndUpdate(
-        { clerkId: createEventDto.clerkId },
-        { $push: { events: event._id } },
-        { new: true },
-      )
-      .populate('events')
-      .exec();
-    return (await result.save()).id;
+      if (!updatedUser) {
+        throw new NotFoundException(
+          `User with clerkId ${pushEventToUserDto.clerkId} not found`,
+        );
+      }
+
+      return updatedUser;
+    } catch (error) {
+      // Log the error and rethrow or handle as appropriate
+      console.error('Error pushing new event to user:', error);
+      throw error;
+    }
   }
 
   // update(id: number, updateUserDto: UpdateUserDto) {
