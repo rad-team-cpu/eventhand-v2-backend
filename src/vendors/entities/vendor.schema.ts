@@ -32,6 +32,9 @@ export class Vendor {
   @Prop()
   logo: string;
 
+  @Prop()
+  banner: string;
+
   @Prop({ default: 0 })
   credibilityFactor: number;
 

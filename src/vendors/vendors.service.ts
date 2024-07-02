@@ -4,10 +4,16 @@ import { CreateVendorDto } from './dto/create-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
+import { isEmpty } from 'class-validator';
+import { Review } from 'src/reviews/entities/review.schema';
+import { ReviewsService } from 'src/reviews/reviews.service';
 
 @Injectable()
 export class VendorsService {
-  constructor(@InjectModel(Vendor.name) private vendorModel: Model<Vendor>) {}
+  constructor(
+    @InjectModel(Vendor.name) private readonly vendorModel: Model<Vendor>,
+    private readonly reviewsService: ReviewsService,
+  ) {}
 
   async create(createVendorDto: CreateVendorDto): Promise<Vendor> {
     return await this.vendorModel.create(createVendorDto);
@@ -37,22 +43,27 @@ export class VendorsService {
 
   // calculate credibility of vendor
   // we need to calculate credibility based on the following:
+  // On a scale of 0 - 100, we weigh different
   // Branding: has a Logo, has a banner, has a bio
+  async calculateCredibility(id: string): Promise<void> {
+    const vendor = await this.vendorModel.findById(id).exec();
 
-  // async calculateCredibility(id: string): Promise<void> {
-  //   // const vendor = await this.vendorModel.findById(id).exec();
+    // Branding Present
+    const hasLogo = Number(Boolean(vendor.logo));
+    const hasBanner = Number(Boolean(vendor.banner));
+    const hasBio = Number(Boolean(vendor.bio));
 
-  //   // Branding Present
-  //   // const hasLogo = vendor.logo;
-  //   // const hasBanner = vendor.banner;
-  //   // const hasBio = vendor.bio;
+    const brandingScore = (hasLogo + hasBanner + hasBio) * 0.2; // Weighs 20%
 
-  //   // Contact Details
-  //   // const contactNumberValidated = false; TBA
-  //   // const emailIsValidated = false; TBA
+    // Contact Details
+    // const contactNumberValidated = false; // TBA
+    // const emailIsValidated = false; // TBA
+    // TBA;
 
-  //   // Reviews
-  //   // const reviews = vendor.reviews;
-  //   //
-  // }
+    // Reviews
+    const reviews = await this.reviewsService.findSome({
+      vendorId: vendor._id,
+    });
+    return;
+  }
 }

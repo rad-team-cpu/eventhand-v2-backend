@@ -3,7 +3,7 @@ import { CreateReviewDto } from './dto/create-review.dto';
 // import { UpdateReviewDto } from './dto/update-review.dto';
 import { Review } from './entities/review.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 @Injectable()
 export class ReviewsService {
@@ -15,6 +15,10 @@ export class ReviewsService {
 
   async findAll(): Promise<Review[]> {
     return await this.reviewModel.find().exec();
+  }
+
+  async findSome(filter: FilterQuery<Review>): Promise<Review[]> {
+    return await this.reviewModel.find(filter).exec();
   }
 
   async findOne(id: string): Promise<Review> {

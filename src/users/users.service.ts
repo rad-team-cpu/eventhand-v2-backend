@@ -12,8 +12,8 @@ import { CreateEventDto } from 'src/events/dto/create-event.dto';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Event.name) private eventModel: Model<Event>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectModel(Event.name) private readonly eventModel: Model<Event>,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
