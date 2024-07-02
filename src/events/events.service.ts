@@ -15,15 +15,20 @@ export class EventsService {
   ) {}
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
-    const event = await this.eventModel.create(createEventDto);
+    try {
+      const event = await this.eventModel.create(createEventDto);
 
-    //emit an event.created event
-    this.eventEmitter.emitAsync('event.created', {
-      clerkId: createEventDto.clerkId,
-      eventId: event.id,
-    } as PushEventToUserDto);
+      // emit event.created to push to user
+      await this.eventEmitter.emitAsync('event.created', {
+        clerkId: createEventDto.clerkId,
+        eventId: event.id,
+      } as PushEventToUserDto);
 
-    return event;
+      return event;
+    } catch (error) {
+      console.error('Error creating event:', error);
+      throw error;
+    }
   }
 
   async findAll(): Promise<Event[]> {

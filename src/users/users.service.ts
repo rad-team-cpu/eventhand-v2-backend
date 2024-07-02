@@ -25,7 +25,6 @@ export class UsersService {
 
       return this.userModel.create(createUserDto);
     } catch (error) {
-      // Log the error and rethrow or handle as appropriate
       console.error('Error creating new User: ', error);
       throw error;
     }
@@ -67,7 +66,6 @@ export class UsersService {
 
       return updatedUser;
     } catch (error) {
-      // Log the error and rethrow or handle as appropriate
       console.error('Error pushing new event to user:', error);
       throw error;
     }
