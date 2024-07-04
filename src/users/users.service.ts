@@ -19,7 +19,7 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
-      if (await this.userModel.exists(createUserDto)) {
+      if (await this.userModel.exists(createUserDto as FilterQuery<User>)) {
         throw new ConflictException(`${createUserDto} already exists`);
       }
 

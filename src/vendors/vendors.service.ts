@@ -4,9 +4,9 @@ import { CreateVendorDto } from './dto/create-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
-import { isEmpty } from 'class-validator';
-import { Review } from 'src/reviews/entities/review.schema';
 import { ReviewsService } from 'src/reviews/reviews.service';
+import { OnEvent } from '@nestjs/event-emitter';
+import { FactorType } from './entities/factor.types';
 
 @Injectable()
 export class VendorsService {
@@ -41,6 +41,21 @@ export class VendorsService {
     return await this.vendorModel.findOneAndDelete(filter).exec();
   }
 
+  @OnEvent('factor.updated')
+  async updateScore(
+    vendorId: string,
+    scoreType: FactorType,
+    score: number,
+  ): Promise<void> {
+    await this.vendorModel
+      .findByIdAndUpdate(vendorId, {
+        $set: { [`credibilityFactors.${scoreType}`]: score },
+      })
+      .exec();
+
+    await this.calculateCredibility(vendorId);
+  }
+
   // calculate credibility of vendor
   // we need to calculate credibility based on the following:
   // On a scale of 0 - 100, we weigh different
@@ -49,11 +64,11 @@ export class VendorsService {
     const vendor = await this.vendorModel.findById(id).exec();
 
     // Branding Present
-    const hasLogo = Number(Boolean(vendor.logo));
-    const hasBanner = Number(Boolean(vendor.banner));
-    const hasBio = Number(Boolean(vendor.bio));
+    // const hasLogo = Number(Boolean(vendor.logo));
+    // const hasBanner = Number(Boolean(vendor.banner));
+    // const hasBio = Number(Boolean(vendor.bio));
 
-    const brandingScore = (hasLogo + hasBanner + hasBio) * 0.2; // Weighs 20%
+    // const brandingScore = (hasLogo + hasBanner + hasBio) * 0.2; // Weighs 20%
 
     // Contact Details
     // const contactNumberValidated = false; // TBA
@@ -61,9 +76,12 @@ export class VendorsService {
     // TBA;
 
     // Reviews
-    const reviews = await this.reviewsService.findSome({
-      vendorId: vendor._id,
-    });
-    return;
+    // const reviews = await this.reviewsService.findSome({
+    //   vendorId: vendor._id,
+    // });
+
+    // vendor.credibilityFactor;
+    // vendor.save();
+    //   return;
   }
 }

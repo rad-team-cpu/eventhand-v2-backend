@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { HydratedDocument, Types } from 'mongoose';
 import { VendorTag } from 'src/tags/entities/vendor-tag.schema';
@@ -35,11 +35,28 @@ export class Vendor {
   @Prop()
   banner: string;
 
+  @Prop(
+    raw({
+      brandingScore: { type: Number },
+      ratingsScore: { type: Number },
+      activityScore: { type: Number },
+      proofScore: { type: Number },
+    }),
+  )
+  credibilityFactors: Record<string, any>;
+
   @Prop({ default: 0 })
-  credibilityFactor: number;
+  credibility: number;
 
   @Prop({ default: false, required: true })
   visibility: boolean;
+}
+
+export enum Factor {
+  brandingScore,
+  ratingsScore,
+  activityScore,
+  proofScore,
 }
 
 export const VendorSchema = SchemaFactory.createForClass(Vendor);
