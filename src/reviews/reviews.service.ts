@@ -58,6 +58,15 @@ export class ReviewsService {
   // }
 
   async remove(id: string): Promise<Review> {
-    return await this.reviewModel.findByIdAndDelete(id).exec();
+    try {
+      const review = await this.reviewModel.findByIdAndDelete(id).exec();
+
+      this.calculateRating(review.vendorId.toString());
+
+      return review;
+    } catch (err) {
+      console.log('Something Went Wrong When Creating a Review', err);
+      throw err;
+    }
   }
 }

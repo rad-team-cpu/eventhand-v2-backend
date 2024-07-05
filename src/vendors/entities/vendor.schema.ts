@@ -52,11 +52,4 @@ export class Vendor {
   visibility: boolean;
 }
 
-export enum Factor {
-  brandingScore,
-  ratingsScore,
-  activityScore,
-  proofScore,
-}
-
 export const VendorSchema = SchemaFactory.createForClass(Vendor);

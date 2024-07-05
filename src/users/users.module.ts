@@ -8,7 +8,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    EventEmitterModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [UsersController],
   providers: [UsersService],
