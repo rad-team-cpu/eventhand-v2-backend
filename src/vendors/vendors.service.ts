@@ -49,7 +49,7 @@ export class VendorsService {
   ): Promise<void> {
     await this.vendorModel
       .findByIdAndUpdate(vendorId, {
-        $set: { [`credibilityFactors.${scoreType}`]: score },
+        $set: { `credibilityFactors.${scoreType}`: score },
       })
       .exec();
 

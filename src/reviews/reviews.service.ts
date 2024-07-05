@@ -33,7 +33,12 @@ export class ReviewsService {
       reviews.reduce((sum, currentReview) => sum + currentReview.rating, 0) /
       reviews.length;
 
-    await this.eventEmitter.emitAsync('rating.calculated', vendorId, average);
+    await this.eventEmitter.emitAsync(
+      'factor.updated',
+      vendorId,
+      'ratingsScore',
+      average,
+    );
   }
 
   async findAll(): Promise<Review[]> {
