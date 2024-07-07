@@ -41,11 +41,7 @@ export class ReviewsService {
     );
   }
 
-  async findAll(): Promise<Review[]> {
-    return await this.reviewModel.find().exec();
-  }
-
-  async findSome(filter: FilterQuery<Review>): Promise<Review[]> {
+  async findAll(filter?: FilterQuery<Review>): Promise<Review[]> {
     return await this.reviewModel.find(filter).exec();
   }
 

@@ -6,10 +6,12 @@ import {
   // Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { Review } from './entities/review.schema';
+import { FilterQuery } from 'mongoose';
 // import { UpdateReviewDto } from './dto/update-review.dto';
 
 @Controller('reviews')
@@ -22,8 +24,8 @@ export class ReviewsController {
   }
 
   @Get()
-  async findAll(): Promise<Review[]> {
-    return await this.reviewsService.findAll();
+  async findAll(@Query() query: FilterQuery<Review>): Promise<Review[]> {
+    return await this.reviewsService.findAll(query);
   }
 
   @Get(':id')
