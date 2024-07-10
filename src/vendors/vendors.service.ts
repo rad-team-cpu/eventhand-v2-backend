@@ -19,8 +19,8 @@ export class VendorsService {
     return await this.vendorModel.create(createVendorDto);
   }
 
-  async findAll(): Promise<Vendor[]> {
-    return await this.vendorModel.find().exec();
+  async findAll(params?: FilterQuery<Vendor>): Promise<Vendor[]> {
+    return await this.vendorModel.find(params).exec();
   }
 
   async findOne(filter: FilterQuery<Vendor>): Promise<Vendor> {
