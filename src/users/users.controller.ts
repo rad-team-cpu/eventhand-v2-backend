@@ -11,7 +11,6 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.schema';
-import { CreateEventDto } from 'src/events/dto/create-event.dto';
 import { isValidObjectId } from 'mongoose';
 
 @Controller('users')
@@ -26,13 +25,6 @@ export class UsersController {
   @Get()
   async findAll(): Promise<User[]> {
     return await this.usersService.findAll();
-  }
-
-  @Post('event')
-  async createNewEvent(
-    @Body() createEventDto: CreateEventDto,
-  ): Promise<string> {
-    return await this.usersService.createNewEvent(createEventDto);
   }
 
   @Get(':id')

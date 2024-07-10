@@ -9,6 +9,7 @@ import { EventsModule } from './events/events.module';
 import { VendorsModule } from './vendors/vendors.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { TagsModule } from './tags/tags.module';
+import { VerificationModule } from './verification/verification.module';
 import config from './config/config';
 
 @Module({
@@ -27,6 +28,7 @@ import config from './config/config';
     VendorsModule,
     ReviewsModule,
     TagsModule,
+    VerificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
