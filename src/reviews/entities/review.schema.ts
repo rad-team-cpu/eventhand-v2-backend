@@ -8,10 +8,10 @@ export type ReviewDocument = HydratedDocument<Review>;
 @Schema({ timestamps: true })
 export class Review {
   @Prop({ type: Types.ObjectId, ref: User.name })
-  userId: User;
+  userId: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: Vendor.name })
-  vendorId: Vendor;
+  vendorId: Types.ObjectId;
 
   @Prop({ required: true })
   rating: number;

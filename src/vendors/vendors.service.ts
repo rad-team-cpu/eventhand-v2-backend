@@ -34,10 +34,14 @@ export class VendorsService {
     return vendor;
   }
 
-  async update(id: number, updateVendorDto: UpdateVendorDto): Promise<Vendor> {
+  async update(id: string, updateVendorDto: UpdateVendorDto): Promise<Vendor> {
     const vendor = await this.vendorModel
-      .findByIdAndUpdate(id, updateVendorDto)
+      .findByIdAndUpdate(id, updateVendorDto, { new: true })
       .exec();
+
+    if (!vendor) {
+      throw new NotFoundException(`user with doesn't exist`);
+    }
 
     return vendor;
   }

@@ -3,10 +3,10 @@ import {
   Get,
   Post,
   Body,
-  // Patch,
   Param,
   Delete,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { VendorsService } from './vendors.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
@@ -36,8 +36,11 @@ export class VendorsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVendorDto: UpdateVendorDto) {
-    return this.vendorsService.update(+id, updateVendorDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateVendorDto: UpdateVendorDto,
+  ): Promise<Vendor> {
+    return await this.vendorsService.update(id, updateVendorDto);
   }
 
   @Delete(':id')

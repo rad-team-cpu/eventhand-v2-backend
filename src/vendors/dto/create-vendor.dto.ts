@@ -7,7 +7,6 @@ import {
   Length,
 } from 'class-validator';
 import { VendorTag } from 'src/tags/entities/vendor-tag.schema';
-import { Vendor } from '../entities/vendor.schema';
 
 export class CreateVendorDto {
   @IsString()
@@ -21,6 +20,10 @@ export class CreateVendorDto {
   @IsOptional()
   @IsString()
   logo?: string;
+
+  @IsOptional()
+  @IsString()
+  banner?: string;
 
   @IsEmail()
   @IsNotEmpty()
