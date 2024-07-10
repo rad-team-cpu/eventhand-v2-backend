@@ -10,6 +10,8 @@ import { VendorsModule } from './vendors/vendors.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { TagsModule } from './tags/tags.module';
 import { VerificationModule } from './verification/verification.module';
+import { PackagesModule } from './packages/packages.module';
+import { PortfolioModule } from './portfolio/portfolio.module';
 import config from './config/config';
 
 @Module({
@@ -29,6 +31,8 @@ import config from './config/config';
     ReviewsModule,
     TagsModule,
     VerificationModule,
+    PackagesModule,
+    PortfolioModule,
   ],
   controllers: [AppController],
   providers: [AppService],
