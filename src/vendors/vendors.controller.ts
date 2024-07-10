@@ -6,12 +6,14 @@ import {
   // Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { VendorsService } from './vendors.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 // import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
-import { isValidObjectId } from 'mongoose';
+import { FilterQuery, isValidObjectId } from 'mongoose';
+import { UpdateVendorDto } from './dto/update-vendor.dto';
 
 @Controller('vendors')
 export class VendorsController {
@@ -23,8 +25,8 @@ export class VendorsController {
   }
 
   @Get()
-  async findAll(): Promise<Vendor[]> {
-    return await this.vendorsService.findAll();
+  async findAll(@Query() params: FilterQuery<Vendor>): Promise<Vendor[]> {
+    return await this.vendorsService.findAll(params);
   }
 
   @Get(':id')
@@ -33,10 +35,10 @@ export class VendorsController {
     return await this.vendorsService.findOne(filter);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateVendorDto: UpdateVendorDto) {
-  //   return this.vendorsService.update(+id, updateVendorDto);
-  // }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateVendorDto: UpdateVendorDto) {
+    return this.vendorsService.update(+id, updateVendorDto);
+  }
 
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Vendor> {

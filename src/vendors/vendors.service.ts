@@ -7,6 +7,7 @@ import { FilterQuery, Model } from 'mongoose';
 import { ReviewsService } from 'src/reviews/reviews.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { FactorType } from './entities/factor.types';
+import { UpdateVendorDto } from './dto/update-vendor.dto';
 
 @Injectable()
 export class VendorsService {
@@ -33,9 +34,13 @@ export class VendorsService {
     return vendor;
   }
 
-  // update(id: number, updateVendorDto: UpdateVendorDto) {
-  //   return `This action updates a #${id} vendor`;
-  // }
+  async update(id: number, updateVendorDto: UpdateVendorDto): Promise<Vendor> {
+    const vendor = await this.vendorModel
+      .findByIdAndUpdate(id, updateVendorDto)
+      .exec();
+
+    return vendor;
+  }
 
   async remove(filter: FilterQuery<Vendor>): Promise<Vendor> {
     return await this.vendorModel.findOneAndDelete(filter).exec();
