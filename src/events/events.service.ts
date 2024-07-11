@@ -4,13 +4,31 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Event } from './entities/event.schema';
 import { FilterQuery, Model } from 'mongoose';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PushEventToUserDto } from 'src/users/dto/push-event-to-user.dto';
 
 @Injectable()
 export class EventsService {
-  constructor(@InjectModel(Event.name) private eventModel: Model<Event>) {}
+  constructor(
+    @InjectModel(Event.name) private eventModel: Model<Event>,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
-    return await this.eventModel.create(createEventDto);
+    try {
+      const event = await this.eventModel.create(createEventDto);
+
+      // emit event.created to push to user
+      await this.eventEmitter.emitAsync('event.created', {
+        clerkId: createEventDto.clerkId,
+        eventId: event.id,
+      } as PushEventToUserDto);
+
+      return event;
+    } catch (error) {
+      console.error('Error creating event:', error);
+      throw error;
+    }
   }
 
   async findAll(): Promise<Event[]> {

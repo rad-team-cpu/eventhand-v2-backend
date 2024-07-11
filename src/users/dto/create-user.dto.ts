@@ -1,8 +1,16 @@
-import { IsString, Length, IsEnum, IsEmail } from 'class-validator';
+import {
+  IsString,
+  Length,
+  IsEnum,
+  IsEmail,
+  IsOptional,
+  IsNotEmpty,
+} from 'class-validator';
 import { Gender } from '../entities/user.schema';
 
 export class CreateUserDto {
   @IsString()
+  @IsNotEmpty()
   clerkId: string;
 
   @IsString()
@@ -14,6 +22,7 @@ export class CreateUserDto {
 
   @IsString()
   @Length(1, 50)
+  @IsNotEmpty()
   firstName: string;
 
   @IsString()
@@ -22,4 +31,8 @@ export class CreateUserDto {
 
   @IsEnum(Gender)
   gender: Gender;
+
+  @IsOptional()
+  @IsString()
+  profilePicture: string;
 }

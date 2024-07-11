@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Type } from 'class-transformer';
+import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
+import { Exclude, Type } from 'class-transformer';
 import { HydratedDocument, Types } from 'mongoose';
 import { VendorTag } from 'src/tags/entities/vendor-tag.schema';
 
@@ -7,7 +7,7 @@ export type VendorDocument = HydratedDocument<Vendor>;
 
 @Schema({ timestamps: true })
 export class Vendor {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, immutable: true })
   clerkId: string;
 
   @Prop({ required: true })
@@ -16,7 +16,7 @@ export class Vendor {
   @Prop()
   address: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true, immutable: true })
   email: string;
 
   @Prop({ require: true })
@@ -27,13 +27,26 @@ export class Vendor {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: VendorTag.name }] })
   @Type(() => Array<VendorTag>)
-  tags: VendorTag[];
+  tags: [VendorTag];
 
   @Prop()
   logo: string;
 
+  @Prop()
+  banner: string;
+
+  @Prop(
+    raw({
+      brandingScore: { type: Number },
+      ratingsScore: { type: Number },
+      activityScore: { type: Number },
+      proofScore: { type: Number },
+    }),
+  )
+  credibilityFactors: Record<string, any>;
+
   @Prop({ default: 0 })
-  credibilityFactor: number;
+  credibility: number;
 
   @Prop({ default: false, required: true })
   visibility: boolean;
