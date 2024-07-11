@@ -27,7 +27,7 @@ export class Vendor {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: VendorTag.name }] })
   @Type(() => Array<VendorTag>)
-  tags: VendorTag[];
+  tags: [VendorTag];
 
   @Prop()
   logo: string;
