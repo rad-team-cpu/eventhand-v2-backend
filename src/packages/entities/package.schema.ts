@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 
@@ -18,18 +18,30 @@ export class Package {
   name: string;
 
   @Prop({ required: true })
+  price: number;
+
+  @Prop({ required: true })
+  pictureURL: string;
+
+  @Prop({ required: true })
   capacity: number;
 
   @Prop({
     type: [
       {
         name: { type: String, required: true },
+        quantity: { type: Number, required: true },
         imageURL: { type: String, required: true },
+        descripion: { type: String, required: true },
       },
     ],
-    required: true,
   })
-  inclusions: { name: string; imageURL: string }[];
+  inclusions: {
+    name: string;
+    imageURL: string;
+    quantity: number;
+    description: string;
+  }[];
 }
 
 export const PackageSchema = SchemaFactory.createForClass(Package);
