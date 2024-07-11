@@ -12,13 +12,13 @@ export enum Gender {
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, immutable: true })
   clerkId: string;
 
   @Prop()
   profilePicture: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, immutable: true })
   email: string;
 
   @Prop({ required: true })
