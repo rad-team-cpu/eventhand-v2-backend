@@ -1,26 +1,45 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
+import { Package } from './entities/package.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 @Injectable()
 export class PackagesService {
-  create(createPackageDto: CreatePackageDto) {
-    return 'This action adds a new package';
+  constructor(
+    @InjectModel(Package.name) private readonly packageModel: Model<Package>,
+  ) {}
+
+  async create(createPackageDto: CreatePackageDto): Promise<Package> {
+    const result = await this.packageModel.create(createPackageDto);
+    return result;
   }
 
-  findAll() {
-    return `This action returns all packages`;
+  async findAll(query: FilterQuery<Package>): Promise<Package[]> {
+    const result = await this.packageModel.find(query).exec();
+    return result;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} package`;
+  async findOne(id: string): Promise<Package> {
+    const result = await this.packageModel.findById(id).exec();
+    return result;
   }
 
-  update(id: number, updatePackageDto: UpdatePackageDto) {
-    return `This action updates a #${id} package`;
+  async update(
+    id: string,
+    updatePackageDto: UpdatePackageDto,
+  ): Promise<Package> {
+    const result = await this.packageModel.findByIdAndUpdate(
+      id,
+      updatePackageDto,
+      { new: true },
+    );
+    return result;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} package`;
+  async remove(id: string): Promise<void> {
+    await this.packageModel.deleteOne({ _id: id });
+    return;
   }
 }
