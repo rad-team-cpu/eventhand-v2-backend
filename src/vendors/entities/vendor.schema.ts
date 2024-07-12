@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { Exclude, Type } from 'class-transformer';
 import { HydratedDocument, Types } from 'mongoose';
+import { Package } from 'src/packages/entities/package.schema';
 import { VendorTag } from 'src/tags/entities/vendor-tag.schema';
 
 export type VendorDocument = HydratedDocument<Vendor>;
