@@ -23,7 +23,7 @@ class InclusionsDTO {
 
   @IsString()
   @IsNotEmpty()
-  descripion: string;
+  description: string;
 }
 
 export class CreatePackageDto {

@@ -1,4 +1,4 @@
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 
@@ -32,7 +32,7 @@ export class Package {
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
         imageURL: { type: String, required: true },
-        descripion: { type: String, required: true },
+        description: { type: String, required: true },
       },
     ],
   })
