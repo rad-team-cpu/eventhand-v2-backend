@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { Type } from 'class-transformer';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 
 export type PackageDocument = HydratedDocument<Package>;
@@ -9,9 +10,10 @@ export class Package {
   @Prop({
     required: true,
     immutable: true,
-    type: Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: Vendor.name,
   })
+  @Type(() => Vendor)
   vendorId: Vendor;
 
   @Prop({ required: true })

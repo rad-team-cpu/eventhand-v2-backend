@@ -18,6 +18,7 @@ export class PackagesService {
 
   async findAll(query: FilterQuery<Package>): Promise<Package[]> {
     const result = await this.packageModel.find(query).exec();
+    console.log(result);
     return result;
   }
 

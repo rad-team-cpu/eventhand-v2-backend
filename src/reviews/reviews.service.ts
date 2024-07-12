@@ -42,7 +42,9 @@ export class ReviewsService {
   }
 
   async findAll(filter?: FilterQuery<Review>): Promise<Review[]> {
-    return await this.reviewModel.find(filter).exec();
+    const result = await this.reviewModel.find(filter).exec();
+    console.log(result);
+    return result;
   }
 
   async findOne(id: string): Promise<Review> {

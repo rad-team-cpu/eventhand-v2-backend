@@ -1,13 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateVendorDto } from './dto/create-vendor.dto';
-// import { UpdateVendorDto } from './dto/update-vendor.dto';
+import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import { ReviewsService } from 'src/reviews/reviews.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { FactorType } from './entities/factor.types';
-import { UpdateVendorDto } from './dto/update-vendor.dto';
 
 @Injectable()
 export class VendorsService {
@@ -41,21 +40,11 @@ export class VendorsService {
           $match: { _id: new Types.ObjectId(vendorId) },
         },
         {
-          $addFields: {
-            stringId: { $toString: '$_id' }, //add temporary stringId
-          },
-        },
-        {
           $lookup: {
             from: 'packages',
-            localField: 'stringId', //use that to search all vendorId
+            localField: '_id', //use that to search all vendorId
             foreignField: 'vendorId',
             as: 'packages',
-          },
-        },
-        {
-          $project: {
-            stringId: 0, //remove string id
           },
         },
       ])
@@ -63,6 +52,7 @@ export class VendorsService {
 
     return result[0];
   }
+
   async update(id: string, updateVendorDto: UpdateVendorDto): Promise<Vendor> {
     const vendor = await this.vendorModel
       .findByIdAndUpdate(id, updateVendorDto, { new: true })
