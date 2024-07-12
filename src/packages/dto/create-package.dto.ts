@@ -1,10 +1,30 @@
+import { Type } from 'class-transformer';
 import {
+  IsArray,
+  IsDefined,
   IsMongoId,
   IsNotEmpty,
-  IsNotEmptyObject,
   IsNumber,
   IsString,
+  ValidateNested,
 } from 'class-validator';
+
+class InclusionsDTO {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  imageURL: string;
+
+  @IsNumber()
+  quantity: number;
+
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+}
 
 export class CreatePackageDto {
   @IsMongoId()
@@ -16,8 +36,19 @@ export class CreatePackageDto {
 
   @IsNumber()
   @IsNotEmpty()
+  price: number;
+
+  @IsNumber()
+  @IsNotEmpty()
   capacity: number;
 
-  @IsNotEmptyObject()
-  inclusions: { name: string; imageURL: string }[];
+  @IsString()
+  @IsNotEmpty()
+  pictureURL: string;
+
+  @IsDefined()
+  @IsArray()
+  @ValidateNested()
+  @Type(() => Array<InclusionsDTO>)
+  inclusions: Array<InclusionsDTO>;
 }

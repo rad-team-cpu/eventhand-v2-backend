@@ -28,6 +28,11 @@ export class VendorsController {
     return await this.vendorsService.findAll(params);
   }
 
+  @Get(':id/packages')
+  async findOneWithPackages(@Param('id') id: string) {
+    return await this.vendorsService.findOneWithPackages(id);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Vendor> {
     const filter = isValidObjectId(id) ? { _id: id } : { clerkId: id };
