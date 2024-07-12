@@ -1,11 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsNumber, IsString } from 'class-validator';
+import { IsMongoId, IsNumber, IsString } from 'class-validator';
 
 export class CreateReviewDto {
-  @IsString()
+  @IsMongoId()
   userId: string;
 
-  @IsString()
+  @IsMongoId()
   vendorId: string;
 
   @IsNumber()
