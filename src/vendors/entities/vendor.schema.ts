@@ -1,7 +1,5 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
-import { Type } from 'class-transformer';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { Tag } from 'src/tags/entities/vendor-tag.schema';
 
 export type VendorDocument = HydratedDocument<Vendor>;
 
@@ -25,11 +23,13 @@ export class Vendor {
   @Prop()
   bio: string;
 
-  @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: Tag.name }],
-  })
-  @Type(() => Array<Tag>)
-  tags: [Tag];
+  @Prop([
+    {
+      tagId: { type: MongooseSchema.Types.ObjectId, ref: 'Tag' },
+      name: String,
+    },
+  ])
+  tags: Array<{ tagId: MongooseSchema.Types.ObjectId; name: string }>;
 
   @Prop()
   logo: string;

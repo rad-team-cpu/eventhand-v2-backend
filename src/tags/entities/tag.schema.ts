@@ -1,16 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { Vendor } from 'src/vendors/entities/vendor.schema';
+import { HydratedDocument } from 'mongoose';
 
-export type VendorTagDocument = HydratedDocument<Tag>;
+export type TagDocument = HydratedDocument<Tag>;
 
 @Schema()
 export class Tag {
-  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Vendor' }] })
-  vendors: Vendor[];
-
-  @Prop({ unique: true })
+  @Prop({ required: true, unique: true, immutable: true, index: true })
   name: string;
+
+  @Prop()
+  description: string;
 }
 
-export const VendorTagSchema = SchemaFactory.createForClass(Tag);
+export const TagSchema = SchemaFactory.createForClass(Tag);

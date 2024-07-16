@@ -10,7 +10,11 @@ export class TagsService {
   constructor(@InjectModel(Tag.name) private tagModel: Model<Tag>) {}
 
   async create(createTagDto: CreateTagDto): Promise<Tag> {
-    return await this.tagModel.create(createTagDto);
+    try {
+      return await this.tagModel.create(createTagDto);
+    } catch (err) {
+      throw err;
+    }
   }
 
   async findAll(): Promise<Tag[]> {
