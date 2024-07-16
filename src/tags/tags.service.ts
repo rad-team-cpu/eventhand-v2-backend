@@ -19,15 +19,15 @@ export class TagsService {
     return await this.tagModel.find().exec();
   }
 
-  async findOne(id: number): Promise<VendorTag> {
-    return await this.tagModel.findOne({ _id: id }).exec();
+  async findOne(id: string): Promise<VendorTag> {
+    return await this.tagModel.findById(id).exec();
   }
 
-  async update(id: number, updateTagDto: UpdateTagDto): Promise<VendorTag> {
+  async update(id: string, updateTagDto: UpdateTagDto): Promise<VendorTag> {
     return await this.tagModel.findByIdAndUpdate(id, updateTagDto);
   }
 
-  async remove(id: number): Promise<VendorTag> {
+  async remove(id: string): Promise<VendorTag> {
     return await this.tagModel.findByIdAndDelete(id);
   }
 }
