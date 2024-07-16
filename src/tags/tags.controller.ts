@@ -10,24 +10,24 @@ import {
 import { TagsService } from './tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
-import { VendorTag } from './entities/vendor-tag.schema';
+import { Tag } from './entities/tag.schema';
 
 @Controller('tags')
 export class TagsController {
   constructor(private readonly tagsService: TagsService) {}
 
   @Post()
-  async create(@Body() createTagDto: CreateTagDto): Promise<VendorTag> {
+  async create(@Body() createTagDto: CreateTagDto): Promise<Tag> {
     return await this.tagsService.create(createTagDto);
   }
 
   @Get()
-  async findAll(): Promise<VendorTag[]> {
+  async findAll(): Promise<Tag[]> {
     return await this.tagsService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<VendorTag> {
+  async findOne(@Param('id') id: string): Promise<Tag> {
     return await this.tagsService.findOne(id);
   }
 
@@ -35,12 +35,12 @@ export class TagsController {
   async update(
     @Param('id') id: string,
     @Body() updateTagDto: UpdateTagDto,
-  ): Promise<VendorTag> {
+  ): Promise<Tag> {
     return await this.tagsService.update(id, updateTagDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<VendorTag> {
+  async remove(@Param('id') id: string): Promise<Tag> {
     return await this.tagsService.remove(id);
   }
 }

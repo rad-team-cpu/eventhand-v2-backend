@@ -6,7 +6,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
-import { VendorTag } from 'src/tags/entities/vendor-tag.schema';
+import { Tag } from 'src/tags/entities/vendor-tag.schema';
 
 export class CreateVendorDto {
   @IsString()
@@ -43,6 +43,6 @@ export class CreateVendorDto {
 
   @IsOptional()
   @IsString()
-  @Transform(() => new VendorTag())
-  tags?: VendorTag;
+  @Transform(() => new Tag())
+  tags?: Tag;
 }
