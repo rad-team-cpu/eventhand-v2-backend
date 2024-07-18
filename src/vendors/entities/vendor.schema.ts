@@ -30,7 +30,7 @@ export class Vendor {
       name: String,
     },
   ])
-  tags: Array<{ tagId: MongooseSchema.Types.ObjectId; name: string }>;
+  tags: { tagId: MongooseSchema.Types.ObjectId; name: string }[];
 
   @Prop()
   logo: string;
