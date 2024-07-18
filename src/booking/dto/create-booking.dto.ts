@@ -7,7 +7,7 @@ export class CreateBookingDto {
   vendorId: MongooseSchema.Types.ObjectId;
 
   @IsMongoId()
-  userId: MongooseSchema.Types.ObjectId;
+  clientId: MongooseSchema.Types.ObjectId;
 
   @IsMongoId()
   packageId: MongooseSchema.Types.ObjectId;
