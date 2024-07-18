@@ -12,8 +12,8 @@ export class CreateBookingDto {
   @IsMongoId()
   packageId: MongooseSchema.Types.ObjectId;
 
-  @IsDate()
-  bookingDate: Date;
+  @IsMongoId()
+  eventId: MongooseSchema.Types.ObjectId;
 
   @IsEnum(BookingStatus)
   bookingStatus: BookingStatus;

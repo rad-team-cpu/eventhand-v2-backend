@@ -4,6 +4,7 @@ import { Package } from 'src/packages/entities/package.schema';
 import { User } from 'src/users/entities/user.schema';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 import { BookingStatus } from './booking-status.enum';
+import { Event } from 'src/events/entities/event.schema';
 
 export type BookingDocument = HydratedDocument<Booking>;
 
@@ -33,8 +34,13 @@ export class Booking {
   })
   packageId: MongooseSchema.Types.ObjectId;
 
-  @Prop({ required: true })
-  bookingDate: Date;
+  @Prop({
+    required: true,
+    type: MongooseSchema.Types.ObjectId,
+    ref: Event.name,
+    immutable: false,
+  })
+  eventId: MongooseSchema.Types.ObjectId;
 
   @Prop({ required: true, default: BookingStatus.Pending })
   bookingStatus: BookingStatus;
