@@ -9,7 +9,7 @@ export class Event {
   @Prop({ required: true })
   attendees: number;
 
-  @Prop({ required: true })
+  @Prop()
   name: string;
 
   @Prop({ required: true })
