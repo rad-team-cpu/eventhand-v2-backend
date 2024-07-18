@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsEmail,
@@ -5,7 +6,10 @@ import {
   IsOptional,
   IsString,
   Length,
+  ValidateNested,
 } from 'class-validator';
+import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
+import { ExistingTagDto } from 'src/tags/dto/existing-tag.dto';
 
 export class CreateVendorDto {
   @IsString()
@@ -42,6 +46,12 @@ export class CreateVendorDto {
 
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  tags: string[];
+  @Type(() => Array<ExistingTagDto>)
+  @ValidateNested({ each: true })
+  tags?: ExistingTagDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  newTags?: CreateTagDto[];
 }

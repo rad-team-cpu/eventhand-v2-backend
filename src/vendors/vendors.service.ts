@@ -16,7 +16,7 @@ export class VendorsService {
   ) {}
 
   async create(createVendorDto: CreateVendorDto): Promise<Vendor> {
-    const { tags, ...vendor } = createVendorDto;
+    const { newTags, ...vendor } = createVendorDto;
     const result = await this.vendorModel.create(vendor);
 
     return result;
