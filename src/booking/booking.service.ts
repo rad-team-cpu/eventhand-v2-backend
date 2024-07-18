@@ -1,26 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { FilterQuery, Model } from 'mongoose';
+import { Booking } from './entities/booking.schema';
 
 @Injectable()
 export class BookingService {
-  create(createBookingDto: CreateBookingDto) {
-    return 'This action adds a new booking';
+  constructor(
+    @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
+  ) {}
+
+  async create(createBookingDto: CreateBookingDto): Promise<Booking> {
+    return await this.bookingModel.create(createBookingDto);
   }
 
-  findAll() {
-    return `This action returns all booking`;
+  async findAll(filter: FilterQuery<Booking>): Promise<Booking[]> {
+    return await this.bookingModel.find(filter).exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} booking`;
+  async findOne(id: string): Promise<Booking> {
+    return await this.bookingModel.findById(id).exec();
   }
 
-  update(id: number, updateBookingDto: UpdateBookingDto) {
-    return `This action updates a #${id} booking`;
+  async update(
+    id: string,
+    updateBookingDto: UpdateBookingDto,
+  ): Promise<Booking> {
+    return await this.bookingModel
+      .findByIdAndUpdate(id, updateBookingDto)
+      .exec();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} booking`;
+  async remove(id: string): Promise<Booking> {
+    return await this.bookingModel.findByIdAndDelete(id).exec();
   }
 }
