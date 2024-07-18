@@ -24,6 +24,9 @@ export class Event {
   attendees: number;
 
   @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
   date: Date;
 
   @Prop({ required: true })

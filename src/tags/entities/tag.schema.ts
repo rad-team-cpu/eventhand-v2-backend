@@ -3,7 +3,7 @@ import { HydratedDocument } from 'mongoose';
 
 export type TagDocument = HydratedDocument<Tag>;
 
-@Schema()
+@Schema({ id: false })
 export class Tag {
   @Prop({ required: true, unique: true, immutable: true, index: true })
   name: string;
