@@ -21,10 +21,10 @@ export class Booking {
   @Prop({
     required: true,
     type: MongooseSchema.Types.ObjectId,
-    ref: User.name,
+    ref: 'User',
     immutable: false,
   })
-  userId: MongooseSchema.Types.ObjectId;
+  clientId: MongooseSchema.Types.ObjectId;
 
   @Prop({
     required: true,
@@ -37,7 +37,7 @@ export class Booking {
   @Prop({
     required: true,
     type: MongooseSchema.Types.ObjectId,
-    ref: Event.name,
+    ref: 'Event',
     immutable: false,
   })
   eventId: MongooseSchema.Types.ObjectId;

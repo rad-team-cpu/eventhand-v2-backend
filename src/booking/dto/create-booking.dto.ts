@@ -1,4 +1,4 @@
-import { IsDate, IsEnum, IsMongoId } from 'class-validator';
+import { IsEnum, IsMongoId } from 'class-validator';
 import { Schema as MongooseSchema } from 'mongoose';
 import { BookingStatus } from '../entities/booking-status.enum';
 
