@@ -1,9 +1,14 @@
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateEventDto {
   @IsString()
+  @IsNotEmpty()
   clerkId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
   @IsNumber()
   attendees: number;

@@ -2,32 +2,34 @@ import { Injectable } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { VendorTag } from './entities/vendor-tag.schema';
+import { Tag } from './entities/tag.schema';
 import { Model } from 'mongoose';
 
 @Injectable()
 export class TagsService {
-  constructor(
-    @InjectModel(VendorTag.name) private tagModel: Model<VendorTag>,
-  ) {}
+  constructor(@InjectModel(Tag.name) private tagModel: Model<Tag>) {}
 
-  async create(createTagDto: CreateTagDto): Promise<VendorTag> {
-    return await this.tagModel.create(createTagDto);
+  async create(createTagDto: CreateTagDto): Promise<Tag> {
+    try {
+      return await this.tagModel.create(createTagDto);
+    } catch (err) {
+      throw err;
+    }
   }
 
-  async findAll(): Promise<VendorTag[]> {
+  async findAll(): Promise<Tag[]> {
     return await this.tagModel.find().exec();
   }
 
-  async findOne(id: number): Promise<VendorTag> {
-    return await this.tagModel.findOne({ _id: id }).exec();
+  async findOne(id: string): Promise<Tag> {
+    return await this.tagModel.findById(id).exec();
   }
 
-  async update(id: number, updateTagDto: UpdateTagDto): Promise<VendorTag> {
+  async update(id: string, updateTagDto: UpdateTagDto): Promise<Tag> {
     return await this.tagModel.findByIdAndUpdate(id, updateTagDto);
   }
 
-  async remove(id: number): Promise<VendorTag> {
+  async remove(id: string): Promise<Tag> {
     return await this.tagModel.findByIdAndDelete(id);
   }
 }
