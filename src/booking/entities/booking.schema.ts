@@ -3,11 +3,7 @@ import { Schema as MongooseSchema } from 'mongoose';
 import { Package } from 'src/packages/entities/package.schema';
 import { User } from 'src/users/entities/user.schema';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
-
-export enum BookingStatus {
-  Pending = 'PENDING',
-  Confirmed = 'CONFIRMED',
-}
+import { BookingStatus } from './booking-status.enum';
 
 @Schema({ timestamps: true })
 export class Booking {
