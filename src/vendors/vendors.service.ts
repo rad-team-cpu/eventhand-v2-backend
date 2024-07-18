@@ -5,18 +5,21 @@ import { Vendor } from './entities/vendor.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import { ReviewsService } from 'src/reviews/reviews.service';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { FactorType } from './entities/factor.types';
 
 @Injectable()
 export class VendorsService {
   constructor(
     @InjectModel(Vendor.name) private readonly vendorModel: Model<Vendor>,
-    private readonly reviewsService: ReviewsService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async create(createVendorDto: CreateVendorDto): Promise<Vendor> {
-    return await this.vendorModel.create(createVendorDto);
+    const { tags, ...vendor } = createVendorDto;
+    const result = await this.vendorModel.create(vendor);
+
+    return result;
   }
 
   async findAll(params?: FilterQuery<Vendor>): Promise<Vendor[]> {

@@ -1,12 +1,11 @@
-import { Transform } from 'class-transformer';
 import {
+  IsArray,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
   Length,
 } from 'class-validator';
-import { VendorTag } from 'src/tags/entities/vendor-tag.schema';
 
 export class CreateVendorDto {
   @IsString()
@@ -42,7 +41,7 @@ export class CreateVendorDto {
   bio?: string;
 
   @IsOptional()
-  @IsString()
-  @Transform(() => new VendorTag())
-  tags?: VendorTag;
+  @IsArray()
+  @IsString({ each: true })
+  tags: string[];
 }

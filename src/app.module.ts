@@ -12,6 +12,7 @@ import { TagsModule } from './tags/tags.module';
 import { VerificationModule } from './verification/verification.module';
 import { PackagesModule } from './packages/packages.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
+import { MatchmakerModule } from './matchmaker/matchmaker.module';
 import config from './config/config';
 
 @Module({
@@ -33,6 +34,7 @@ import config from './config/config';
     VerificationModule,
     PackagesModule,
     PortfolioModule,
+    MatchmakerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
