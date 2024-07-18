@@ -13,6 +13,7 @@ import { VerificationModule } from './verification/verification.module';
 import { PackagesModule } from './packages/packages.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
 import { MatchmakerModule } from './matchmaker/matchmaker.module';
+import { BookingModule } from './booking/booking.module';
 import config from './config/config';
 
 @Module({
@@ -35,6 +36,7 @@ import config from './config/config';
     PackagesModule,
     PortfolioModule,
     MatchmakerModule,
+    BookingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
