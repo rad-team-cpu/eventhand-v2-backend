@@ -5,7 +5,7 @@ import { User } from 'src/users/entities/user.schema';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 import { BookingStatus } from './booking-status.enum';
 
-export type VendorDocument = HydratedDocument<Vendor>;
+export type BookingDocument = HydratedDocument<Booking>;
 
 @Schema({ timestamps: true })
 export class Booking {
@@ -40,4 +40,4 @@ export class Booking {
   bookingStatus: BookingStatus;
 }
 
-export const VendorSchema = SchemaFactory.createForClass(Vendor);
+export const BookingSchema = SchemaFactory.createForClass(Booking);
