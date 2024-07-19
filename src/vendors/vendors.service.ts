@@ -4,9 +4,10 @@ import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
-import { ReviewsService } from 'src/reviews/reviews.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { FactorType } from './entities/factor.types';
+import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
+import { Tag, TagDocument } from 'src/tags/entities/tag.schema';
 
 @Injectable()
 export class VendorsService {
@@ -16,8 +17,20 @@ export class VendorsService {
   ) {}
 
   async create(createVendorDto: CreateVendorDto): Promise<Vendor> {
-    const { newTags, ...vendor } = createVendorDto;
-    const result = await this.vendorModel.create(vendor);
+    const { newTags, tags, ...vendor } = createVendorDto;
+
+    const createdTags: Promise<Tag>[] = newTags.map(
+      async (x) =>
+        (await this.eventEmitter.emitAsync(
+          'tags.new',
+          x,
+        )) as unknown as Promise<Tag>,
+    );
+
+    const result = await this.vendorModel.create({
+      ...vendor,
+      tags: { ...tags, ...createdTags },
+    });
 
     return result;
   }
@@ -28,6 +41,7 @@ export class VendorsService {
 
   async findOne(filter: FilterQuery<Vendor>): Promise<Vendor> {
     const vendor = await this.vendorModel.findOne(filter).exec();
+    console.log(vendor);
 
     if (!vendor) {
       throw new NotFoundException(`user with doesn't exist`);
@@ -58,7 +72,7 @@ export class VendorsService {
 
   async update(id: string, updateVendorDto: UpdateVendorDto): Promise<Vendor> {
     const vendor = await this.vendorModel
-      .findByIdAndUpdate(id, updateVendorDto, { new: true })
+      .findByIdAndUpdate(id, updateVendorDto)
       .exec();
 
     if (!vendor) {
@@ -66,6 +80,39 @@ export class VendorsService {
     }
 
     return vendor;
+  }
+
+  async updateTags(
+    id: string,
+    updateVendorTagsDto: UpdateVendorTagsDto,
+  ): Promise<Vendor> {
+    const vendorExists = await this.vendorModel.exists({ _id: id }).exec();
+
+    if (!vendorExists) {
+      throw new NotFoundException(`user with doesn't exist`);
+    }
+
+    const { tags = [], newTags = [] } = updateVendorTagsDto;
+
+    let createdTags: Tag[] = [];
+
+    if (newTags.length > 0) {
+      createdTags = (
+        await this.eventEmitter.emitAsync('tags.new', newTags)
+      ).flat();
+    }
+
+    // Flatten and normalize the structure of all tags
+    const updatedTags = [
+      ...tags.map((tag) => ({ _id: tag._id, name: tag.name })),
+      ...createdTags.map((tag) => ({ _id: tag._id, name: tag.name })),
+    ];
+
+    const updatedVendor = await this.vendorModel
+      .findByIdAndUpdate(id, { $set: { tags: updatedTags } }, { new: true })
+      .exec();
+
+    return updatedVendor;
   }
 
   async remove(filter: FilterQuery<Vendor>): Promise<Vendor> {

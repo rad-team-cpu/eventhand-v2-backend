@@ -13,6 +13,7 @@ import { CreateVendorDto } from './dto/create-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
 import { FilterQuery, isValidObjectId } from 'mongoose';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
+import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
 
 @Controller('vendors')
 export class VendorsController {
@@ -45,6 +46,14 @@ export class VendorsController {
     @Body() updateVendorDto: UpdateVendorDto,
   ): Promise<Vendor> {
     return await this.vendorsService.update(id, updateVendorDto);
+  }
+
+  @Patch(':id/tags')
+  async updateTags(
+    @Param('id') id: string,
+    @Body() updateVendorTagsDto: UpdateVendorTagsDto,
+  ): Promise<Vendor> {
+    return await this.vendorsService.updateTags(id, updateVendorTagsDto);
   }
 
   @Delete(':id')
