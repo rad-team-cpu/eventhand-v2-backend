@@ -24,12 +24,16 @@ export class Vendor {
   @Prop()
   bio: string;
 
-  @Prop([
-    {
-      tagId: { type: MongooseSchema.Types.ObjectId, ref: Tag.name },
-      name: String,
-    },
-  ])
+  @Prop({
+    type: [
+      {
+        type: {
+          tagId: { type: MongooseSchema.Types.ObjectId, ref: Tag.name },
+          name: String,
+        },
+      },
+    ],
+  })
   tags: { tagId: MongooseSchema.Types.ObjectId; name: string }[];
 
   @Prop()

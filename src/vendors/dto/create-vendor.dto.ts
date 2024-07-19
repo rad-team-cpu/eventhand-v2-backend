@@ -46,12 +46,13 @@ export class CreateVendorDto {
 
   @IsOptional()
   @IsArray()
-  @Type(() => Array<ExistingTagDto>)
   @ValidateNested({ each: true })
+  @Type(() => ExistingTagDto)
   tags?: ExistingTagDto[];
 
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
+  @Type(() => CreateTagDto)
   newTags?: CreateTagDto[];
 }

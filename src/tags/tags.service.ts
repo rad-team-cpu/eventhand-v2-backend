@@ -4,11 +4,13 @@ import { UpdateTagDto } from './dto/update-tag.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Tag } from './entities/tag.schema';
 import { Model } from 'mongoose';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class TagsService {
   constructor(@InjectModel(Tag.name) private tagModel: Model<Tag>) {}
 
+  @OnEvent('tags.new')
   async create(createTagDto: CreateTagDto): Promise<Tag> {
     try {
       return await this.tagModel.create(createTagDto);
