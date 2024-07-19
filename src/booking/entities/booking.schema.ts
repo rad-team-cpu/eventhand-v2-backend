@@ -1,10 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Package } from 'src/packages/entities/package.schema';
-import { User } from 'src/users/entities/user.schema';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 import { BookingStatus } from './booking-status.enum';
-import { Event } from 'src/events/entities/event.schema';
 
 export type BookingDocument = HydratedDocument<Booking>;
 
