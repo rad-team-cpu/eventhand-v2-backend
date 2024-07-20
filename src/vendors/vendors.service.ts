@@ -8,6 +8,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { FactorType } from './entities/factor.types';
 import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
 import { Tag } from 'src/tags/entities/tag.schema';
+import { SelectedTagsDto, Selection } from './dto/selected-vendor-tags.dto';
 
 @Injectable()
 export class VendorsService {
@@ -35,13 +36,76 @@ export class VendorsService {
     return result;
   }
 
-  async findAll(params?: FilterQuery<Vendor>): Promise<Vendor[]> {
-    return await this.vendorModel.find(params).exec();
+  async findAll(query?: FilterQuery<Vendor>): Promise<Vendor[]> {
+    return await this.vendorModel.find(query).exec();
   }
 
-  async findOne(filter: FilterQuery<Vendor>): Promise<Vendor> {
-    const vendor = await this.vendorModel.findOne(filter).exec();
-    console.log(vendor);
+  async findAllByTags(selectedTagsDto: SelectedTagsDto): Promise<Vendor[]> {
+    const { tags = [], selection } = selectedTagsDto;
+
+    let query;
+
+    switch (selection) {
+      case Selection.And:
+        // Match all tags (AND)
+        query = {
+          tags: {
+            $all: tags.map((tag) => ({
+              $elemMatch: {
+                _id: tag._id,
+                name: tag.name,
+              },
+            })),
+          },
+        };
+        break;
+
+      case Selection.Or:
+        // Match at least one tag (OR)
+        query = {
+          tags: {
+            $elemMatch: {
+              $or: tags.map((tag) => ({
+                _id: tag._id,
+                name: tag.name,
+              })),
+            },
+          },
+        };
+        break;
+
+      case Selection.Exclusive:
+        // Match exactly these tags and no others
+        query = {
+          $and: [
+            {
+              tags: {
+                $all: tags.map((tag) => ({
+                  $elemMatch: {
+                    _id: tag._id,
+                    name: tag.name,
+                  },
+                })),
+              },
+            },
+            {
+              $expr: {
+                $eq: [{ $size: '$tags' }, tags.length],
+              },
+            },
+          ],
+        };
+        break;
+
+      default:
+        throw new Error('Invalid selection type');
+    }
+
+    return this.findAll(query);
+  }
+
+  async findOne(query: FilterQuery<Vendor>): Promise<Vendor> {
+    const vendor = await this.vendorModel.findOne(query).exec();
 
     if (!vendor) {
       throw new NotFoundException(`user with doesn't exist`);
@@ -86,9 +150,9 @@ export class VendorsService {
     id: string,
     updateVendorTagsDto: UpdateVendorTagsDto,
   ): Promise<Vendor> {
-    const vendorExists = await this.vendorModel.exists({ _id: id }).exec();
+    const vendor = await this.vendorModel.findById(id).exec();
 
-    if (!vendorExists) {
+    if (!vendor) {
       throw new NotFoundException(`user with doesn't exist`);
     }
 
@@ -108,6 +172,7 @@ export class VendorsService {
       ...createdTags.map((tag) => ({ _id: tag._id, name: tag.name })),
     ];
 
+    // Update Vendor
     const updatedVendor = await this.vendorModel
       .findByIdAndUpdate(id, { $set: { tags: updatedTags } }, { new: true })
       .exec();
@@ -139,20 +204,25 @@ export class VendorsService {
   // On a scale of 0 - 100, we weigh different
   // Branding: has a Logo, has a banner, has a bio
   async calculateCredibility(id: string): Promise<void> {
-    // const vendor = await this.vendorModel.findById(id).exec();
+    const vendor = await this.vendorModel.findById(id).exec();
+
     // Branding Present
     // const hasLogo = Number(Boolean(vendor.logo));
     // const hasBanner = Number(Boolean(vendor.banner));
     // const hasBio = Number(Boolean(vendor.bio));
+
     // const brandingScore = (hasLogo + hasBanner + hasBio) * 0.2; // Weighs 20%
+
     // Contact Details
     // const contactNumberValidated = false; // TBA
     // const emailIsValidated = false; // TBA
     // TBA;
+
     // Reviews
     // const reviews = await this.reviewsService.findSome({
     //   vendorId: vendor._id,
     // });
+
     // vendor.credibilityFactor;
     // vendor.save();
     //   return;

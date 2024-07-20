@@ -5,15 +5,15 @@ import {
   Body,
   Param,
   Delete,
-  Query,
   Patch,
 } from '@nestjs/common';
 import { VendorsService } from './vendors.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
-import { FilterQuery, isValidObjectId } from 'mongoose';
+import { isValidObjectId } from 'mongoose';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
+import { SelectedTagsDto } from './dto/selected-vendor-tags.dto';
 
 @Controller('vendors')
 export class VendorsController {
@@ -29,13 +29,13 @@ export class VendorsController {
     return await this.vendorsService.findAll();
   }
 
-  // @Get('tags')
-  // async findByTags(@Query() body?: ): Promise<Vendor[]> {
-  //   return await this.vendorsService.findAll(query);
-  // }
+  @Get('tags')
+  async findByTags(@Body() tags: SelectedTagsDto): Promise<Vendor[]> {
+    return await this.vendorsService.findAllByTags(tags);
+  }
 
   @Get(':id/packages')
-  async findOneWithPackages(@Param('id') id: string) {
+  async findOneWithPackages(@Param('id') id: string): Promise<Vendor> {
     return await this.vendorsService.findOneWithPackages(id);
   }
 
