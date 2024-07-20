@@ -25,9 +25,14 @@ export class VendorsController {
   }
 
   @Get()
-  async findAll(@Query() params: FilterQuery<Vendor>): Promise<Vendor[]> {
-    return await this.vendorsService.findAll(params);
+  async findAll(): Promise<Vendor[]> {
+    return await this.vendorsService.findAll();
   }
+
+  // @Get('tags')
+  // async findByTags(@Query() body?: ): Promise<Vendor[]> {
+  //   return await this.vendorsService.findAll(query);
+  // }
 
   @Get(':id/packages')
   async findOneWithPackages(@Param('id') id: string) {
