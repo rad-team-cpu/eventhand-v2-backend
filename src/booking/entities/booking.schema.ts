@@ -3,6 +3,7 @@ import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Package } from 'src/packages/entities/package.schema';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 import { BookingStatus } from './booking-status.enum';
+import { User } from '@clerk/clerk-sdk-node';
 
 export type BookingDocument = HydratedDocument<Booking>;
 
@@ -19,7 +20,7 @@ export class Booking {
   @Prop({
     required: true,
     type: MongooseSchema.Types.ObjectId,
-    ref: 'User',
+    ref: User.name,
     immutable: false,
   })
   clientId: MongooseSchema.Types.ObjectId;
@@ -35,7 +36,7 @@ export class Booking {
   @Prop({
     required: true,
     type: MongooseSchema.Types.ObjectId,
-    ref: 'Event',
+    ref: Event.name,
     immutable: false,
   })
   eventId: MongooseSchema.Types.ObjectId;
