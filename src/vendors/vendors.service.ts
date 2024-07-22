@@ -4,9 +4,11 @@ import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
-import { ReviewsService } from 'src/reviews/reviews.service';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { FactorType } from './entities/factor.types';
+import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
+import { Tag } from 'src/tags/entities/tag.schema';
+import { SelectedTagsDto, Selection } from './dto/selected-vendor-tags.dto';
 
 @Injectable()
 export class VendorsService {
@@ -16,18 +18,94 @@ export class VendorsService {
   ) {}
 
   async create(createVendorDto: CreateVendorDto): Promise<Vendor> {
-    const { newTags, ...vendor } = createVendorDto;
-    const result = await this.vendorModel.create(vendor);
+    const { newTags, tags, ...vendor } = createVendorDto;
+
+    const createdTags: Promise<Tag>[] = newTags.map(
+      async (x) =>
+        (await this.eventEmitter.emitAsync(
+          'tags.new',
+          x,
+        )) as unknown as Promise<Tag>,
+    );
+
+    const result = await this.vendorModel.create({
+      ...vendor,
+      tags: { ...tags, ...createdTags },
+    });
 
     return result;
   }
 
-  async findAll(params?: FilterQuery<Vendor>): Promise<Vendor[]> {
-    return await this.vendorModel.find(params).exec();
+  async findAll(query?: FilterQuery<Vendor>): Promise<Vendor[]> {
+    return await this.vendorModel.find(query).exec();
   }
 
-  async findOne(filter: FilterQuery<Vendor>): Promise<Vendor> {
-    const vendor = await this.vendorModel.findOne(filter).exec();
+  async findAllByTags(selectedTagsDto: SelectedTagsDto): Promise<Vendor[]> {
+    const { tags = [], selection } = selectedTagsDto;
+
+    let query;
+
+    switch (selection) {
+      case Selection.And:
+        // Match all tags (AND)
+        query = {
+          tags: {
+            $all: tags.map((tag) => ({
+              $elemMatch: {
+                _id: tag._id,
+                name: tag.name,
+              },
+            })),
+          },
+        };
+        break;
+
+      case Selection.Or:
+        // Match at least one tag (OR)
+        query = {
+          tags: {
+            $elemMatch: {
+              $or: tags.map((tag) => ({
+                _id: tag._id,
+                name: tag.name,
+              })),
+            },
+          },
+        };
+        break;
+
+      case Selection.Exclusive:
+        // Match exactly these tags and no others
+        query = {
+          $and: [
+            {
+              tags: {
+                $all: tags.map((tag) => ({
+                  $elemMatch: {
+                    _id: tag._id,
+                    name: tag.name,
+                  },
+                })),
+              },
+            },
+            {
+              $expr: {
+                $eq: [{ $size: '$tags' }, tags.length],
+              },
+            },
+          ],
+        };
+        break;
+
+      default:
+        throw new Error('Invalid selection type');
+    }
+
+    return this.findAll(query);
+  }
+
+  async findOne(query: FilterQuery<Vendor>): Promise<Vendor> {
+    const vendor = await this.vendorModel.findOne(query).exec();
 
     if (!vendor) {
       throw new NotFoundException(`user with doesn't exist`);
@@ -58,7 +136,7 @@ export class VendorsService {
 
   async update(id: string, updateVendorDto: UpdateVendorDto): Promise<Vendor> {
     const vendor = await this.vendorModel
-      .findByIdAndUpdate(id, updateVendorDto, { new: true })
+      .findByIdAndUpdate(id, updateVendorDto)
       .exec();
 
     if (!vendor) {
@@ -66,6 +144,40 @@ export class VendorsService {
     }
 
     return vendor;
+  }
+
+  async updateTags(
+    id: string,
+    updateVendorTagsDto: UpdateVendorTagsDto,
+  ): Promise<Vendor> {
+    const vendor = await this.vendorModel.findById(id).exec();
+
+    if (!vendor) {
+      throw new NotFoundException(`user with doesn't exist`);
+    }
+
+    const { tags = [], newTags = [] } = updateVendorTagsDto;
+
+    let createdTags: Tag[] = [];
+
+    if (newTags.length > 0) {
+      createdTags = (
+        await this.eventEmitter.emitAsync('tags.new', newTags)
+      ).flat();
+    }
+
+    // Flatten and normalize the structure of all tags
+    const updatedTags = [
+      ...tags.map((tag) => ({ _id: tag._id, name: tag.name })),
+      ...createdTags.map((tag) => ({ _id: tag._id, name: tag.name })),
+    ];
+
+    // Update Vendor
+    const updatedVendor = await this.vendorModel
+      .findByIdAndUpdate(id, { $set: { tags: updatedTags } }, { new: true })
+      .exec();
+
+    return updatedVendor;
   }
 
   async remove(filter: FilterQuery<Vendor>): Promise<Vendor> {
