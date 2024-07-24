@@ -42,6 +42,7 @@ export class VendorsService {
 
   async findAllByTags(selectedTagsDto: SelectedTagsDto): Promise<Vendor[]> {
     const { tags = [], selection } = selectedTagsDto;
+    const tagObjectIds = tags.map((tag) => new Types.ObjectId(tag));
 
     let query;
 
@@ -50,11 +51,8 @@ export class VendorsService {
         // Match all tags (AND)
         query = {
           tags: {
-            $all: tags.map((tag) => ({
-              $elemMatch: {
-                _id: tag._id,
-                name: tag.name,
-              },
+            $all: tagObjectIds.map((id) => ({
+              $elemMatch: { _id: id },
             })),
           },
         };
@@ -63,14 +61,7 @@ export class VendorsService {
       case Selection.Or:
         // Match at least one tag (OR)
         query = {
-          tags: {
-            $elemMatch: {
-              $or: tags.map((tag) => ({
-                _id: tag._id,
-                name: tag.name,
-              })),
-            },
-          },
+          'tags._id': { $in: tagObjectIds },
         };
         break;
 
@@ -80,19 +71,12 @@ export class VendorsService {
           $and: [
             {
               tags: {
-                $all: tags.map((tag) => ({
-                  $elemMatch: {
-                    _id: tag._id,
-                    name: tag.name,
-                  },
+                $all: tagObjectIds.map((id) => ({
+                  $elemMatch: { _id: id },
                 })),
               },
             },
-            {
-              $expr: {
-                $eq: [{ $size: '$tags' }, tags.length],
-              },
-            },
+            { $expr: { $eq: [{ $size: '$tags' }, tagObjectIds.length] } },
           ],
         };
         break;
@@ -101,7 +85,7 @@ export class VendorsService {
         throw new Error('Invalid selection type');
     }
 
-    return this.findAll(query);
+    return this.vendorModel.find(query).exec();
   }
 
   async findOne(query: FilterQuery<Vendor>): Promise<Vendor> {

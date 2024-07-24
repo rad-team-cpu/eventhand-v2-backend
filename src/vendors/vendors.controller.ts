@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { VendorsService } from './vendors.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
@@ -30,7 +31,7 @@ export class VendorsController {
   }
 
   @Get('tags')
-  async findByTags(@Body() tags: SelectedTagsDto): Promise<Vendor[]> {
+  async findByTags(@Query() tags: SelectedTagsDto): Promise<Vendor[]> {
     return await this.vendorsService.findAllByTags(tags);
   }
 

@@ -1,6 +1,5 @@
-import { PickType } from '@nestjs/mapped-types';
-import { CreateVendorDto } from './create-vendor.dto';
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsArray, IsEnum, IsMongoId, IsNotEmpty } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export enum Selection {
   And = 'AND',
@@ -8,10 +7,18 @@ export enum Selection {
   Exclusive = 'EXCLUSIVE',
 }
 
-export class SelectedTagsDto extends PickType(CreateVendorDto, [
-  'tags',
-] as const) {
+export class SelectedTagsDto {
+  @IsArray()
+  @IsMongoId({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.split(',');
+    }
+    return value;
+  })
+  tags: string[];
+
   @IsEnum(Selection)
   @IsNotEmpty()
-  selection: Selection;
+  selection: Selection = Selection.Or;
 }
