@@ -55,6 +55,9 @@ export class Vendor {
   @Prop({ default: 0 })
   credibility: number;
 
+  @Prop({ type: [Date] })
+  unavailableDates: Date[];
+
   @Prop({ default: false, required: true })
   visibility: boolean;
 }

@@ -34,7 +34,7 @@ export class User {
   gender: Gender;
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: Event.name }] })
-  @Type(() => Array<Event>)
+  @Type(() => Event)
   events: Event[];
 
   @Prop({

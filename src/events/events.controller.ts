@@ -6,6 +6,7 @@ import {
   // Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { Event } from './entities/event.schema';
@@ -22,15 +23,8 @@ export class EventsController {
   }
 
   @Get()
-  async findAll() {
+  async findAll(): Promise<Event[]> {
     return this.eventsService.findAll();
-  }
-
-  @Get('clerk=:clerkId')
-  async findAllByUserClerkId(
-    @Param('clerkId') clerkId: string,
-  ): Promise<Event[]> {
-    return await this.eventsService.getAllByUser({ clerkId });
   }
 
   @Get(':id')
