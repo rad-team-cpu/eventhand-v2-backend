@@ -6,12 +6,14 @@ import {
   // Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.schema';
 import { isValidObjectId } from 'mongoose';
+import { Event } from 'src/events/entities/event.schema';
 
 @Controller('users')
 export class UsersController {
@@ -31,6 +33,28 @@ export class UsersController {
   async findOne(@Param('id') id: string): Promise<User> {
     const filter = isValidObjectId(id) ? { _id: id } : { clerkId: id };
     return await this.usersService.findOne(filter);
+  }
+
+  @Get(':id/events')
+  async findOneWithUpcomingEvents(
+    @Param('id') id: string,
+    @Query('time') time?: string,
+  ): Promise<Event[]> {
+    const filter = isValidObjectId(id) ? { _id: id } : { clerkId: id };
+    const currentDate = new Date();
+
+    const user = await this.usersService.findOne(filter);
+
+    if (!time) {
+      return user.events;
+    }
+
+    const after =
+      time === 'upcoming'
+        ? (event) => event.date > currentDate
+        : (event) => event.date <= currentDate;
+
+    return user.events.filter(after);
   }
 
   // @Patch(':id')

@@ -12,5 +12,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
   ],
   controllers: [EventsController],
   providers: [EventsService],
+  exports: [EventsService],
 })
 export class EventsModule {}

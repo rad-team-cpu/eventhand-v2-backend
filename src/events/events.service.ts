@@ -6,6 +6,7 @@ import { Event } from './entities/event.schema';
 import { FilterQuery, Model } from 'mongoose';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PushEventToUserDto } from 'src/users/dto/push-event-to-user.dto';
+import { User } from 'src/users/entities/user.schema';
 
 @Injectable()
 export class EventsService {
@@ -31,11 +32,7 @@ export class EventsService {
     }
   }
 
-  async findAll(): Promise<Event[]> {
-    return await this.eventModel.find().exec();
-  }
-
-  async getAllByUser(filter: FilterQuery<Event>): Promise<Event[]> {
+  async findAll(filter?: FilterQuery<Event>): Promise<Event[]> {
     return await this.eventModel.find(filter).exec();
   }
 
