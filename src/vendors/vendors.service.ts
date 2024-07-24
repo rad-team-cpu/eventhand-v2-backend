@@ -105,7 +105,10 @@ export class VendorsService {
   }
 
   async findOne(query: FilterQuery<Vendor>): Promise<Vendor> {
-    const vendor = await this.vendorModel.findOne(query).exec();
+    const vendor = await this.vendorModel
+      .findOne(query)
+      .populate('events')
+      .exec();
 
     if (!vendor) {
       throw new NotFoundException(`user with doesn't exist`);
@@ -196,35 +199,35 @@ export class VendorsService {
       })
       .exec();
 
-    await this.calculateCredibility(vendorId);
+    // await this.calculateCredibility(vendorId);
   }
 
   // calculate credibility of vendor
   // we need to calculate credibility based on the following:
   // On a scale of 0 - 100, we weigh different
   // Branding: has a Logo, has a banner, has a bio
-  async calculateCredibility(id: string): Promise<void> {
-    const vendor = await this.vendorModel.findById(id).exec();
+  // async calculateCredibility(id: string): Promise<void> {
+  //   const vendor = await this.vendorModel.findById(id).exec();
 
-    // Branding Present
-    // const hasLogo = Number(Boolean(vendor.logo));
-    // const hasBanner = Number(Boolean(vendor.banner));
-    // const hasBio = Number(Boolean(vendor.bio));
+  // Branding Present
+  // const hasLogo = Number(Boolean(vendor.logo));
+  // const hasBanner = Number(Boolean(vendor.banner));
+  // const hasBio = Number(Boolean(vendor.bio));
 
-    // const brandingScore = (hasLogo + hasBanner + hasBio) * 0.2; // Weighs 20%
+  // const brandingScore = (hasLogo + hasBanner + hasBio) * 0.2; // Weighs 20%
 
-    // Contact Details
-    // const contactNumberValidated = false; // TBA
-    // const emailIsValidated = false; // TBA
-    // TBA;
+  // Contact Details
+  // const contactNumberValidated = false; // TBA
+  // const emailIsValidated = false; // TBA
+  // TBA;
 
-    // Reviews
-    // const reviews = await this.reviewsService.findSome({
-    //   vendorId: vendor._id,
-    // });
+  // Reviews
+  // const reviews = await this.reviewsService.findSome({
+  //   vendorId: vendor._id,
+  // });
 
-    // vendor.credibilityFactor;
-    // vendor.save();
-    //   return;
-  }
+  // vendor.credibilityFactor;
+  // vendor.save();
+  //   return;
+  // }
 }
