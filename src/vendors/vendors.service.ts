@@ -18,7 +18,7 @@ export class VendorsService {
   ) {}
 
   async create(createVendorDto: CreateVendorDto): Promise<Vendor> {
-    const { newTags, tags, ...vendor } = createVendorDto;
+    const { newTags = [], tags = [], ...vendor } = createVendorDto;
 
     const createdTags: Promise<Tag>[] = newTags.map(
       async (x) =>
@@ -89,10 +89,7 @@ export class VendorsService {
   }
 
   async findOne(query: FilterQuery<Vendor>): Promise<Vendor> {
-    const vendor = await this.vendorModel
-      .findOne(query)
-      // .populate('events')
-      .exec();
+    const vendor = await this.vendorModel.findOne(query).exec();
 
     if (!vendor) {
       throw new NotFoundException(`user with doesn't exist`);
