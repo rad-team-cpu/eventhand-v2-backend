@@ -15,7 +15,7 @@ export class Booking {
     ref: Vendor.name,
     immutable: false,
   })
-  vendorId: MongooseSchema.Types.ObjectId;
+  vendor: MongooseSchema.Types.ObjectId;
 
   @Prop({
     required: true,
@@ -23,7 +23,7 @@ export class Booking {
     ref: User.name,
     immutable: false,
   })
-  clientId: MongooseSchema.Types.ObjectId;
+  client: MongooseSchema.Types.ObjectId;
 
   @Prop({
     required: true,
@@ -31,7 +31,7 @@ export class Booking {
     ref: Package.name,
     immutable: false,
   })
-  packageId: MongooseSchema.Types.ObjectId;
+  package: MongooseSchema.Types.ObjectId;
 
   @Prop({
     required: true,
@@ -39,7 +39,7 @@ export class Booking {
     ref: Event.name,
     immutable: false,
   })
-  eventId: MongooseSchema.Types.ObjectId;
+  event: MongooseSchema.Types.ObjectId;
 
   @Prop({ required: true, default: BookingStatus.Pending })
   bookingStatus: BookingStatus;
