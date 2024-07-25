@@ -18,7 +18,7 @@ export class VendorsService {
   ) {}
 
   async create(createVendorDto: CreateVendorDto): Promise<Vendor> {
-    const { newTags, tags, ...vendor } = createVendorDto;
+    const { newTags = [], tags = [], ...vendor } = createVendorDto;
 
     const createdTags: Promise<Tag>[] = newTags.map(
       async (x) =>
