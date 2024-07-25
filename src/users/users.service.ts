@@ -38,7 +38,9 @@ export class UsersService {
     try {
       const result = this.userModel.findOne(filter).populate('events').exec();
 
-      if (!result) throw new NotFoundException(`User doesn't exist`);
+      if (!result) {
+        throw new NotFoundException(`User with ${filter?.clerkId} not found`);
+      }
 
       return result;
     } catch (error) {
