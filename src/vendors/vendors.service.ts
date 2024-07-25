@@ -89,10 +89,7 @@ export class VendorsService {
   }
 
   async findOne(query: FilterQuery<Vendor>): Promise<Vendor> {
-    const vendor = await this.vendorModel
-      .findOne(query)
-      // .populate('events')
-      .exec();
+    const vendor = await this.vendorModel.findOne(query).exec();
 
     if (!vendor) {
       throw new NotFoundException(`user with doesn't exist`);
