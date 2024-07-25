@@ -32,7 +32,11 @@ export class UsersController {
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<User> {
     const filter = isValidObjectId(id) ? { _id: id } : { clerkId: id };
-    return await this.usersService.findOne(filter);
+      const user = await this.usersService.findOne(filter);
+      if (!user) {
+        throw new NotFoundException(`User with clerkId ${clerkId} not found`);
+      }
+        return user;
   }
 
   @Get(':id/events')
