@@ -91,7 +91,7 @@ export class VendorsService {
   async findOne(query: FilterQuery<Vendor>): Promise<Vendor> {
     const vendor = await this.vendorModel
       .findOne(query)
-      .populate('events')
+      // .populate('events')
       .exec();
 
     if (!vendor) {
