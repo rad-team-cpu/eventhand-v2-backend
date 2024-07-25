@@ -16,11 +16,19 @@ export class BookingService {
   }
 
   async findAll(filter: FilterQuery<Booking>): Promise<Booking[]> {
-    return await this.bookingModel.find(filter).exec();
+    return await this.bookingModel
+      .find(filter)
+      .populate('vendor', 'name logo')
+      .populate('package', '-createdAt -updatedAt -__v')
+      .exec();
   }
 
   async findOne(id: string): Promise<Booking> {
-    return await this.bookingModel.findById(id).exec();
+    return await this.bookingModel
+      .findById(id)
+      .populate('vendor', 'name logo tags')
+      .populate('package', '-createdAt -updatedAt -__v')
+      .exec();
   }
 
   async update(
@@ -29,6 +37,8 @@ export class BookingService {
   ): Promise<Booking> {
     return await this.bookingModel
       .findByIdAndUpdate(id, updateBookingDto)
+      .populate('vendor', 'name logo tags')
+      .populate('package', '-createdAt -updatedAt -__v')
       .exec();
   }
 

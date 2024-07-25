@@ -4,16 +4,16 @@ import { BookingStatus } from '../entities/booking-status.enum';
 
 export class CreateBookingDto {
   @IsMongoId()
-  vendorId: MongooseSchema.Types.ObjectId;
+  vendor: MongooseSchema.Types.ObjectId;
 
   @IsMongoId()
-  clientId: MongooseSchema.Types.ObjectId;
+  client: MongooseSchema.Types.ObjectId;
 
   @IsMongoId()
-  packageId: MongooseSchema.Types.ObjectId;
+  package: MongooseSchema.Types.ObjectId;
 
   @IsMongoId()
-  eventId: MongooseSchema.Types.ObjectId;
+  event: MongooseSchema.Types.ObjectId;
 
   @IsEnum(BookingStatus)
   bookingStatus: BookingStatus;
