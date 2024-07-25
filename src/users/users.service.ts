@@ -36,10 +36,15 @@ export class UsersService {
 
   async findOne(filter: FilterQuery<User>): Promise<User> {
     try {
-      const result = this.userModel.findOne(filter).populate('events').exec();
+      const result = await this.userModel
+        .findOne(filter)
+        .populate('events')
+        .exec();
 
       if (!result) {
-        throw new NotFoundException(`User with ${filter?.clerkId} not found`);
+        throw new NotFoundException(
+          `User with ${filter?._id ? filter?._id : filter?.clerkId} not found`,
+        );
       }
 
       return result;
