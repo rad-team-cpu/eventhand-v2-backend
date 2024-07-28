@@ -13,37 +13,44 @@ export class MatchmakerService {
     @InjectModel(Vendor.name) private readonly vendorModel: Model<Vendor>,
   ) {}
 
-  // async findSuitableVendorsAndPackages(event: Event): Promise<Vendor[]> {
-  //   // Find suitable packages
-  //   const suitablePackages = await this.packageModel
-  //     .find({
-  //       price: { $lte: event.budget },
-  //       capacity: { $gte: event.attendees },
-  //     })
-  //     .populate('vendorId')
-  //     .exec();
+  async findSuitableVendorsAndPackages(eventId: string): Promise<Vendor[]> {
+    const event = await this.eventModel.findById(eventId);
+    // Find suitable packages
+    const suitablePackages = await this.packageModel
+      .find({
+        price: { $lte: event.budget },
+      })
+      .exec();
 
-  //   // Filter vendors based on availability
-  //   const result = await Promise.all(
-  //     suitablePackages.map(async (pkg) => {
-  //       const vendor = pkg.vendorId as Vendor;
-  //       const isAvailable = await this.checkVendorAvailability(
-  //         vendor,
-  //         event.date,
-  //       );
+    const listOfVendorIds = await Promise.all(
+      suitablePackages.map(
+        async (pkge) => await this.vendorModel.findById(pkge.vendorId),
+      ),
+    );
 
-  //       if (isAvailable) {
-  //         return { vendor, package: pkg };
-  //       }
-  //       return null;
-  //     }),
-  //   );
+    return listOfVendorIds;
 
-  //   // Remove null entries and sort by vendor rating
-  //   return result
-  //     .filter((item) => item !== null)
-  //     .sort((a, b) => (b.vendor.rating || 0) - (a.vendor.rating || 0));
-  // }
+    //   // Filter vendors based on availability
+    //   const result = await Promise.all(
+    //     suitablePackages.map(async (pkg) => {
+    //       const vendor = pkg.vendorId as Vendor;
+    //       const isAvailable = await this.checkVendorAvailability(
+    //         vendor,
+    //         event.date,
+    //       );
+
+    //       if (isAvailable) {
+    //         return { vendor, package: pkg };
+    //       }
+    //       return null;
+    //     }),
+    //   );
+
+    //   // Remove null entries and sort by vendor rating
+    //   return result
+    //     .filter((item) => item !== null)
+    //     .sort((a, b) => (b.vendor.rating || 0) - (a.vendor.rating || 0));
+  }
 
   // private async checkVendorAvailability(
   //   vendor: Vendor,
