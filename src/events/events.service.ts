@@ -33,11 +33,14 @@ export class EventsService {
   }
 
   async findAll(filter?: FilterQuery<Event>): Promise<Event[]> {
-    return await this.eventModel.find(filter).exec();
+    return await this.eventModel.find(filter).populate('bookings').exec();
   }
 
   async findOne(filter: FilterQuery<Event>): Promise<Event> {
-    return await this.eventModel.findOne(filter).exec();
+    return await this.eventModel
+      .findOne(filter)
+      .populate({ path: 'bookings' })
+      .exec();
   }
 
   // update(id: number, updateEventDto: UpdateEventDto) {

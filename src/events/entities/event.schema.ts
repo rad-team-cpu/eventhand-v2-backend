@@ -1,10 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { Type } from 'class-transformer';
+import { HydratedDocument } from 'mongoose';
 import { Booking } from 'src/booking/entities/booking.schema';
 
 export type EventDocument = HydratedDocument<Event>;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: {
+    getters: true,
+    virtuals: true,
+  },
+})
 export class Event {
   @Prop({ required: true })
   attendees: number;
@@ -18,8 +25,16 @@ export class Event {
   @Prop({ required: true })
   budget: number;
 
-  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: Booking.name }] })
-  bookings: MongooseSchema.Types.ObjectId;
+  @Type(() => Booking)
+  @Prop({
+    virtual: {
+      name: 'bookings',
+      options: { ref: 'Booking', localField: '_id', foreignField: 'event' },
+    },
+  })
+  bookings: Booking[];
 }
 
-export const EventSchema = SchemaFactory.createForClass(Event);
+const EventSchema = SchemaFactory.createForClass(Event);
+
+export { EventSchema };
