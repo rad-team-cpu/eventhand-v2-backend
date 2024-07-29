@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
@@ -23,7 +24,7 @@ export class BookingController {
   }
 
   @Get()
-  async findAll(filter: FilterQuery<Booking>): Promise<Booking[]> {
+  async findAll(@Query() filter?: FilterQuery<Booking>): Promise<Booking[]> {
     return await this.bookingService.findAll(filter);
   }
 
