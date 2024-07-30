@@ -7,10 +7,9 @@ export type EventDocument = HydratedDocument<Event>;
 
 @Schema({
   timestamps: true,
-  toJSON: {
-    getters: true,
-    virtuals: true,
-  },
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+  id: false,
 })
 export class Event {
   @Prop({ required: true })
@@ -26,15 +25,15 @@ export class Event {
   budget: number;
 
   @Type(() => Booking)
-  @Prop({
-    virtual: {
-      name: 'bookings',
-      options: { ref: 'Booking', localField: '_id', foreignField: 'event' },
-    },
-  })
   bookings: Booking[];
 }
 
 const EventSchema = SchemaFactory.createForClass(Event);
+
+EventSchema.virtual('bookings', {
+  ref: 'Booking',
+  localField: '_id',
+  foreignField: 'event',
+});
 
 export { EventSchema };

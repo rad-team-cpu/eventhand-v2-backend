@@ -1,7 +1,8 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsEmail,
+  IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -9,7 +10,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
-import { ExistingTagDto } from 'src/tags/dto/existing-tag.dto';
 
 export class CreateVendorDto {
   @IsString()
@@ -46,9 +46,8 @@ export class CreateVendorDto {
 
   @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ExistingTagDto)
-  tags?: ExistingTagDto[];
+  @IsMongoId({ each: true })
+  tags?: string[];
 
   @IsOptional()
   @IsArray()
