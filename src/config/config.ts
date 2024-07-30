@@ -8,5 +8,6 @@ export default () => ({
   clerk: {
     publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
     secretKey: process.env.CLERK_POKEMON_KEY,
+    webhookSecret: process.env.WEBHOOK_SECRET,
   },
 });

@@ -17,6 +17,7 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
+  @OnEvent('user.created')
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       if (await this.userModel.exists(createUserDto as FilterQuery<User>)) {
@@ -63,6 +64,7 @@ export class UsersService {
           { $push: { events: pushEventToUserDto.eventId } },
           { new: true },
         )
+        .populate('events')
         .exec();
 
       if (!updatedUser) {
