@@ -6,7 +6,6 @@ import {
   // Patch,
   Param,
   Delete,
-  Query,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { Event } from './entities/event.schema';

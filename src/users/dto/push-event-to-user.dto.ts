@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class PushEventToUserDto {
   @IsString()
   @IsNotEmpty()
   clerkId: string;
 
-  @IsString()
-  @IsNotEmpty()
-  eventId: string;
+  @IsMongoId()
+  eventId: Types.ObjectId;
 }

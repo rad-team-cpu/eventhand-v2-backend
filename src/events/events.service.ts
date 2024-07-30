@@ -21,7 +21,7 @@ export class EventsService {
       // emit event.created to push to user
       await this.eventEmitter.emitAsync('event.created', {
         clerkId: createEventDto.clerkId,
-        eventId: event.id,
+        eventId: event._id,
       } as PushEventToUserDto);
 
       return event;
