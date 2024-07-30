@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
+import { Type } from 'class-transformer';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Tag } from 'src/tags/entities/tag.schema';
 
@@ -27,14 +28,13 @@ export class Vendor {
   @Prop({
     type: [
       {
-        type: {
-          tagId: { type: MongooseSchema.Types.ObjectId, ref: Tag.name },
-          name: String,
-        },
+        type: MongooseSchema.Types.ObjectId,
+        ref: Tag.name,
       },
     ],
   })
-  tags: { tagId: MongooseSchema.Types.ObjectId; name: string }[];
+  @Type(() => Tag)
+  tags: Tag[];
 
   @Prop()
   logo: string;

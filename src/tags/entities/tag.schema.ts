@@ -6,14 +6,14 @@ export type TagDocument = HydratedDocument<Tag>;
 
 @Schema()
 export class Tag {
+  @Transform(({ value }) => value.toString())
+  _id: ObjectId;
+
   @Prop({ required: true, unique: true, immutable: true, index: true })
   name: string;
 
   @Prop()
   description: string;
-
-  @Transform(({ value }) => value.toString())
-  _id: ObjectId;
 }
 
 export const TagSchema = SchemaFactory.createForClass(Tag);

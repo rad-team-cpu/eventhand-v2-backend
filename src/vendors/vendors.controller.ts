@@ -64,6 +64,6 @@ export class VendorsController {
 
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Vendor> {
-    return await this.vendorsService.remove({ id });
+    return await this.vendorsService.remove({ _id: id });
   }
 }

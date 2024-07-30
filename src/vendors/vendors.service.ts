@@ -9,6 +9,7 @@ import { FactorType } from './entities/factor.types';
 import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
 import { Tag } from 'src/tags/entities/tag.schema';
 import { SelectedTagsDto, Selection } from './dto/selected-vendor-tags.dto';
+import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
 
 @Injectable()
 export class VendorsService {
@@ -20,24 +21,33 @@ export class VendorsService {
   async create(createVendorDto: CreateVendorDto): Promise<Vendor> {
     const { newTags = [], tags = [], ...vendor } = createVendorDto;
 
-    const createdTags: Promise<Tag>[] = newTags.map(
-      async (x) =>
-        (await this.eventEmitter.emitAsync(
-          'tags.new',
-          x,
-        )) as unknown as Promise<Tag>,
-    );
+    console.log(tags);
+
+    // const createdTags = await Promise.all(
+    //   newTags.map(
+    //     async (tag) =>
+    //       (await this.eventEmitter.emitAsync(
+    //         'tags.new',
+    //         tag,
+    //       )) as unknown as Tag,
+    //   ),
+    // );
+
+    const createdTags = (await this.eventEmitter.emitAsync(
+      'tags.new',
+      newTags as CreateTagDto[],
+    )) as unknown as Tag[];
 
     const result = await this.vendorModel.create({
       ...vendor,
-      tags: { ...tags, ...createdTags },
+      tags: [...tags, ...createdTags.map((tag) => tag._id)],
     });
 
     return result;
   }
 
   async findAll(query?: FilterQuery<Vendor>): Promise<Vendor[]> {
-    return await this.vendorModel.find(query).exec();
+    return await this.vendorModel.find(query).populate('tags', 'name').exec();
   }
 
   async findAllByTags(selectedTagsDto: SelectedTagsDto): Promise<Vendor[]> {
@@ -51,9 +61,7 @@ export class VendorsService {
         // Match all tags (AND)
         query = {
           tags: {
-            $all: tagObjectIds.map((id) => ({
-              $elemMatch: { _id: id },
-            })),
+            $all: tagObjectIds,
           },
         };
         break;
@@ -61,23 +69,15 @@ export class VendorsService {
       case Selection.Or:
         // Match at least one tag (OR)
         query = {
-          'tags._id': { $in: tagObjectIds },
+          tags: { $in: tagObjectIds },
         };
         break;
 
       case Selection.Exclusive:
         // Match exactly these tags and no others
         query = {
-          $and: [
-            {
-              tags: {
-                $all: tagObjectIds.map((id) => ({
-                  $elemMatch: { _id: id },
-                })),
-              },
-            },
-            { $expr: { $eq: [{ $size: '$tags' }, tagObjectIds.length] } },
-          ],
+          tags: tagObjectIds,
+          $expr: { $eq: [{ $size: '$tags' }, tagObjectIds.length] },
         };
         break;
 
@@ -85,11 +85,14 @@ export class VendorsService {
         throw new Error('Invalid selection type');
     }
 
-    return this.vendorModel.find(query).exec();
+    return this.vendorModel.find(query).populate('tags', 'name').exec();
   }
 
   async findOne(query: FilterQuery<Vendor>): Promise<Vendor> {
-    const vendor = await this.vendorModel.findOne(query).exec();
+    const vendor = await this.vendorModel
+      .findOne(query)
+      .populate('tags', 'name')
+      .exec();
 
     if (!vendor) {
       throw new NotFoundException(`user with doesn't exist`);
@@ -121,6 +124,7 @@ export class VendorsService {
   async update(id: string, updateVendorDto: UpdateVendorDto): Promise<Vendor> {
     const vendor = await this.vendorModel
       .findByIdAndUpdate(id, updateVendorDto)
+      .populate('tags', 'name')
       .exec();
 
     if (!vendor) {
@@ -151,14 +155,12 @@ export class VendorsService {
     }
 
     // Flatten and normalize the structure of all tags
-    const updatedTags = [
-      ...tags.map((tag) => ({ _id: tag._id, name: tag.name })),
-      ...createdTags.map((tag) => ({ _id: tag._id, name: tag.name })),
-    ];
+    const updatedTags = [...tags, ...createdTags];
 
     // Update Vendor
     const updatedVendor = await this.vendorModel
       .findByIdAndUpdate(id, { $set: { tags: updatedTags } }, { new: true })
+      .populate('tags', 'name')
       .exec();
 
     return updatedVendor;
