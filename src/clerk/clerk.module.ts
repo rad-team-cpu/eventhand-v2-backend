@@ -8,6 +8,8 @@ import {
   DynamicModule,
 } from '@nestjs/common';
 import { Clerk } from '@clerk/clerk-sdk-node';
+import { WebhookController } from './clerk.controller';
+import { WebhookService } from './clerk.service';
 
 export const CLERK = 'CLERK';
 export type ClerkService = ReturnType<typeof Clerk>;
@@ -84,7 +86,9 @@ export class ClerkModule extends ConfigurableModuleClass {
             Clerk({ secretKey: clerkKeys.secretKey }),
           inject: [CLERK_KEYS],
         },
+        WebhookService,
       ],
+      controllers: [WebhookController],
       exports: [CLERK],
     };
   }
