@@ -102,23 +102,29 @@ export class VendorsService {
   }
 
   async findOneWithPackages(vendorId: string): Promise<Vendor> {
+    // const result = await this.vendorModel
+    // .aggregate([
+    //   {
+    //     $match: { _id: new Types.ObjectId(vendorId) },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: 'packages',
+    //       localField: '_id', //use that to search all vendorId
+    //       foreignField: 'vendorId',
+    //       as: 'packages',
+    //     },
+    //   },
+    // ])
+    // .exec();
+
     const result = await this.vendorModel
-      .aggregate([
-        {
-          $match: { _id: new Types.ObjectId(vendorId) },
-        },
-        {
-          $lookup: {
-            from: 'packages',
-            localField: '_id', //use that to search all vendorId
-            foreignField: 'vendorId',
-            as: 'packages',
-          },
-        },
-      ])
+      .findById(vendorId)
+      .populate('tags', 'name')
+      .populate({ path: 'packages' })
       .exec();
 
-    return result[0];
+    return result;
   }
 
   async update(id: string, updateVendorDto: UpdateVendorDto): Promise<Vendor> {
