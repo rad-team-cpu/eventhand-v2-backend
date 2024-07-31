@@ -17,18 +17,29 @@ export class MatchmakerService {
     const event = await this.eventModel.findById(eventId);
     // Find suitable packages
     const suitablePackages = await this.packageModel
-      .find({
-        price: { $lte: event.budget },
-      })
+      .aggregate([
+        { $match: { price: { $lte: event.budget } } }, // match all vendors
+        { $sort: { price: -1 } },
+        {
+          $group: {
+            _id: '$vendorId',
+            packages: { $push: '$$ROOT' }, // create array of packages
+            count: { $sum: 1 }, //number of documents in this group.
+          },
+        },
+        { $unwind: '$packages' }, // deconstruct packages to their own document
+        { $limit: 1 }, // limit it to one
+        { $replaceRoot: { newRoot: '$packages' } }, // change packages to just the one.
+      ])
       .exec();
 
-    const listOfVendorIds = await Promise.all(
+    const listOfVendors = await Promise.all(
       suitablePackages.map(
         async (pkge) => await this.vendorModel.findById(pkge.vendorId),
       ),
     );
 
-    return listOfVendorIds;
+    return listOfVendors;
 
     //   // Filter vendors based on availability
     //   const result = await Promise.all(
@@ -56,8 +67,5 @@ export class MatchmakerService {
   //   vendor: Vendor,
   //   date: Date,
   // ): Promise<boolean> {
-  //   // Implement your logic to check vendor availability
-  //   // This might involve checking the vendor's unavailable dates or existing bookings
-  //   // For example:
   // }
 }
