@@ -1,9 +1,9 @@
-import { WebhookEvent } from '@clerk/clerk-sdk-node';
-import { Controller, Post, RawBodyRequest, Req } from '@nestjs/common';
+import { Controller, HttpStatus, Post, Req, Res } from '@nestjs/common';
 import { Request, Response, response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { Webhook } from 'svix';
 import { WebhookService } from './clerk.service';
+import { WebhookEvent } from '@clerk/clerk-sdk-node';
 
 @Controller('clerk')
 export class WebhookController {
@@ -12,19 +12,44 @@ export class WebhookController {
     private readonly webhookService: WebhookService,
   ) {}
 
-  @Post('/webhook')
-  async webhook(@Req() req: RawBodyRequest<Request>): Promise<Response> {
-    const payload = req.rawBody.toString('utf-8');
-    const headers = {
-      'svix-id': req.headers['svix-id'] as string,
-      'svix-timestamp': req.headers['svix-timestamp'] as string,
-      'svix-signature': req.headers['svix-signature'] as string,
-    };
+  @Post('webhook')
+  async handleWebhook(@Req() req: Request, @Res() res: Response) {
+    const WEBHOOK_SECRET = this.configService.get<string>('WEBHOOK_SECRET');
+    if (!WEBHOOK_SECRET) {
+      throw new Error('You need a WEBHOOK_SECRET in your .env');
+    }
 
-    const wh = new Webhook(
-      this.configService.get<string>('clerk.webhookSecret'),
-    );
-    const evt = wh.verify(payload, headers) as WebhookEvent;
+    const headers = req.headers;
+    const payload = JSON.stringify(req.body);
+
+    const svix_id = headers['svix-id'] as string;
+    const svix_timestamp = headers['svix-timestamp'] as string;
+    const svix_signature = headers['svix-signature'] as string;
+
+    if (!svix_id || !svix_timestamp || !svix_signature) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        success: false,
+        message: 'Error occurred -- no svix headers',
+      });
+    }
+
+    const wh = new Webhook(WEBHOOK_SECRET);
+    let evt: WebhookEvent;
+
+    try {
+      evt = wh.verify(payload, {
+        'svix-id': svix_id,
+        'svix-timestamp': svix_timestamp,
+        'svix-signature': svix_signature,
+      }) as WebhookEvent;
+    } catch (err) {
+      console.log('Error verifying webhook:', err);
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        success: false,
+        message: err,
+      });
+    }
+
     // Handle the webhook
     return (await this.webhookService.handleEvent(evt))
       ? response.status(201)
