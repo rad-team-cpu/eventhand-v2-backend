@@ -15,31 +15,89 @@ export class MatchmakerService {
 
   async findSuitableVendorsAndPackages(eventId: string): Promise<Vendor[]> {
     const event = await this.eventModel.findById(eventId);
-    // Find suitable packages
-    const suitablePackages = await this.packageModel
+
+    const suitableVendors = await this.vendorModel
       .aggregate([
-        { $match: { price: { $lte: event.budget } } }, // match all vendors
-        { $sort: { price: -1 } },
         {
-          $group: {
-            _id: '$vendorId',
-            packages: { $push: '$$ROOT' }, // create array of packages
-            count: { $sum: 1 }, //number of documents in this group.
+          // look up all the packages for this vendor
+          $lookup: {
+            from: 'packages',
+            localField: '_id',
+            foreignField: 'vendorId',
+            as: 'packages',
+          },
+        }, // check if there's at least a package that's within the budget
+        {
+          $match: {
+            packages: { $elemMatch: { price: { $lte: event.budget } } },
           },
         },
-        { $unwind: '$packages' }, // deconstruct packages to their own document
-        { $limit: 1 }, // limit it to one
-        { $replaceRoot: { newRoot: '$packages' } }, // change packages to just the one.
+        {
+          $lookup: {
+            from: 'bookings', // look up bookings.
+            let: { vendorId: '$_id' }, // reference vendorId to $_id
+            pipeline: [
+              //mini aggregation to only match the bookings that are on date.
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$vendorId', '$$vendorId'] },
+                      { $eq: ['$date', event.date] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: 'bookings',
+          },
+        }, // Only include vendors with no bookings for the event date
+        {
+          $match: {
+            bookings: { $size: 0 },
+          },
+        },
+        {
+          $lookup: {
+            from: 'tags',
+            localField: 'tags',
+            foreignField: '_id',
+            as: 'tags',
+          }, // look up the tags
+        },
+        {
+          $project: {
+            _id: 1, // finally structure the result
+            name: 1,
+            email: 1,
+            contactNumber: 1,
+            bio: 1,
+            logo: 1,
+            banner: 1,
+            visibility: 1,
+            tags: {
+              $map: {
+                input: '$tags',
+                as: 'tag',
+                in: { _id: '$$tag._id', name: '$$tag.name' },
+              },
+            },
+            packages: {
+              $filter: {
+                input: '$packages',
+                as: 'package',
+                cond: { $lte: ['$$package.price', event.budget] },
+              },
+            },
+          },
+        },
+        {
+          $sort: { 'packages.price': -1 },
+        },
       ])
       .exec();
 
-    const listOfVendors = await Promise.all(
-      suitablePackages.map(
-        async (pkge) => await this.vendorModel.findById(pkge.vendorId),
-      ),
-    );
-
-    return listOfVendors;
+    return suitableVendors;
 
     //   // Filter vendors based on availability
     //   const result = await Promise.all(
