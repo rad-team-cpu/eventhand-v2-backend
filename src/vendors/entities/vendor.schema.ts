@@ -1,11 +1,16 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { Package } from 'src/packages/entities/package.schema';
 import { Tag } from 'src/tags/entities/tag.schema';
 
 export type VendorDocument = HydratedDocument<Vendor>;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+})
 export class Vendor {
   @Prop({ required: true, unique: true, immutable: true })
   clerkId: string;
@@ -60,6 +65,17 @@ export class Vendor {
 
   @Prop({ default: false, required: true })
   visibility: boolean;
+
+  @Type(() => Package)
+  packages: Package[];
 }
 
-export const VendorSchema = SchemaFactory.createForClass(Vendor);
+const VendorSchema = SchemaFactory.createForClass(Vendor);
+
+VendorSchema.virtual('packages', {
+  ref: 'Package',
+  localField: '_id',
+  foreignField: 'vendorId',
+});
+
+export { VendorSchema };

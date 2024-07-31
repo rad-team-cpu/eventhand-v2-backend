@@ -9,7 +9,6 @@ export type EventDocument = HydratedDocument<Event>;
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
-  id: false,
 })
 export class Event {
   @Prop({ required: true })
