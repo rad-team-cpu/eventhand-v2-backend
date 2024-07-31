@@ -17,7 +17,7 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
-  @OnEvent('user.created')
+  @OnEvent('user.created', { async: true })
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       if (await this.userModel.exists(createUserDto as FilterQuery<User>)) {
@@ -55,21 +55,26 @@ export class UsersService {
     }
   }
 
-  @OnEvent('event.created')
-  async pushNewEvent(pushEventToUserDto: PushEventToUserDto): Promise<User> {
+  @OnEvent('event.push', { async: true })
+  @OnEvent('event.pull', { async: true })
+  async UpdateEvent(
+    eventToUserDto: PushEventToUserDto,
+    inverse: boolean = false,
+  ): Promise<User> {
     try {
+      const pushOrPull = inverse
+        ? { $push: { events: eventToUserDto.eventId } }
+        : { $pull: { events: eventToUserDto.eventId } };
       const updatedUser = await this.userModel
-        .findOneAndUpdate(
-          { clerkId: pushEventToUserDto.clerkId },
-          { $push: { events: pushEventToUserDto.eventId } },
-          { new: true },
-        )
+        .findOneAndUpdate({ clerkId: eventToUserDto.clerkId }, pushOrPull, {
+          new: true,
+        })
         .populate('events')
         .exec();
 
       if (!updatedUser) {
         throw new NotFoundException(
-          `User with clerkId ${pushEventToUserDto.clerkId} not found`,
+          `User with clerkId ${eventToUserDto.clerkId} not found`,
         );
       }
 

@@ -6,11 +6,7 @@ import { Tag } from 'src/tags/entities/tag.schema';
 
 export type VendorDocument = HydratedDocument<Vendor>;
 
-@Schema({
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true },
-})
+@Schema({ timestamps: true })
 export class Vendor {
   @Prop({ required: true, unique: true, immutable: true })
   clerkId: string;
@@ -59,9 +55,6 @@ export class Vendor {
 
   @Prop({ default: 0 })
   credibility: number;
-
-  @Prop({ type: [Date] })
-  unavailableDates: Date[];
 
   @Prop({ default: false, required: true })
   visibility: boolean;

@@ -43,7 +43,7 @@ export class VendorsService {
       tags: [...tags, ...createdTags.map((tag) => tag._id)],
     });
 
-    return result;
+    return this.findOne({ _id: result.id });
   }
 
   async findAll(query?: FilterQuery<Vendor>): Promise<Vendor[]> {
@@ -52,7 +52,9 @@ export class VendorsService {
 
   async findAllByTags(selectedTagsDto: SelectedTagsDto): Promise<Vendor[]> {
     const { tags = [], selection } = selectedTagsDto;
+    console.log(tags);
     const tagObjectIds = tags.map((tag) => new Types.ObjectId(tag));
+    console.log(tagObjectIds);
 
     let query;
 
@@ -64,6 +66,7 @@ export class VendorsService {
             $all: tagObjectIds,
           },
         };
+        console.log(query);
         break;
 
       case Selection.Or:
@@ -71,6 +74,7 @@ export class VendorsService {
         query = {
           tags: { $in: tagObjectIds },
         };
+        console.log(query);
         break;
 
       case Selection.Exclusive:
@@ -79,6 +83,7 @@ export class VendorsService {
           tags: tagObjectIds,
           $expr: { $eq: [{ $size: '$tags' }, tagObjectIds.length] },
         };
+        console.log(query);
         break;
 
       default:
@@ -102,22 +107,6 @@ export class VendorsService {
   }
 
   async findOneWithPackages(vendorId: string): Promise<Vendor> {
-    // const result = await this.vendorModel
-    // .aggregate([
-    //   {
-    //     $match: { _id: new Types.ObjectId(vendorId) },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: 'packages',
-    //       localField: '_id', //use that to search all vendorId
-    //       foreignField: 'vendorId',
-    //       as: 'packages',
-    //     },
-    //   },
-    // ])
-    // .exec();
-
     const result = await this.vendorModel
       .findById(vendorId)
       .populate('tags', 'name')
