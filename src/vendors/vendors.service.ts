@@ -110,7 +110,7 @@ export class VendorsService {
     const result = await this.vendorModel
       .findById(vendorId)
       .populate('tags', 'name')
-      .populate({ path: 'packages' })
+      .populate('packages')
       .exec();
 
     return result;
