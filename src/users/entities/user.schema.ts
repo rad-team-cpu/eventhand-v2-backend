@@ -10,7 +10,11 @@ export enum Gender {
   FEMALE = 'FEMALE',
 }
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+})
 export class User {
   @Prop({ required: true, unique: true, immutable: true })
   clerkId: string;
@@ -51,4 +55,10 @@ export class User {
   };
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+const userSchema = SchemaFactory.createForClass(User);
+
+userSchema.virtual('fullName').get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+export { userSchema };
