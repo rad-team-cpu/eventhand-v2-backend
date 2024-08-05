@@ -12,7 +12,6 @@ export class CreateEventDto {
   @IsNotEmpty()
   clerkId: string;
 
-  @IsOptional()
   @IsString()
   @IsNotEmpty()
   name: string;
