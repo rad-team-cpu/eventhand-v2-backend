@@ -55,10 +55,4 @@ export class User {
   };
 }
 
-const userSchema = SchemaFactory.createForClass(User);
-
-userSchema.virtual('fullName').get(function () {
-  return `${this.firstName} ${this.lastName}`;
-});
-
-export { userSchema };
+export const UserSchema = SchemaFactory.createForClass(User);
