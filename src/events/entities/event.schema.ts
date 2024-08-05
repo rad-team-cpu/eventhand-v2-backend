@@ -14,7 +14,7 @@ export class Event {
   @Prop({ required: true })
   attendees: number;
 
-  @Prop()
+  @Prop({ required: true })
   name: string;
 
   @Prop({ required: true })
