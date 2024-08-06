@@ -6,7 +6,6 @@ import {
   IsOptional,
   IsNotEmpty,
 } from 'class-validator';
-import { Gender } from '../entities/user.schema';
 
 export class CreateUserDto {
   @IsString()
@@ -28,9 +27,6 @@ export class CreateUserDto {
   @IsString()
   @Length(10, 15)
   contactNumber: string;
-
-  @IsEnum(Gender)
-  gender: Gender;
 
   @IsOptional()
   @IsString()
