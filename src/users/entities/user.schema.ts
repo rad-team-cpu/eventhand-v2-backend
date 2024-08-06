@@ -5,11 +5,6 @@ import { Event } from 'src/events/entities/event.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
-export enum Gender {
-  MALE = 'MALE',
-  FEMALE = 'FEMALE',
-}
-
 @Schema({ timestamps: true })
 export class User {
   @Prop({ required: true, unique: true, immutable: true })
@@ -29,9 +24,6 @@ export class User {
 
   @Prop({ required: true })
   contactNumber: string;
-
-  @Prop({ required: true, enum: Object.values(Gender) })
-  gender: Gender;
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: Event.name }] })
   @Type(() => Event)

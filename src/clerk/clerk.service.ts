@@ -2,7 +2,6 @@ import { WebhookEvent } from '@clerk/clerk-sdk-node';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { Gender } from 'src/users/entities/user.schema';
 
 @Injectable()
 export class WebhookService {
@@ -27,7 +26,6 @@ export class WebhookService {
           lastName: last_name,
           contactNumber: phone_numbers[0]?.phone_number,
           email: email_addresses[0]?.email_address,
-          gender: Gender[gender],
           profilePicture: image_url,
         } as CreateUserDto)
           ? `New User ${id} created`
