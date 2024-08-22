@@ -1,4 +1,6 @@
-import { PartialType } from '@nestjs/mapped-types';
 import { CreateEventDto } from './create-event.dto';
+import { OmitType, PartialType } from '@nestjs/swagger';
 
-export class UpdateEventDto extends PartialType(CreateEventDto) {}
+export class UpdateEventDto extends OmitType(PartialType(CreateEventDto), [
+  'user',
+]) {}

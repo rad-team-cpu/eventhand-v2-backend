@@ -5,7 +5,11 @@ import { Event } from 'src/events/entities/event.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+})
 export class User {
   @Prop({ required: true, unique: true, immutable: true })
   clerkId: string;
@@ -25,7 +29,6 @@ export class User {
   @Prop({ required: true })
   contactNumber: string;
 
-  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: Event.name }] })
   @Type(() => Event)
   events: Event[];
 
@@ -43,4 +46,12 @@ export class User {
   };
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('events', {
+  ref: 'Event',
+  localField: '_id',
+  foreignField: 'user',
+});
+
+export { UserSchema };

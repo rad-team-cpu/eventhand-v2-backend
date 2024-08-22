@@ -61,7 +61,7 @@ export class MatchmakerService {
             localField: 'tags',
             foreignField: '_id',
             as: 'tags',
-          }, // look up the tags
+          }, // add the tags too.
         },
         {
           $project: {
