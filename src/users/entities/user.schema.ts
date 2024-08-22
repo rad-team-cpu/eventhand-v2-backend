@@ -59,7 +59,7 @@ const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.virtual('events', {
   ref: 'Events',
-  localField: 'clerkId',
+  localField: '_id',
   foreignField: 'clerkId',
 });
 
