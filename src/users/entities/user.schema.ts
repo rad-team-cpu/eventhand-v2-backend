@@ -5,11 +5,6 @@ import { Event } from 'src/events/entities/event.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
-export enum Gender {
-  MALE = 'MALE',
-  FEMALE = 'FEMALE',
-}
-
 @Schema({
   timestamps: true,
   toJSON: { virtuals: true },
@@ -33,9 +28,6 @@ export class User {
 
   @Prop({ required: true })
   contactNumber: string;
-
-  @Prop({ required: true, enum: Object.values(Gender) })
-  gender: Gender;
 
   @Type(() => Event)
   events: Event[];
