@@ -1,10 +1,47 @@
-import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Transform } from 'class-transformer';
+import {
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+
+class BudgetDto {
+  @IsNumber()
+  @IsOptional()
+  eventPlanning: number;
+
+  @IsNumber()
+  @IsOptional()
+  eventCoordination: number;
+
+  @IsNumber()
+  @IsOptional()
+  venue: number;
+
+  @IsNumber()
+  @IsOptional()
+  catering: number;
+
+  @IsNumber()
+  @IsOptional()
+  decorations: number;
+
+  @IsNumber()
+  @IsOptional()
+  photography: number;
+
+  @IsNumber()
+  @IsOptional()
+  videography: number;
+}
 
 export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
-  clerkId: string;
+  userId: string;
 
   @IsString()
   @IsNotEmpty()
@@ -17,6 +54,7 @@ export class CreateEventDto {
   @IsDate()
   date: Date;
 
-  @IsNumber()
-  budget: number;
+  @ValidateNested()
+  @Type(() => BudgetDto)
+  budget: BudgetDto;
 }

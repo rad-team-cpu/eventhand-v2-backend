@@ -37,7 +37,7 @@ export class User {
   @Prop({ required: true, enum: Object.values(Gender) })
   gender: Gender;
 
-  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: Event.name }] })
+  // @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: Event.name }] })
   @Type(() => Event)
   events: Event[];
 
@@ -55,4 +55,12 @@ export class User {
   };
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('events', {
+  ref: 'Events',
+  localField: 'clerkId',
+  foreignField: 'clerkId',
+});
+
+export { UserSchema };
