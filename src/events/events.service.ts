@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Event } from './entities/event.schema';
 import { FilterQuery, Model } from 'mongoose';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { PushEventToUserDto } from 'src/users/dto/push-event-to-user.dto';
 
 @Injectable()
 export class EventsService {
@@ -17,12 +16,6 @@ export class EventsService {
   async create(createEventDto: CreateEventDto): Promise<Event> {
     try {
       const event = await this.eventModel.create(createEventDto);
-
-      // emit event.created to push to user
-      await this.eventEmitter.emitAsync('event.created', {
-        clerkId: createEventDto.clerkId,
-        eventId: event._id,
-      } as PushEventToUserDto);
 
       return event;
     } catch (error) {
