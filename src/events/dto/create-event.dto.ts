@@ -41,7 +41,7 @@ class BudgetDto {
 export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  user: string;
 
   @IsString()
   @IsNotEmpty()

@@ -12,7 +12,7 @@ export type EventDocument = HydratedDocument<Event>;
 })
 export class Event {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
-  userId: MongooseSchema.Types.ObjectId;
+  user: MongooseSchema.Types.ObjectId;
 
   @Prop({ required: true })
   attendees: number;
