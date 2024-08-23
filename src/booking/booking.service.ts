@@ -20,6 +20,8 @@ export class BookingService {
       .find(filter)
       .populate('vendor', 'name logo')
       .populate('package', '-createdAt -updatedAt -__v')
+      .populate('event')
+      .populate('client')
       .exec();
   }
 
@@ -27,6 +29,8 @@ export class BookingService {
     return await this.bookingModel
       .findById(id)
       .populate('vendor', 'name logo tags')
+      .populate('event')
+      .populate('client')
       .populate('package', '-createdAt -updatedAt -__v')
       .exec();
   }
