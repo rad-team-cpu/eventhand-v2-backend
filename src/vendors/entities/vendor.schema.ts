@@ -5,6 +5,42 @@ import { Package } from 'src/packages/entities/package.schema';
 import { Tag } from 'src/tags/entities/tag.schema';
 
 export type VendorDocument = HydratedDocument<Vendor>;
+export type AddressDocument = HydratedDocument<Address>;
+export type CredentialDocument = HydratedDocument<Credential>;
+
+@Schema()
+class Address {
+  @Prop({ required: true })
+  street: string;
+
+  @Prop({ required: true })
+  city: string;
+
+  @Prop({ required: true })
+  region: string;
+
+  @Prop({ required: true })
+  postalCode: string;
+}
+
+const AddressSchema = SchemaFactory.createForClass(Address);
+
+@Schema()
+class Credential {
+  @Prop({ required: true })
+  type: string;
+
+  @Prop({ required: true })
+  url: string;
+
+  @Prop({ required: true })
+  verified: boolean;
+
+  @Prop({ required: true })
+  expiry: Date;
+}
+
+const CredentialSchema = SchemaFactory.createForClass(Credential);
 
 @Schema({
   timestamps: true,
@@ -18,14 +54,24 @@ export class Vendor {
   @Prop({ required: true })
   name: string;
 
-  @Prop()
-  address: string;
+  @Prop({ required: true, type: AddressSchema })
+  @Type(() => Address)
+  address: Address;
 
   @Prop({ required: true, unique: true, immutable: true })
   email: string;
 
   @Prop({ require: true })
   contactNumber: string;
+
+  @Prop({ required: true })
+  blockedDays: string[];
+
+  @Prop({
+    type: [{ type: CredentialSchema }],
+  })
+  @Type(() => Credential)
+  credential: Credential[];
 
   @Prop()
   bio: string;
