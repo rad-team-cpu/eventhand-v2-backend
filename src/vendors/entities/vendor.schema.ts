@@ -46,6 +46,9 @@ export class Vendor {
   @Prop({ require: true })
   contactNumber: string;
 
+  @Prop({ required: true })
+  blockedDays: string[];
+
   @Prop()
   bio: string;
 
