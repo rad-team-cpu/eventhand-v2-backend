@@ -36,6 +36,10 @@ export class Vendor {
   @Prop({ required: true })
   name: string;
 
+  @Prop({ required: true, type: AddressSchema })
+  @Type(() => Address)
+  address: Address;
+
   @Prop({ required: true, unique: true, immutable: true })
   email: string;
 
