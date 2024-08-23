@@ -5,6 +5,24 @@ import { Package } from 'src/packages/entities/package.schema';
 import { Tag } from 'src/tags/entities/tag.schema';
 
 export type VendorDocument = HydratedDocument<Vendor>;
+type AddressSchema = HydratedDocument<Address>;
+
+@Schema()
+class Address {
+  @Prop({ required: true })
+  street: string;
+
+  @Prop({ required: true })
+  city: string;
+
+  @Prop({ required: true })
+  region: string;
+
+  @Prop({ required: true })
+  postalCode: string;
+}
+
+const AddressSchema = SchemaFactory.createForClass(Address);
 
 @Schema({
   timestamps: true,
@@ -17,9 +35,6 @@ export class Vendor {
 
   @Prop({ required: true })
   name: string;
-
-  @Prop()
-  address: string;
 
   @Prop({ required: true, unique: true, immutable: true })
   email: string;
