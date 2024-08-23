@@ -11,6 +11,24 @@ import {
 } from 'class-validator';
 import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
 
+export class CreateAddressDto {
+  @IsString()
+  @IsNotEmpty()
+  street: string;
+
+  @IsString()
+  @IsNotEmpty()
+  city: string;
+
+  @IsString()
+  @IsNotEmpty()
+  region: string;
+
+  @IsString()
+  @IsNotEmpty()
+  postalCode: string;
+}
+
 export class CreateVendorDto {
   @IsString()
   @IsNotEmpty()
@@ -36,9 +54,9 @@ export class CreateVendorDto {
   @Length(10, 15)
   contactNumber: string;
 
-  @IsOptional()
-  @IsString()
-  address?: string;
+  @ValidateNested()
+  @Type(() => CreateAddressDto)
+  address?: CreateAddressDto;
 
   @IsOptional()
   @IsString()
