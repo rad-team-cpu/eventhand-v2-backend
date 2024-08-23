@@ -47,7 +47,11 @@ export class VendorsService {
   }
 
   async findAll(query?: FilterQuery<Vendor>): Promise<Vendor[]> {
-    return await this.vendorModel.find(query).populate('tags', 'name').exec();
+    return await this.vendorModel
+      .find(query)
+      .populate('tags', 'name')
+      .populate('bookings')
+      .exec();
   }
 
   async findAllByTags(selectedTagsDto: SelectedTagsDto): Promise<Vendor[]> {
@@ -97,6 +101,7 @@ export class VendorsService {
     const vendor = await this.vendorModel
       .findOne(query)
       .populate('tags', 'name')
+      .populate('bookings')
       .exec();
 
     if (!vendor) {
@@ -111,6 +116,7 @@ export class VendorsService {
       .findById(vendorId)
       .populate('tags', 'name')
       .populate('packages')
+      .populate('bookings')
       .exec();
 
     return result;
