@@ -5,7 +5,8 @@ import { Package } from 'src/packages/entities/package.schema';
 import { Tag } from 'src/tags/entities/tag.schema';
 
 export type VendorDocument = HydratedDocument<Vendor>;
-type AddressSchema = HydratedDocument<Address>;
+export type AddressDocument = HydratedDocument<Address>;
+export type CredentialDocument = HydratedDocument<Credential>;
 
 @Schema()
 class Address {
@@ -23,6 +24,23 @@ class Address {
 }
 
 const AddressSchema = SchemaFactory.createForClass(Address);
+
+@Schema()
+class Credential {
+  @Prop({ required: true })
+  type: string;
+
+  @Prop({ required: true })
+  url: string;
+
+  @Prop({ required: true })
+  verified: boolean;
+
+  @Prop({ required: true })
+  expiry: Date;
+}
+
+const CredentialSchema = SchemaFactory.createForClass(Credential);
 
 @Schema({
   timestamps: true,
@@ -48,6 +66,12 @@ export class Vendor {
 
   @Prop({ required: true })
   blockedDays: string[];
+
+  @Prop({
+    type: [{ type: CredentialSchema }],
+  })
+  @Type(() => Credential)
+  credential: Credential[];
 
   @Prop()
   bio: string;
