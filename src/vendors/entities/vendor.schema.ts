@@ -75,4 +75,10 @@ VendorSchema.virtual('packages', {
   foreignField: 'vendorId',
 });
 
+VendorSchema.virtual('bookings', {
+  ref: 'Booking',
+  localField: '_id',
+  foreignField: 'vendor',
+});
+
 export { VendorSchema };
