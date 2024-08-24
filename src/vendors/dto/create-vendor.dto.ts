@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsDate,
   IsEmail,
   IsMongoId,
   IsNotEmpty,
@@ -29,6 +30,22 @@ export class CreateAddressDto {
   postalCode: string;
 }
 
+export class CreateCredentialDto {
+  @IsString()
+  type: string;
+
+  @IsString()
+  @IsNotEmpty()
+  url: string;
+
+  @IsString()
+  @IsNotEmpty()
+  verified: boolean = false;
+
+  @IsDate()
+  expiry: Date;
+}
+
 export class CreateVendorDto {
   @IsString()
   @IsNotEmpty()
@@ -46,6 +63,10 @@ export class CreateVendorDto {
   @IsString()
   banner?: string;
 
+  @IsOptional()
+  @IsString({ each: true })
+  blockedDays?: string[];
+
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -54,13 +75,17 @@ export class CreateVendorDto {
   @Length(10, 15)
   contactNumber: string;
 
+  @ValidateNested({ each: true })
+  @Type(() => CreateCredentialDto)
+  credential: CreateCredentialDto[];
+
   @ValidateNested()
   @Type(() => CreateAddressDto)
-  address?: CreateAddressDto;
+  address: CreateAddressDto;
 
-  @IsOptional()
   @IsString()
-  bio?: string;
+  @IsNotEmpty()
+  bio: string;
 
   @IsOptional()
   @IsArray()
