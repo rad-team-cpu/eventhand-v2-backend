@@ -40,10 +40,10 @@ export class BookingService {
     updateBookingDto: UpdateBookingDto,
   ): Promise<Booking> {
     return await this.bookingModel
-      .findByIdAndUpdate(id, updateBookingDto)
+      .findByIdAndUpdate(id, updateBookingDto, { new: true })
       .populate('vendor', 'name logo tags')
       .populate('event')
-      .populate('client', 'firstName lastName contactNumber -id')
+      .populate('client', 'firstName lastName contactNumber')
       .populate('package', '-createdAt -updatedAt -__v')
       .exec();
   }
