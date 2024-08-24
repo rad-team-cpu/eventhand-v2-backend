@@ -1,9 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Package } from 'src/packages/entities/package.schema';
-import { Vendor } from 'src/vendors/entities/vendor.schema';
 import { BookingStatus } from './booking-status.enum';
-import { User } from 'src/users/entities/user.schema';
+import { Vendor } from 'src/vendors/entities/vendor.schema';
 
 export type BookingDocument = HydratedDocument<Booking>;
 
@@ -36,7 +35,7 @@ export class Booking {
   @Prop({
     required: true,
     type: MongooseSchema.Types.ObjectId,
-    ref: Event.name,
+    ref: 'Event',
     immutable: false,
   })
   event: MongooseSchema.Types.ObjectId;
