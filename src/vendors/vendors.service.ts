@@ -21,18 +21,6 @@ export class VendorsService {
   async create(createVendorDto: CreateVendorDto): Promise<Vendor> {
     const { newTags = [], tags = [], ...vendor } = createVendorDto;
 
-    console.log(tags);
-
-    // const createdTags = await Promise.all(
-    //   newTags.map(
-    //     async (tag) =>
-    //       (await this.eventEmitter.emitAsync(
-    //         'tags.new',
-    //         tag,
-    //       )) as unknown as Tag,
-    //   ),
-    // );
-
     const createdTags = (await this.eventEmitter.emitAsync(
       'tags.new',
       newTags as CreateTagDto[],

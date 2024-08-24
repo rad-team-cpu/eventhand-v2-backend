@@ -49,6 +49,6 @@ export class CreatePackageDto {
   @IsDefined()
   @IsArray()
   @ValidateNested()
-  @Type(() => Array<InclusionsDTO>)
+  @Type(() => InclusionsDTO)
   inclusions: Array<InclusionsDTO>;
 }
