@@ -21,7 +21,7 @@ export class BookingService {
       .populate('vendor', 'name logo')
       .populate('package', '-createdAt -updatedAt -__v')
       .populate('event')
-      .populate('client')
+      .populate('client', 'firstName lastName contactNumber')
       .exec();
   }
 
@@ -30,7 +30,7 @@ export class BookingService {
       .findById(id)
       .populate('vendor', 'name logo tags')
       .populate('event')
-      .populate('client')
+      .populate('client', 'firstName lastName contactNumber')
       .populate('package', '-createdAt -updatedAt -__v')
       .exec();
   }
@@ -42,6 +42,8 @@ export class BookingService {
     return await this.bookingModel
       .findByIdAndUpdate(id, updateBookingDto)
       .populate('vendor', 'name logo tags')
+      .populate('event')
+      .populate('client', 'firstName lastName contactNumber -id')
       .populate('package', '-createdAt -updatedAt -__v')
       .exec();
   }
