@@ -85,8 +85,9 @@ export class CreateVendorDto {
   @Type(() => CreateAddressDto)
   address: CreateAddressDto;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @IsNotEmpty()
   bio: string;
 
   @IsOptional()
