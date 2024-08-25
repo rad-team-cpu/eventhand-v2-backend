@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
-  IsDate,
+  IsDateString,
   IsEmail,
   IsMongoId,
   IsNotEmpty,
@@ -43,7 +43,7 @@ export class CreateCredentialDto {
   @IsNotEmpty()
   verified: boolean = false;
 
-  @IsDate()
+  @IsDateString()
   expiry: Date;
 }
 
