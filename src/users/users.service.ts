@@ -32,14 +32,17 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return await this.userModel.find().populate('events').exec();
+    return await this.userModel
+      .find()
+      // .populate('events')
+      .exec();
   }
 
   async findOne(filter: FilterQuery<User>): Promise<User> {
     try {
       const result = await this.userModel
         .findOne(filter)
-        .populate('events')
+        // .populate('events')
         .exec();
 
       if (!result) {
@@ -84,7 +87,7 @@ export class UsersService {
         .findOneAndUpdate({ clerkId: eventToUserDto.clerkId }, pushOrPull, {
           new: true,
         })
-        .populate('events')
+        // .populate('events')
         .exec();
 
       if (!updatedUser) {
