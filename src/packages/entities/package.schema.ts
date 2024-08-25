@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Type } from 'class-transformer';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { Tag } from 'src/tags/entities/tag.schema';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 
 export type PackageDocument = HydratedDocument<Package>;
@@ -22,6 +24,17 @@ export class Package {
 
   @Prop({ required: true })
   pictureURL: string;
+
+  @Prop({
+    type: [
+      {
+        type: MongooseSchema.Types.ObjectId,
+        ref: Tag.name,
+      },
+    ],
+  })
+  @Type(() => Tag)
+  tags: Tag[];
 
   @Prop({ required: true })
   capacity: number;
