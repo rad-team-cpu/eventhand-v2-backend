@@ -55,6 +55,21 @@ export class UsersService {
     }
   }
 
+  async findClient(clerkId: string): Promise<User> {
+    try {
+      const result = await this.userModel.findOne({ clerkId }).exec();
+
+      if (!result) {
+        throw new NotFoundException(`User with ${clerkId} not found`);
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Error finding user: ', error);
+      throw error;
+    }
+  }
+
   @OnEvent('event.push', { async: true })
   @OnEvent('event.pull', { async: true })
   async UpdateEvent(

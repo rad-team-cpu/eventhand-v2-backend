@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { Event } from 'src/events/entities/event.schema';
+import { HydratedDocument, Schema as MongooseSchema, ObjectId, Types } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -11,6 +10,9 @@ export type UserDocument = HydratedDocument<User>;
   toObject: { virtuals: true },
 })
 export class User {
+  @Prop({ type: Types.ObjectId })
+  _id: ObjectId | string;
+
   @Prop({ required: true, unique: true, immutable: true })
   clerkId: string;
 
@@ -29,29 +31,9 @@ export class User {
   @Prop({ required: true })
   contactNumber: string;
 
-  @Type(() => Event)
-  events: Event[];
-
-  @Prop({
-    _id: { type: MongooseSchema.Types.ObjectId },
-    name: { type: String },
-    type: { type: String },
-    address: { type: String },
-  })
-  vendor: {
-    _id: MongooseSchema.Types.ObjectId;
-    name: string;
-    type: string;
-    address: string;
-  };
 }
 
 const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.virtual('events', {
-  ref: 'Event',
-  localField: '_id',
-  foreignField: 'user',
-});
 
 export { UserSchema };
