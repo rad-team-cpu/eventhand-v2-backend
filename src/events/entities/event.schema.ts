@@ -12,7 +12,7 @@ export type EventDocument = HydratedDocument<Event>;
 })
 export class Event {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
-  user: MongooseSchema.Types.ObjectId;
+  clientId: MongooseSchema.Types.ObjectId;
 
   @Prop({ required: true })
   attendees: number;
@@ -20,21 +20,24 @@ export class Event {
   @Prop({ required: true })
   name: string;
 
+  @Prop()
+  address?: string;
+
   @Prop({ required: true })
   date: Date;
 
   @Prop(
     raw({
-      eventPlanning: { type: Number },
-      eventCoordination: { type: Number },
-      venue: { type: Number },
-      catering: { type: Number },
-      decorations: { type: Number },
-      photography: { type: Number },
-      videography: { type: Number },
+      eventPlanning: { type: Number, default: null },
+      eventCoordination: { type: Number, default: null },
+      venue: { type: Number, default: null },
+      catering: { type: Number, default: null },
+      decorations: { type: Number, default: null },
+      photography: { type: Number, default: null },
+      videography: { type: Number, default: null },
     }),
   )
-  budget: Record<number, any>;
+  budget: Record<string, number | null>;
 
   @Type(() => Booking)
   bookings: Booking[];
@@ -42,10 +45,40 @@ export class Event {
 
 const EventSchema = SchemaFactory.createForClass(Event);
 
+EventSchema.virtual('total').get(function () {
+  const budget = this.budget || {};
+  return Object.values(budget).reduce((total, value) => {
+    return total + (value || 0); // Sum non-null values
+  }, 0);
+});
+
 EventSchema.virtual('bookings', {
   ref: 'Booking',
   localField: '_id',
   foreignField: 'event',
 });
+
+export type PaginatedClientEvent = {
+  _id: string; // Assuming ObjectId is converted to string
+  userId: string;
+  name: string;
+  attendees: number;
+  date: Date;
+  address: string;
+  budget: {
+    eventPlanning: number | null;
+    eventCoordination: number | null;
+    venue: number | null;
+    decorations: number | null;
+    catering: number | null;
+    photography: number | null;
+    videography: number | null;
+    total?: number
+  };
+  pending: Booking[];
+  confirmed: Booking[];
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export { EventSchema };

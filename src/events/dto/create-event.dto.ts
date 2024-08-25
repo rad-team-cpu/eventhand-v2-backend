@@ -41,13 +41,18 @@ class BudgetDto {
 export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
-  user: string;
+  clientId: string;
 
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @IsString()
+  @IsOptional()
+  address?: string;
+
   @IsNumber()
+  @IsNotEmpty()
   attendees: number;
 
   @Transform(({ value }) => new Date(value))
