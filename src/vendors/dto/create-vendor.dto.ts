@@ -32,6 +32,7 @@ export class CreateAddressDto {
 
 export class CreateCredentialDto {
   @IsString()
+  @IsNotEmpty()
   type: string;
 
   @IsString()
@@ -75,6 +76,7 @@ export class CreateVendorDto {
   @Length(10, 15)
   contactNumber: string;
 
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => CreateCredentialDto)
   credential: CreateCredentialDto[];

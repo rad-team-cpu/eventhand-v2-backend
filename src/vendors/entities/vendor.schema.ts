@@ -61,19 +61,20 @@ export class Vendor {
   @Prop({ required: true, unique: true, immutable: true })
   email: string;
 
-  @Prop({ require: true })
+  @Prop({ required: true })
   contactNumber: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: [] })
   blockedDays: string[];
 
   @Prop({
     type: [{ type: CredentialSchema }],
+    default: [],
   })
   @Type(() => Credential)
   credential: Credential[];
 
-  @Prop()
+  @Prop({ default: 'Add a new bio' })
   bio: string;
 
   @Prop({
