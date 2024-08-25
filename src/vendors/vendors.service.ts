@@ -112,7 +112,7 @@ export class VendorsService {
 
   async update(id: string, updateVendorDto: UpdateVendorDto): Promise<Vendor> {
     const vendor = await this.vendorModel
-      .findByIdAndUpdate(id, updateVendorDto)
+      .findByIdAndUpdate(id, updateVendorDto, { new: true })
       .populate('tags', 'name')
       .exec();
 
