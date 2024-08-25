@@ -12,8 +12,8 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.schema';
-import { isValidObjectId, Schema } from 'mongoose';
-import { Event, PaginatedClientEvent } from 'src/events/entities/event.schema';
+import { isValidObjectId } from 'mongoose';
+import { PaginatedClientEvent } from 'src/events/entities/event.schema';
 import { EventsService } from 'src/events/events.service';
 
 @Controller('users')
