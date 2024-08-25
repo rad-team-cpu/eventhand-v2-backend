@@ -44,7 +44,7 @@ export class EventsService {
       clientId = new Schema.Types.ObjectId(clientId);
     }
 
-    console.log(clientId)
+    console.log(clientId);
 
     const events: PaginatedClientEvent[] = await this.eventModel
       .aggregate([
@@ -86,7 +86,7 @@ export class EventsService {
           $project: {
             bookingDetails: 0,
             createdAt: 0,
-            updatedAt: 0 // Exclude the intermediate bookingDetails array
+            updatedAt: 0, // Exclude the intermediate bookingDetails array
           },
         },
 
