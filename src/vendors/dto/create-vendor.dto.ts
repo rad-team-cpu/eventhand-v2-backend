@@ -32,6 +32,7 @@ export class CreateAddressDto {
 
 export class CreateCredentialDto {
   @IsString()
+  @IsNotEmpty()
   type: string;
 
   @IsString()
@@ -65,7 +66,7 @@ export class CreateVendorDto {
 
   @IsOptional()
   @IsString({ each: true })
-  blockedDays?: string[];
+  blockedDays?: string[] = [];
 
   @IsEmail()
   @IsNotEmpty()
@@ -75,9 +76,10 @@ export class CreateVendorDto {
   @Length(10, 15)
   contactNumber: string;
 
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => CreateCredentialDto)
-  credential: CreateCredentialDto[];
+  credential: CreateCredentialDto[] = [];
 
   @ValidateNested()
   @Type(() => CreateAddressDto)
@@ -85,7 +87,7 @@ export class CreateVendorDto {
 
   @IsString()
   @IsNotEmpty()
-  bio: string;
+  bio: string = '';
 
   @IsOptional()
   @IsArray()
