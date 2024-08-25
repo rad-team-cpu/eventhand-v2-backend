@@ -86,7 +86,7 @@ export class CreateVendorDto {
   address: CreateAddressDto;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   bio: string;
 
   @IsOptional()
