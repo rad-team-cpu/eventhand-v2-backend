@@ -6,14 +6,13 @@ import {
   // Patch,
   Param,
   Delete,
-  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.schema';
-import { isValidObjectId, Schema } from 'mongoose';
-import { Event, PaginatedClientEvent } from 'src/events/entities/event.schema';
+import { isValidObjectId } from 'mongoose';
+import { PaginatedClientEvent } from 'src/events/entities/event.schema';
 import { EventsService } from 'src/events/events.service';
 
 @Controller('users')
@@ -28,10 +27,10 @@ export class UsersController {
     return await this.usersService.create(createUserDto);
   }
 
-  // @Get()
-  // async findAll(): Promise<User[]> {
-  //   return await this.usersService.findAll();
-  // }
+  @Get()
+  async findAll(): Promise<User[]> {
+    return await this.usersService.findAll();
+  }
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<User> {
@@ -40,8 +39,8 @@ export class UsersController {
     return user;
   }
 
-  @Get()
-  async findClient(@Query('clerkId') clerkId: string): Promise<{
+  @Get(':id/events')
+  async findClient(@Param('clerkId') clerkId: string): Promise<{
     user: User;
     events: {
       events: PaginatedClientEvent[];

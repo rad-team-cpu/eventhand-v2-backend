@@ -1,6 +1,6 @@
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, ObjectId } from 'mongoose';
 import { Booking } from 'src/booking/entities/booking.schema';
 
 export type EventDocument = HydratedDocument<Event>;
@@ -12,7 +12,7 @@ export type EventDocument = HydratedDocument<Event>;
 })
 export class Event {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
-  clientId: MongooseSchema.Types.ObjectId;
+  clientId: ObjectId;
 
   @Prop({ required: true })
   attendees: number;
@@ -73,7 +73,7 @@ export type PaginatedClientEvent = {
     catering: number | null;
     photography: number | null;
     videography: number | null;
-    total?: number
+    total?: number;
   };
   pending: Booking[];
   confirmed: Booking[];

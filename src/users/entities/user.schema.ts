@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Type } from 'class-transformer';
-import { HydratedDocument, Schema as MongooseSchema, ObjectId, Types } from 'mongoose';
+import { Transform } from 'class-transformer';
+import { HydratedDocument, ObjectId } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -10,8 +10,8 @@ export type UserDocument = HydratedDocument<User>;
   toObject: { virtuals: true },
 })
 export class User {
-  @Prop({ type: Types.ObjectId })
-  _id: ObjectId | string;
+  @Transform(({ value }) => value.toString())
+  _id: ObjectId;
 
   @Prop({ required: true, unique: true, immutable: true })
   clerkId: string;
@@ -30,10 +30,8 @@ export class User {
 
   @Prop({ required: true })
   contactNumber: string;
-
 }
 
 const UserSchema = SchemaFactory.createForClass(User);
-
 
 export { UserSchema };
