@@ -54,7 +54,7 @@ export class Vendor {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true, type: AddressSchema })
+  @Prop({ type: AddressSchema })
   @Type(() => Address)
   address: Address;
 
@@ -64,7 +64,7 @@ export class Vendor {
   @Prop({ required: true })
   contactNumber: string;
 
-  @Prop({ required: true, default: [] })
+  @Prop({ default: [] })
   blockedDays: string[];
 
   @Prop({
@@ -78,6 +78,7 @@ export class Vendor {
   bio: string;
 
   @Prop({
+    default: [],
     type: [
       {
         type: MongooseSchema.Types.ObjectId,
@@ -107,7 +108,7 @@ export class Vendor {
   @Prop({ default: 0 })
   credibility: number;
 
-  @Prop({ default: false, required: true })
+  @Prop({ default: false })
   visibility: boolean;
 
   @Type(() => Package)

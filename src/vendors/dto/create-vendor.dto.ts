@@ -81,12 +81,14 @@ export class CreateVendorDto {
   @Type(() => CreateCredentialDto)
   credential: CreateCredentialDto[];
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => CreateAddressDto)
   address: CreateAddressDto;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  @IsNotEmpty()
   bio: string;
 
   @IsOptional()
