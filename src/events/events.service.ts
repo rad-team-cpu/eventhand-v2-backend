@@ -44,8 +44,6 @@ export class EventsService {
       clientId = new Schema.Types.ObjectId(clientId);
     }
 
-    console.log(clientId);
-
     const events: PaginatedClientEvent[] = await this.eventModel
       .aggregate([
         // Match events by userId
@@ -77,6 +75,17 @@ export class EventsService {
                 as: 'booking',
                 cond: { $eq: ['$$booking.status', 'Confirmed'] },
               },
+            },
+            'budget.total': {
+              $sum: [
+                { $ifNull: ['$budget.eventPlanning', 0] },
+                { $ifNull: ['$budget.eventCoordination', 0] },
+                { $ifNull: ['$budget.venue', 0] },
+                { $ifNull: ['$budget.catering', 0] },
+                { $ifNull: ['$budget.decorations', 0] },
+                { $ifNull: ['$budget.photography', 0] },
+                { $ifNull: ['$budget.videography', 0] },
+              ],
             },
           },
         },
