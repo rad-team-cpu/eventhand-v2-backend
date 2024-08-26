@@ -4,6 +4,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { FilterQuery, Model, ObjectId, Schema } from 'mongoose';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventsService {
@@ -12,7 +13,6 @@ export class EventsService {
   async create(createEventDto: CreateEventDto): Promise<Event> {
     try {
       const event = await this.eventModel.create(createEventDto);
-
       return event;
     } catch (error) {
       console.error('Error creating event:', error);
@@ -21,10 +21,7 @@ export class EventsService {
   }
 
   async findAll(filter?: FilterQuery<Event>): Promise<Event[]> {
-    return await this.eventModel
-      .find(filter)
-      .populate({ path: 'bookings' })
-      .exec();
+    return await this.eventModel.find(filter).exec();
   }
 
   async findAllClientEvents(
@@ -108,15 +105,12 @@ export class EventsService {
   }
 
   async findOne(filter: FilterQuery<Event>): Promise<Event> {
-    return await this.eventModel
-      .findOne(filter)
-      .populate({ path: 'bookings' })
-      .exec();
+    return await this.eventModel.findOne(filter).exec();
   }
 
-  // update(id: number, updateEventDto: UpdateEventDto) {
-  //   return `This action updates a #${id} event`;
-  // }
+  async update(id: string, updateEventDto: UpdateEventDto) {
+    return await this.eventModel.findById(id, updateEventDto, { new: true });
+  }
 
   async remove(id: string): Promise<Event> {
     return await this.eventModel.findByIdAndDelete(id).exec();
