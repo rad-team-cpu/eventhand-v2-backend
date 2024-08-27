@@ -30,7 +30,7 @@ export class EventsController {
     return this.eventsService.findAll();
   }
 
-  @Get(':userId')
+  @Get('user/:userId')
   async findAllClientEvents(
     @Param('userId') userId: string,
     @Query('page') page: number,
@@ -65,7 +65,7 @@ export class EventsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Event> {
-    return await this.eventsService.findOne({ id });
+    return await this.eventsService.findOne({ _id: id });
   }
 
   @Patch(':id')

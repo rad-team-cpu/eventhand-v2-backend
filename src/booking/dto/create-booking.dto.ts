@@ -1,19 +1,18 @@
 import { IsEnum, IsMongoId } from 'class-validator';
-import { Schema as MongooseSchema } from 'mongoose';
 import { BookingStatus } from '../entities/booking-status.enum';
 
 export class CreateBookingDto {
   @IsMongoId()
-  vendor: MongooseSchema.Types.ObjectId;
+  vendorId: string;
 
   @IsMongoId()
-  client: MongooseSchema.Types.ObjectId;
+  clientId: string;
 
   @IsMongoId()
-  package: MongooseSchema.Types.ObjectId;
+  package: string;
 
   @IsMongoId()
-  event: MongooseSchema.Types.ObjectId;
+  event: string;
 
   @IsEnum(BookingStatus)
   bookingStatus: BookingStatus;

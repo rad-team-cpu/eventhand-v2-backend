@@ -3,7 +3,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 // import { UpdateEventDto } from './dto/update-event.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
-import { FilterQuery, Model, ObjectId, Schema } from 'mongoose';
+import { FilterQuery, Model, ObjectId, Schema, UpdateQuery } from 'mongoose';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { OnEvent } from '@nestjs/event-emitter';
 
@@ -115,12 +115,16 @@ export class EventsService {
   }
 
   async findOne(filter: FilterQuery<Event>): Promise<Event> {
-    return await this.eventModel.findOne(filter).exec();
+    return await this.eventModel.findOne(filter).populate('bookings').exec();
   }
 
   @OnEvent('booking.created')
-  async update(id: string, updateEventDto: UpdateEventDto) {
-    return await this.eventModel.findById(id, updateEventDto, { new: true });
+  @OnEvent('booking.deleted')
+  async update(id: string, updateEventDto: UpdateQuery<Event>): Promise<Event> {
+    const result = await this.eventModel.findByIdAndUpdate(id, updateEventDto, {
+      new: true,
+    });
+    return result;
   }
 
   async remove(id: string): Promise<Event> {
