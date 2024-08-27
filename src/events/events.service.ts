@@ -4,7 +4,6 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { FilterQuery, Model, ObjectId, Schema, UpdateQuery } from 'mongoose';
-import { UpdateEventDto } from './dto/update-event.dto';
 import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
