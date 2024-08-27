@@ -3,10 +3,10 @@ import { BookingStatus } from '../entities/booking-status.enum';
 
 export class CreateBookingDto {
   @IsMongoId()
-  vendor: string;
+  vendorId: string;
 
   @IsMongoId()
-  client: string;
+  clientId: string;
 
   @IsMongoId()
   package: string;

@@ -32,20 +32,20 @@ export class BookingService {
   async findAll(filter: FilterQuery<Booking>): Promise<Booking[]> {
     return await this.bookingModel
       .find(filter)
-      .populate('vendor', 'name logo')
+      .populate('vendorId', 'name logo')
       .populate('package', '-createdAt -updatedAt -__v')
       .populate('event')
-      .populate('client', 'firstName lastName contactNumber')
+      .populate('clientId', 'firstName lastName contactNumber')
       .exec();
   }
 
   async findOne(id: string): Promise<Booking> {
     return await this.bookingModel
       .findById(id)
-      .populate('vendor', 'name logo tags')
+      .populate('vendorId', 'name logo tags')
       .populate('event')
       .populate('client', 'firstName lastName contactNumber')
-      .populate('package', '-createdAt -updatedAt -__v')
+      .populate('packageId', '-createdAt -updatedAt -__v')
       .exec();
   }
 
@@ -55,9 +55,9 @@ export class BookingService {
   ): Promise<Booking> {
     return await this.bookingModel
       .findByIdAndUpdate(id, updateBookingDto, { new: true })
-      .populate('vendor', 'name logo tags')
+      .populate('vendorId', 'name logo tags')
       .populate('event')
-      .populate('client', 'firstName lastName contactNumber')
+      .populate('clientId', 'firstName lastName contactNumber')
       .populate('package', '-createdAt -updatedAt -__v')
       .exec();
   }
