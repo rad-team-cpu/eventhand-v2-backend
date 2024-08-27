@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { FilterQuery, Model, ObjectId, Schema } from 'mongoose';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class EventsService {
@@ -117,6 +118,7 @@ export class EventsService {
     return await this.eventModel.findOne(filter).exec();
   }
 
+  @OnEvent('booking.created')
   async update(id: string, updateEventDto: UpdateEventDto) {
     return await this.eventModel.findById(id, updateEventDto, { new: true });
   }

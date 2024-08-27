@@ -4,15 +4,29 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Booking } from './entities/booking.schema';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UpdateEventDto } from 'src/events/dto/update-event.dto';
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(createBookingDto: CreateBookingDto): Promise<Booking> {
-    return await this.bookingModel.create(createBookingDto);
+    try {
+      const result = await this.bookingModel.create(createBookingDto);
+
+      //pushes this to event
+      this.eventEmitter.emitAsync('booking.created', createBookingDto.vendor, {
+        $push: { event: result },
+      } as UpdateEventDto);
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findAll(filter: FilterQuery<Booking>): Promise<Booking[]> {

@@ -15,7 +15,6 @@ import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Schema } from 'mongoose';
 import { UpdateEventDto } from './dto/update-event.dto';
-// import { UpdateEventDto } from './dto/update-event.dto';
 
 @Controller('events')
 export class EventsController {
