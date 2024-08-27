@@ -14,7 +14,7 @@ export class Booking {
     ref: Vendor.name,
     immutable: false,
   })
-  vendorId: MongooseSchema.Types.ObjectId;
+  vendor: MongooseSchema.Types.ObjectId;
 
   @Prop({
     required: true,
@@ -22,7 +22,7 @@ export class Booking {
     ref: 'User',
     immutable: false,
   })
-  clientId: MongooseSchema.Types.ObjectId;
+  client: MongooseSchema.Types.ObjectId;
 
   @Prop({
     required: true,
