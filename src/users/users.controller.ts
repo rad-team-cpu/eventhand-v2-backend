@@ -39,7 +39,7 @@ export class UsersController {
     return user;
   }
 
-  @Get(':clerkId/events')
+  @Get(':id/events')
   async findClient(@Param('clerkId') clerkId: string): Promise<{
     user: User;
     events: {
