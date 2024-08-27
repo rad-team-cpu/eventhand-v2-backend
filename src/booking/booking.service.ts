@@ -2,35 +2,49 @@ import { Injectable } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 import { Booking } from './entities/booking.schema';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Event } from 'src/events/entities/event.schema';
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(createBookingDto: CreateBookingDto): Promise<Booking> {
-    return await this.bookingModel.create(createBookingDto);
+    try {
+      const result = await this.bookingModel.create(createBookingDto);
+
+      //pushes this to event
+      await this.eventEmitter.emitAsync('booking.created', result.event, {
+        $push: { bookings: result },
+      });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findAll(filter: FilterQuery<Booking>): Promise<Booking[]> {
     return await this.bookingModel
       .find(filter)
-      .populate('vendor', 'name logo')
+      .populate('vendorId', 'name logo')
       .populate('package', '-createdAt -updatedAt -__v')
       .populate('event')
-      .populate('client', 'firstName lastName contactNumber')
+      .populate('clientId', 'firstName lastName contactNumber')
       .exec();
   }
 
   async findOne(id: string): Promise<Booking> {
     return await this.bookingModel
       .findById(id)
-      .populate('vendor', 'name logo tags')
+      .populate('vendorId', 'name logo tags')
       .populate('event')
-      .populate('client', 'firstName lastName contactNumber')
+      .populate('clientId', 'firstName lastName contactNumber')
       .populate('package', '-createdAt -updatedAt -__v')
       .exec();
   }
@@ -41,14 +55,25 @@ export class BookingService {
   ): Promise<Booking> {
     return await this.bookingModel
       .findByIdAndUpdate(id, updateBookingDto, { new: true })
-      .populate('vendor', 'name logo tags')
+      .populate('vendorId', 'name logo tags')
       .populate('event')
-      .populate('client', 'firstName lastName contactNumber')
+      .populate('clientId', 'firstName lastName contactNumber')
       .populate('package', '-createdAt -updatedAt -__v')
       .exec();
   }
 
   async remove(id: string): Promise<Booking> {
-    return await this.bookingModel.findByIdAndDelete(id).exec();
+    try {
+      const result = await this.bookingModel.findByIdAndDelete(id).exec();
+
+      //pops this to event
+      await this.eventEmitter.emitAsync('booking.deleted', result.event, {
+        $pull: { booking: { _id: id } } as UpdateQuery<Event>,
+      });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 }

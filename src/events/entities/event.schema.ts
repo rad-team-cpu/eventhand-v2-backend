@@ -39,6 +39,7 @@ export class Event {
   )
   budget: Record<string, number | null>;
 
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Booking' }] })
   @Type(() => Booking)
   bookings: Booking[];
 }
@@ -50,12 +51,6 @@ EventSchema.virtual('total').get(function () {
   return Object.values(budget).reduce((total, value) => {
     return total + (value || 0); // Sum non-null values
   }, 0);
-});
-
-EventSchema.virtual('bookings', {
-  ref: 'Booking',
-  localField: '_id',
-  foreignField: 'event',
 });
 
 export type PaginatedClientEvent = {

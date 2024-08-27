@@ -8,12 +8,13 @@ import {
   Delete,
   BadRequestException,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Schema } from 'mongoose';
-// import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Controller('events')
 export class EventsController {
@@ -29,7 +30,7 @@ export class EventsController {
     return this.eventsService.findAll();
   }
 
-  @Get(':userId')
+  @Get('user/:userId')
   async findAllClientEvents(
     @Param('userId') userId: string,
     @Query('page') page: number,
@@ -64,13 +65,13 @@ export class EventsController {
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Event> {
-    return await this.eventsService.findOne({ id });
+    return await this.eventsService.findOne({ _id: id });
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-  //   return this.eventsService.update(+id, updateEventDto);
-  // }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
+    return this.eventsService.update(id, updateEventDto);
+  }
 
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Event> {
