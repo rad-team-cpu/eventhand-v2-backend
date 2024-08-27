@@ -11,7 +11,9 @@ export class MatchmakerService {
     @InjectModel(Vendor.name) private readonly vendorModel: Model<Vendor>,
   ) {}
 
-  async findSuitableVendorsAndPackages(eventId: string): Promise<Vendor[]> {
+  async knapsackSearch(eventId: string): Promise<Vendor[]> {}
+
+  async bruteforceSearch(eventId: string): Promise<Vendor[]> {
     const event = await this.eventModel.findById(eventId);
 
     const suitableVendors = await this.vendorModel
