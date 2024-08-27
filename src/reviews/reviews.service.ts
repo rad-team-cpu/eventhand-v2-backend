@@ -3,7 +3,7 @@ import { CreateReviewDto } from './dto/create-review.dto';
 // import { UpdateReviewDto } from './dto/update-review.dto';
 import { Review } from './entities/review.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -51,9 +51,14 @@ export class ReviewsService {
     return await this.reviewModel.findById(id).exec();
   }
 
-  // async update(id: number, updateReviewDto: UpdateReviewDto): Promise<Review> {
-  //   return `This action updates a #${id} review`;
-  // }
+  async update(
+    id: string,
+    updateReviewDto: UpdateQuery<Review>,
+  ): Promise<Review> {
+    return await this.reviewModel
+      .findByIdAndUpdate(id, updateReviewDto, { new: true })
+      .exec();
+  }
 
   async remove(id: string): Promise<Review> {
     try {

@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  // Patch,
+  Patch,
   Param,
   Delete,
   Query,
@@ -12,7 +12,7 @@ import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { Review } from './entities/review.schema';
 import { FilterQuery } from 'mongoose';
-// import { UpdateReviewDto } from './dto/update-review.dto';
+import { UpdateReviewDto } from './dto/update-review.dto';
 
 @Controller('reviews')
 export class ReviewsController {
@@ -33,10 +33,13 @@ export class ReviewsController {
     return await this.reviewsService.findOne(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-  //   return this.reviewsService.update(+id, updateReviewDto);
-  // }
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateReviewDto: UpdateReviewDto,
+  ): Promise<Review> {
+    return this.reviewsService.update(id, updateReviewDto);
+  }
 
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Review> {
