@@ -33,8 +33,8 @@ export class BookingService {
     return await this.bookingModel
       .find(filter)
       .populate('vendorId', 'name logo')
-      .populate('package', '-createdAt -updatedAt -__v')
-      .populate('event')
+      .populate('package', '-createdAt -updatedAt -__v -vendorId')
+      .populate('event', '-budget -bookings')
       .populate('clientId', 'firstName lastName contactNumber')
       .exec();
   }
