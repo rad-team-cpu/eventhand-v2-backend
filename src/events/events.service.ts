@@ -13,7 +13,7 @@ export class EventsService {
   async create(createEventDto: CreateEventDto): Promise<Event> {
     try {
       const event = await this.eventModel.create(createEventDto);
-      return event;
+      return event.toJSON();
     } catch (error) {
       console.error('Error creating event:', error);
       throw error;
@@ -60,17 +60,89 @@ export class EventsService {
         {
           $addFields: {
             pending: {
-              $filter: {
-                input: '$bookingDetails',
-                as: 'booking',
-                cond: { $eq: ['$$booking.status', 'Pending'] },
+              $map: {
+                input: {
+                  $filter: {
+                    input: '$bookingDetails',
+                    as: 'booking',
+                    cond: { $eq: ['$$booking.bookingStatus', 'PENDING'] },
+                  },
+                },
+                as: 'pendingBooking',
+                in: {
+                  id: '$$pendingBooking._id',
+                  package: {
+                    name: '$$pendingBooking.package.name',
+                    capacity: '$$pendingBooking.package.capacity',
+                    orderType: '$$pendingBooking.package.orderType',
+                    description: '$$pendingBooking.package.description',
+                  },
+                  vendor: {
+                    id: '$$pendingBooking.vendorId',
+                    name: {
+                      $arrayElemAt: [
+                        {
+                          $filter: {
+                            input: '$vendors',
+                            as: 'vendor',
+                            cond: {
+                              $eq: [
+                                '$$vendor._id',
+                                '$$pendingBooking.vendorId',
+                              ],
+                            },
+                          },
+                        },
+                        0,
+                      ],
+                    },
+                  },
+                  status: '$$pendingBooking.status',
+                  date: '$$pendingBooking.date',
+                },
               },
             },
             confirmed: {
-              $filter: {
-                input: '$bookingDetails',
-                as: 'booking',
-                cond: { $eq: ['$$booking.status', 'Confirmed'] },
+              $map: {
+                input: {
+                  $filter: {
+                    input: '$bookingDetails',
+                    as: 'booking',
+                    cond: { $eq: ['$$booking.bookingStatus', 'CONFIRMED'] },
+                  },
+                },
+                as: 'confirmedBooking',
+                in: {
+                  id: '$$confirmedBooking._id',
+                  package: {
+                    name: '$$confirmedBooking.package.name',
+                    capacity: '$$confirmedBooking.package.capacity',
+                    orderType: '$$confirmedBooking.package.orderType',
+                    description: '$$confirmedBooking.package.description',
+                  },
+                  vendor: {
+                    id: '$$confirmedBooking.vendorId',
+                    name: {
+                      $arrayElemAt: [
+                        {
+                          $filter: {
+                            input: '$vendors',
+                            as: 'vendor',
+                            cond: {
+                              $eq: [
+                                '$$vendor._id',
+                                '$$confirmedBooking.vendorId',
+                              ],
+                            },
+                          },
+                        },
+                        0,
+                      ],
+                    },
+                  },
+                  status: '$$confirmedBooking.status',
+                  date: '$$confirmedBooking.date',
+                },
               },
             },
             'budget.total': {
@@ -91,6 +163,7 @@ export class EventsService {
         {
           $project: {
             bookingDetails: 0,
+            bookings: 0,
             createdAt: 0,
             updatedAt: 0, // Exclude the intermediate bookingDetails array
           },
@@ -101,6 +174,8 @@ export class EventsService {
         { $limit: limit },
       ])
       .exec();
+
+    console.log(events);
 
     const total = await this.eventModel.countDocuments({ clientId }).exec();
     const totalPages = Math.ceil(total / pageSize);
