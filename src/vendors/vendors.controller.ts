@@ -26,6 +26,11 @@ export class VendorsController {
   }
 
   @Get()
+  async findAllVisible(): Promise<Vendor[]> {
+    return await this.vendorsService.findAll({ visibility: true });
+  }
+
+  @Get('all')
   async findAll(): Promise<Vendor[]> {
     return await this.vendorsService.findAll();
   }
