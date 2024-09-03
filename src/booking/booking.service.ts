@@ -83,7 +83,7 @@ export class BookingService {
       const result = await this.bookingModel.findByIdAndDelete(id).exec();
 
       //pops this to event
-      await this.eventEmitter.emitAsync('booking.deleted', result.event, {
+      this.eventEmitter.emit('booking.deleted', result.event, {
         $pull: { booking: { _id: id } } as UpdateQuery<Event>,
       });
 
