@@ -40,6 +40,9 @@ export class Booking {
   })
   package: EmbeddedPackage;
 
+  @Prop({ required: true })
+  date: Date;
+
   @Prop({
     required: true,
     type: MongooseSchema.Types.ObjectId,

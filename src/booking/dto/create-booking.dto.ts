@@ -1,4 +1,9 @@
-import { IsEnum, IsMongoId, ValidateNested } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsMongoId,
+  ValidateNested,
+} from 'class-validator';
 import { BookingStatus } from '../entities/booking-status.enum';
 import { EmbeddedPackage } from '../entities/booking.schema';
 import { EmbeddedPackageDto } from './embedded-package.dto';
@@ -14,6 +19,9 @@ export class CreateBookingDto {
   @ValidateNested()
   @Type(() => EmbeddedPackage)
   package: EmbeddedPackageDto;
+
+  @IsDateString()
+  date: Date;
 
   @IsMongoId()
   event: string;
