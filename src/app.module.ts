@@ -16,7 +16,6 @@ import { MatchmakerModule } from './matchmaker/matchmaker.module';
 import { BookingModule } from './booking/booking.module';
 import config from './config/config';
 // import { ClerkModule } from './clerk/clerk.module';
-import { OrderTypesModule } from './order-types/order-types.module';
 
 @Module({
   imports: [
@@ -39,7 +38,6 @@ import { OrderTypesModule } from './order-types/order-types.module';
     PortfolioModule,
     MatchmakerModule,
     BookingModule,
-    OrderTypesModule,
     // ClerkModule.forRootAsync({
     //   imports: [ConfigModule],
     //   useFactory: async (configService: ConfigService) => ({
