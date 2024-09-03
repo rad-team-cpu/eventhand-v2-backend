@@ -11,3 +11,9 @@ export class UpdateEventDateDto {
   @IsDateString()
   readonly date: string;
 }
+
+export class UpdateEventAddressDto {
+  @IsNotEmpty()
+  @IsString()
+  readonly address: string;
+}

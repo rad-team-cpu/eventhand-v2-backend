@@ -14,7 +14,11 @@ import { EventsService } from './events.service';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Schema } from 'mongoose';
-import { UpdateEventDateDto, UpdateEventNameDto } from './dto/update-event.dto';
+import {
+  UpdateEventAddressDto,
+  UpdateEventDateDto,
+  UpdateEventNameDto,
+} from './dto/update-event.dto';
 
 @Controller('events')
 export class EventsController {
@@ -92,5 +96,16 @@ export class EventsController {
     @Body() updateEventDateDto: UpdateEventDateDto,
   ): Promise<Event> {
     return this.eventsService.updateEventDate(eventId, updateEventDateDto);
+  }
+
+  @Patch(':id/address')
+  async updateEventAddress(
+    @Param('id') eventId: string,
+    @Body() updateEventAddressDto: UpdateEventAddressDto,
+  ): Promise<Event> {
+    return this.eventsService.updateEventAddress(
+      eventId,
+      updateEventAddressDto,
+    );
   }
 }

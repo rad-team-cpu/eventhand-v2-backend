@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { FilterQuery, Model, ObjectId, Schema, UpdateQuery } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
-import { UpdateEventDateDto, UpdateEventNameDto } from './dto/update-event.dto';
+import { UpdateEventAddressDto, UpdateEventDateDto, UpdateEventNameDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventsService {
@@ -232,6 +232,23 @@ export class EventsService {
     const updatedEvent = await this.eventModel.findByIdAndUpdate(
       eventId,
       { date: updateEventDateDto.date },
+      { new: true, runValidators: true },
+    );
+
+    if (!updatedEvent) {
+      throw new NotFoundException(`Event with ID ${eventId} not found`);
+    }
+
+    return updatedEvent;
+  }
+
+  async updateEventAddress(
+    eventId: string,
+    updateEventAddressDto: UpdateEventAddressDto,
+  ): Promise<Event> {
+    const updatedEvent = await this.eventModel.findByIdAndUpdate(
+      eventId,
+      { address: updateEventAddressDto.address },
       { new: true, runValidators: true },
     );
 
