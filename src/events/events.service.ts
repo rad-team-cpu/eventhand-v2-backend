@@ -5,7 +5,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { FilterQuery, Model, ObjectId, Schema, UpdateQuery } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
-import { UpdateEventAddressDto, UpdateEventDateDto, UpdateEventNameDto } from './dto/update-event.dto';
+import {
+  UpdateEventAddressDto,
+  UpdateEventAttendeesDto,
+  UpdateEventDateDto,
+  UpdateEventNameDto,
+} from './dto/update-event.dto';
 
 @Injectable()
 export class EventsService {
@@ -249,6 +254,31 @@ export class EventsService {
     const updatedEvent = await this.eventModel.findByIdAndUpdate(
       eventId,
       { address: updateEventAddressDto.address },
+      { new: true, runValidators: true },
+    );
+
+    if (!updatedEvent) {
+      throw new NotFoundException(`Event with ID ${eventId} not found`);
+    }
+
+    return updatedEvent;
+  }
+
+  async updateEventAttendees(
+    eventId: string,
+    updateEventAttendeesDto: UpdateEventAttendeesDto,
+  ): Promise<Event> {
+    const { attendees } = updateEventAttendeesDto;
+
+    if (attendees < 2) {
+      throw new Error(
+        'The number of attendees must be greater than or equal to 2.',
+      );
+    }
+
+    const updatedEvent = await this.eventModel.findByIdAndUpdate(
+      eventId,
+      { attendees },
       { new: true, runValidators: true },
     );
 

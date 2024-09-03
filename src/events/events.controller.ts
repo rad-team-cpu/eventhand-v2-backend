@@ -16,6 +16,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { Schema } from 'mongoose';
 import {
   UpdateEventAddressDto,
+  UpdateEventAttendeesDto,
   UpdateEventDateDto,
   UpdateEventNameDto,
 } from './dto/update-event.dto';
@@ -106,6 +107,17 @@ export class EventsController {
     return this.eventsService.updateEventAddress(
       eventId,
       updateEventAddressDto,
+    );
+  }
+
+  @Patch(':id/attendees')
+  async updateEventAttendees(
+    @Param('id') eventId: string,
+    @Body() updateEventAttendeesDto: UpdateEventAttendeesDto,
+  ): Promise<Event> {
+    return this.eventsService.updateEventAttendees(
+      eventId,
+      updateEventAttendeesDto,
     );
   }
 }
