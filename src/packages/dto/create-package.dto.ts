@@ -5,6 +5,7 @@ import {
   IsMongoId,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -51,4 +52,9 @@ export class CreatePackageDto {
   @ValidateNested()
   @Type(() => InclusionsDTO)
   inclusions: Array<InclusionsDTO>;
+
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  tags?: string[];
 }
