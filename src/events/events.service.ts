@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 // import { UpdateEventDto } from './dto/update-event.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { FilterQuery, Model, ObjectId, Schema, UpdateQuery } from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
+import { UpdateEventDateDto, UpdateEventNameDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventsService {
@@ -203,5 +204,41 @@ export class EventsService {
 
   async remove(id: string): Promise<Event> {
     return await this.eventModel.findByIdAndDelete(id).exec();
+  }
+
+  async updateEventName(
+    id: string,
+    updateEventNameDto: UpdateEventNameDto,
+  ): Promise<Event> {
+    const updatedEvent = await this.eventModel
+      .findByIdAndUpdate(
+        id,
+        { name: updateEventNameDto.name },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!updatedEvent) {
+      throw new NotFoundException(`Event with ID "${id}" not found`);
+    }
+
+    return updatedEvent;
+  }
+
+  async updateEventDate(
+    eventId: string,
+    updateEventDateDto: UpdateEventDateDto,
+  ): Promise<Event> {
+    const updatedEvent = await this.eventModel.findByIdAndUpdate(
+      eventId,
+      { date: updateEventDateDto.date },
+      { new: true, runValidators: true },
+    );
+
+    if (!updatedEvent) {
+      throw new NotFoundException(`Event with ID ${eventId} not found`);
+    }
+
+    return updatedEvent;
   }
 }

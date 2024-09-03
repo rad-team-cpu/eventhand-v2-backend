@@ -1,6 +1,13 @@
-import { CreateEventDto } from './create-event.dto';
-import { OmitType, PartialType } from '@nestjs/swagger';
+import { IsDateString, IsString, Length, IsNotEmpty } from 'class-validator';
 
-export class UpdateEventDto extends OmitType(PartialType(CreateEventDto), [
-  'clientId',
-]) {}
+export class UpdateEventNameDto {
+  @IsString()
+  @Length(1, 255)
+  readonly name: string;
+}
+
+export class UpdateEventDateDto {
+  @IsNotEmpty()
+  @IsDateString()
+  readonly date: string;
+}

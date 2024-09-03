@@ -14,7 +14,7 @@ import { EventsService } from './events.service';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Schema } from 'mongoose';
-import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateEventDateDto, UpdateEventNameDto } from './dto/update-event.dto';
 
 @Controller('events')
 export class EventsController {
@@ -68,13 +68,29 @@ export class EventsController {
     return await this.eventsService.findOne({ _id: id });
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(id, updateEventDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
+  //   return this.eventsService.update(id, updateEventDto);
+  // }
 
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Event> {
     return await this.eventsService.remove(id);
+  }
+
+  @Patch(':id/name')
+  async updateEventName(
+    @Param('id') id: string,
+    @Body() updateEventNameDto: UpdateEventNameDto,
+  ): Promise<Event> {
+    return this.eventsService.updateEventName(id, updateEventNameDto);
+  }
+
+  @Patch(':id/date')
+  async updateEventDate(
+    @Param('id') eventId: string,
+    @Body() updateEventDateDto: UpdateEventDateDto,
+  ): Promise<Event> {
+    return this.eventsService.updateEventDate(eventId, updateEventDateDto);
   }
 }
