@@ -1,11 +1,10 @@
 import { OmitType } from '@nestjs/swagger';
 import { IsMongoId } from 'class-validator';
-import { Package } from 'src/packages/entities/package.schema';
+import { CreatePackageDto } from 'src/packages/dto/create-package.dto';
 
-export class EmbeddedPackageDto extends OmitType(Package, [
+export class EmbeddedPackageDto extends OmitType(CreatePackageDto, [
   'vendorId',
   'price',
-  'tags',
 ]) {
   @IsMongoId()
   _id: string;
