@@ -1,5 +1,8 @@
-import { IsEnum, IsMongoId } from 'class-validator';
+import { IsEnum, IsMongoId, ValidateNested } from 'class-validator';
 import { BookingStatus } from '../entities/booking-status.enum';
+import { EmbeddedPackage } from '../entities/booking.schema';
+import { EmbeddedPackageDto } from './embedded-package.dto';
+import { Type } from 'class-transformer';
 
 export class CreateBookingDto {
   @IsMongoId()
@@ -8,8 +11,9 @@ export class CreateBookingDto {
   @IsMongoId()
   clientId: string;
 
-  @IsMongoId()
-  package: string;
+  @ValidateNested()
+  @Type(() => EmbeddedPackage)
+  package: EmbeddedPackageDto;
 
   @IsMongoId()
   event: string;
