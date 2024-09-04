@@ -13,6 +13,7 @@ export class EventsService {
   async create(createEventDto: CreateEventDto): Promise<Event> {
     try {
       const event = await this.eventModel.create(createEventDto);
+
       return event;
     } catch (error) {
       console.error('Error creating event:', error);

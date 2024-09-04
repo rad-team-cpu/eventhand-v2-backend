@@ -6,6 +6,11 @@ import { Vendor } from 'src/vendors/entities/vendor.schema';
 
 export type PackageDocument = HydratedDocument<Package>;
 
+class OrderType {
+  name: string;
+  disabled: boolean;
+}
+
 @Schema({ timestamps: true })
 export class Package {
   @Prop({
@@ -24,6 +29,10 @@ export class Package {
 
   @Prop({ required: true })
   pictureURL: string;
+
+  @Prop({ type: [{ type: OrderType }] })
+  @Type(() => OrderType)
+  orderTypes: OrderType[];
 
   @Prop({
     type: [
