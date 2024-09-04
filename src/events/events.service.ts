@@ -3,7 +3,14 @@ import { CreateEventDto } from './dto/create-event.dto';
 // import { UpdateEventDto } from './dto/update-event.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
-import { FilterQuery, Model, ObjectId, Schema, UpdateQuery } from 'mongoose';
+import mongoose, {
+  FilterQuery,
+  Model,
+  ObjectId,
+  Schema,
+  UpdateQuery,
+  Types,
+} from 'mongoose';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
   UpdateEventAddressDto,
@@ -51,133 +58,100 @@ export class EventsService {
 
     const events: PaginatedClientEvent[] = await this.eventModel
       .aggregate([
-        // Match events by userId
-        { $match: { clientId } },
-
-        // Lookup and populate the bookings
+        {
+          $match: { clientId },
+        },
         {
           $lookup: {
-            from: 'bookings', // The name of the collection that holds bookings
+            from: 'bookings',
             localField: 'bookings',
             foreignField: '_id',
-            as: 'bookingDetails',
+            as: 'bookings',
           },
         },
-
-        // Add pending and confirmed fields
         {
-          $addFields: {
-            pending: {
-              $map: {
-                input: {
-                  $filter: {
-                    input: '$bookingDetails',
-                    as: 'booking',
-                    cond: { $eq: ['$$booking.bookingStatus', 'PENDING'] },
-                  },
-                },
-                as: 'pendingBooking',
-                in: {
-                  id: '$$pendingBooking._id',
-                  package: {
-                    name: '$$pendingBooking.package.name',
-                    capacity: '$$pendingBooking.package.capacity',
-                    orderType: '$$pendingBooking.package.orderType',
-                    description: '$$pendingBooking.package.description',
-                  },
-                  vendor: {
-                    id: '$$pendingBooking.vendorId',
-                    name: {
-                      $arrayElemAt: [
-                        {
-                          $filter: {
-                            input: '$vendors',
-                            as: 'vendor',
-                            cond: {
-                              $eq: [
-                                '$$vendor._id',
-                                '$$pendingBooking.vendorId',
-                              ],
-                            },
-                          },
-                        },
-                        0,
-                      ],
-                    },
-                  },
-                  status: '$$pendingBooking.status',
-                  date: '$$pendingBooking.date',
-                },
-              },
-            },
-            confirmed: {
-              $map: {
-                input: {
-                  $filter: {
-                    input: '$bookingDetails',
-                    as: 'booking',
-                    cond: { $eq: ['$$booking.bookingStatus', 'CONFIRMED'] },
-                  },
-                },
-                as: 'confirmedBooking',
-                in: {
-                  id: '$$confirmedBooking._id',
-                  package: {
-                    name: '$$confirmedBooking.package.name',
-                    capacity: '$$confirmedBooking.package.capacity',
-                    orderType: '$$confirmedBooking.package.orderType',
-                    description: '$$confirmedBooking.package.description',
-                  },
-                  vendor: {
-                    id: '$$confirmedBooking.vendorId',
-                    name: {
-                      $arrayElemAt: [
-                        {
-                          $filter: {
-                            input: '$vendors',
-                            as: 'vendor',
-                            cond: {
-                              $eq: [
-                                '$$vendor._id',
-                                '$$confirmedBooking.vendorId',
-                              ],
-                            },
-                          },
-                        },
-                        0,
-                      ],
-                    },
-                  },
-                  status: '$$confirmedBooking.status',
-                  date: '$$confirmedBooking.date',
-                },
-              },
-            },
-            'budget.total': {
-              $sum: [
-                { $ifNull: ['$budget.eventPlanning', 0] },
-                { $ifNull: ['$budget.eventCoordination', 0] },
-                { $ifNull: ['$budget.venue', 0] },
-                { $ifNull: ['$budget.catering', 0] },
-                { $ifNull: ['$budget.decorations', 0] },
-                { $ifNull: ['$budget.photography', 0] },
-                { $ifNull: ['$budget.videography', 0] },
-              ],
-            },
+          $unwind: '$bookings',
+        },
+        {
+          $lookup: {
+            from: 'vendors',
+            localField: 'bookings.vendorId',
+            foreignField: '_id',
+            as: 'bookings.vendor',
           },
         },
-
-        // Exclude the original bookings array
         {
           $project: {
-            bookingDetails: 0,
-            bookings: 0,
-            createdAt: 0,
-            updatedAt: 0, // Exclude the intermediate bookingDetails array
+            _id: 1,
+            name: 1,
+            attendees: 1,
+            date: 1,
+            address: 1,
+            budget: 1,
+            'bookings._id': 1,
+            'bookings.vendorId': 1,
+            'bookings.eventId': 1,
+            'bookings.date': 1,
+            'bookings.status': 1,
+            'bookings.package': 1,
+            'bookings.createdAt': 1,
+            'bookings.updatedAt': 1,
+            'bookings.vendor._id': 1,
+            'bookings.vendor.name': 1,
+            'bookings.vendor.logo': 1,
+            'bookings.vendor.address': 1,
+            'bookings.vendor.contactNum': 1,
+            'bookings.vendor.email': 1,
           },
         },
-
-        // Pagination: Skip and limit the results
+        {
+          $unwind: '$bookings.vendor',
+        },
+        {
+          $group: {
+            _id: '$_id',
+            name: { $first: '$name' },
+            attendees: { $first: '$attendees' },
+            date: { $first: '$date' },
+            address: { $first: '$address' },
+            budget: { $first: '$budget' },
+            createdAt: { $first: '$createdAt' },
+            updatedAt: { $first: '$updatedAt' },
+            confirmedBookings: {
+              $push: {
+                $cond: [
+                  { $eq: ['$bookings.status', 'CONFIRMED'] },
+                  '$bookings',
+                  '$$REMOVE',
+                ],
+              },
+            },
+            pendingBookings: {
+              $push: {
+                $cond: [
+                  { $eq: ['$bookings.status', 'PENDING'] },
+                  '$bookings',
+                  '$$REMOVE',
+                ],
+              },
+            },
+            cancelledOrDeclinedBookings: {
+              $push: {
+                $cond: [
+                  { $in: ['$bookings.status', ['CANCELLED', 'DECLINED']] },
+                  '$bookings',
+                  '$$REMOVE',
+                ],
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            createdAt: 0,
+            updatedAt: 0,
+          },
+        },
         { $skip: skip },
         { $limit: limit },
       ])
@@ -340,5 +314,85 @@ export class EventsService {
     }
 
     return updatedEvent;
+  }
+
+  async getEventWithBookings(eventId: string) {
+    const _id = new Types.ObjectId(eventId);
+    console.log(_id);
+    const event = await this.eventModel
+      .aggregate([
+        {
+          $match: { _id }, // Match the event by eventId
+        },
+        {
+          $lookup: {
+            from: 'bookings',
+            localField: 'bookings',
+            foreignField: '_id',
+            as: 'bookings',
+          },
+        },
+        {
+          $unwind: '$bookings',
+        },
+        {
+          $lookup: {
+            from: 'vendors',
+            localField: 'bookings.vendorId',
+            foreignField: '_id',
+            as: 'bookings.vendor',
+          },
+        },
+        {
+          $unwind: '$bookings.vendor',
+        },
+        {
+          $group: {
+            _id: '$_id',
+            name: { $first: '$name' },
+            attendees: { $first: '$attendees' },
+            date: { $first: '$date' },
+            address: { $first: '$address' },
+            budget: { $first: '$budget' },
+            confirmedBookings: {
+              $push: {
+                $cond: [
+                  { $eq: ['$bookings.status', 'CONFIRMED'] },
+                  '$bookings',
+                  '$$REMOVE',
+                ],
+              },
+            },
+            pendingBookings: {
+              $push: {
+                $cond: [
+                  { $eq: ['$bookings.status', 'PENDING'] },
+                  '$bookings',
+                  '$$REMOVE',
+                ],
+              },
+            },
+            cancelledOrDeclinedBookings: {
+              $push: {
+                $cond: [
+                  { $in: ['$bookings.status', ['CANCELLED', 'DECLINED']] },
+                  '$bookings',
+                  '$$REMOVE',
+                ],
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            createdAt: 0,
+            updatedAt: 0,
+          },
+        },
+      ])
+      .exec();
+
+
+    return event.length > 0 ? event[0] : null;
   }
 }
