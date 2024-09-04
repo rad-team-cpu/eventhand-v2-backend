@@ -17,6 +17,7 @@ import { Schema } from 'mongoose';
 import {
   UpdateEventAddressDto,
   UpdateEventAttendeesDto,
+  UpdateEventBudgetDto,
   UpdateEventDateDto,
   UpdateEventNameDto,
 } from './dto/update-event.dto';
@@ -119,5 +120,13 @@ export class EventsController {
       eventId,
       updateEventAttendeesDto,
     );
+  }
+
+  @Patch(':id/budget')
+  async updateEventBudget(
+    @Param('id') eventId: string,
+    @Body() updateEventBudgetDto: UpdateEventBudgetDto,
+  ): Promise<Event> {
+    return this.eventsService.updateEventBudget(eventId, updateEventBudgetDto);
   }
 }

@@ -8,6 +8,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import {
   UpdateEventAddressDto,
   UpdateEventAttendeesDto,
+  UpdateEventBudgetDto,
   UpdateEventDateDto,
   UpdateEventNameDto,
 } from './dto/update-event.dto';
@@ -279,6 +280,57 @@ export class EventsService {
     const updatedEvent = await this.eventModel.findByIdAndUpdate(
       eventId,
       { attendees },
+      { new: true, runValidators: true },
+    );
+
+    if (!updatedEvent) {
+      throw new NotFoundException(`Event with ID ${eventId} not found`);
+    }
+
+    return updatedEvent;
+  }
+
+  async updateEventBudget(
+    eventId: string,
+    updateEventBudgetDto: UpdateEventBudgetDto,
+  ): Promise<Event> {
+    let updateQuery: UpdateQuery<Event>;
+
+    const {
+      eventPlanning,
+      eventCoordination,
+      catering,
+      venue,
+      decorations,
+      photography,
+      videography,
+      address,
+    } = updateEventBudgetDto;
+
+    const budget = {
+      eventPlanning,
+      eventCoordination,
+      catering,
+      venue,
+      decorations,
+      photography,
+      videography,
+    };
+
+    if (updateEventBudgetDto.venue !== null) {
+      updateQuery = { budget, address: null };
+    } else if (
+      updateEventBudgetDto.venue === null &&
+      updateEventBudgetDto.address
+    ) {
+      updateQuery = { budget, address };
+    } else {
+      updateQuery = { budget };
+    }
+
+    const updatedEvent = await this.eventModel.findByIdAndUpdate(
+      eventId,
+      updateQuery,
       { new: true, runValidators: true },
     );
 
