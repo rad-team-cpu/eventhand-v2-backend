@@ -1,10 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { Package } from 'src/packages/entities/package.schema';
+import { Package, PackageSchema } from 'src/packages/entities/package.schema';
 import { BookingStatus } from './booking-status.enum';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
+import { OmitType } from '@nestjs/swagger';
 
 export type BookingDocument = HydratedDocument<Booking>;
+
+export class EmbeddedPackage extends OmitType(Package, [
+  'vendorId',
+  'tags',
+  'price',
+]) {}
+
+const EmbeddedPackageSchema = PackageSchema.omit(['vendorId', 'tags', 'price']);
 
 @Schema({ timestamps: true })
 export class Booking {
@@ -26,11 +35,13 @@ export class Booking {
 
   @Prop({
     required: true,
-    type: MongooseSchema.Types.ObjectId,
-    ref: Package.name,
-    immutable: false,
+    type: EmbeddedPackageSchema,
+    immutable: true,
   })
-  package: MongooseSchema.Types.ObjectId;
+  package: EmbeddedPackage;
+
+  @Prop({ required: true })
+  date: Date;
 
   @Prop({
     required: true,

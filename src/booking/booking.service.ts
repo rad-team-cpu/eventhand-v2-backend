@@ -6,6 +6,7 @@ import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 import { Booking } from './entities/booking.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Event } from 'src/events/entities/event.schema';
+import { BookingStatus } from './entities/booking-status.enum';
 
 @Injectable()
 export class BookingService {
@@ -19,7 +20,7 @@ export class BookingService {
       const result = await this.bookingModel.create(createBookingDto);
 
       //pushes this to event
-      await this.eventEmitter.emitAsync('booking.created', result.event, {
+      this.eventEmitter.emit('booking.created', result.event, {
         $push: { bookings: result },
       });
 
@@ -27,6 +28,21 @@ export class BookingService {
     } catch (error) {
       throw error;
     }
+  }
+
+  cancelBookingsExcept(bookingId: string, vendorId: string, date: Date): void {
+    this.updateMany(
+      {
+        vendorId,
+        _id: { $ne: bookingId },
+        date,
+      },
+      { bookingStatus: BookingStatus.Cancelled },
+    );
+  }
+
+  updateMany(filter: FilterQuery<Booking>, update: UpdateQuery<Booking>): void {
+    this.bookingModel.updateMany(filter, update);
   }
 
   async findAll(filter: FilterQuery<Booking>): Promise<Booking[]> {
@@ -67,7 +83,7 @@ export class BookingService {
       const result = await this.bookingModel.findByIdAndDelete(id).exec();
 
       //pops this to event
-      await this.eventEmitter.emitAsync('booking.deleted', result.event, {
+      this.eventEmitter.emit('booking.deleted', result.event, {
         $pull: { booking: { _id: id } } as UpdateQuery<Event>,
       });
 
