@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsMongoId,
   IsNumber,
@@ -21,6 +22,7 @@ export class CreateReviewDto {
   rating: number;
 
   @ValidateNested()
+  @Type(() => EmbeddedPackageDto)
   package: EmbeddedPackageDto;
 
   @IsString()
