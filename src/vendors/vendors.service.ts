@@ -10,6 +10,7 @@ import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
 import { Tag } from 'src/tags/entities/tag.schema';
 import { SelectedTagsDto, Selection } from './dto/selected-vendor-tags.dto';
 import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
+import { format } from 'date-fns';
 
 @Injectable()
 export class VendorsService {
@@ -202,4 +203,84 @@ export class VendorsService {
   // vendor.save();
   //   return;
   // }
+
+  async getVendorsWithRatings(clerkId: string, tagId: string) {
+    const today = format(new Date(), 'eeee').toUpperCase(); // Get current day of the week in uppercase
+    const tagObjectId = new Types.ObjectId(tagId);
+    console.log(today)
+
+    const vendors = await this.vendorModel
+      .aggregate([
+        {
+          // Filter vendors by clerkId and ensure they are not blocked on the current day
+          $match: {
+            clerkId: { $ne: clerkId },
+            visibility: true,
+            blockedDays: { $nin: [today] },
+          },
+        },
+        {
+          // Lookup VendorPackages by vendorId and filter by package tag
+          $lookup: {
+            from: 'vendorPackages',
+            localField: '_id',
+            foreignField: 'vendorId',
+            as: 'packages',
+          },
+        },
+        {
+          $unwind: {
+            path: '$packages',
+            preserveNullAndEmptyArrays: true, // Preserve vendors even if they have no packages
+          },
+  
+        },
+        {
+          // Filter packages by tagId
+          $match: {
+            'packages.tags': tagObjectId,
+          },
+        },
+        {
+          // Lookup reviews for the vendor
+          $lookup: {
+            from: 'vendorReviews',
+            localField: '_id',
+            foreignField: 'vendorId',
+            as: 'reviews',
+          },
+        },
+        {
+          $addFields: {
+            // Calculate the average rating from reviews (1-5 only)
+            averageRating: {
+              $avg: {
+                $filter: {
+                  input: '$reviews.rating',
+                  as: 'rating',
+                  cond: {
+                    $and: [
+                      { $gte: ['$$rating', 1] },
+                      { $lte: ['$$rating', 5] },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          // Group to return vendor id, name, logo, and average rating
+          $project: {
+            _id: 1,
+            name: 1,
+            logo: 1,
+            averageRating: 1,
+          },
+        },
+      ])
+      .exec();
+
+    return vendors;
+  }
 }

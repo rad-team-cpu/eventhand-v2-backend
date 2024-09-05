@@ -71,4 +71,52 @@ export class VendorsController {
   async remove(@Param('id') id: string): Promise<Vendor> {
     return await this.vendorsService.remove({ _id: id });
   }
+
+  @Get(':id/list')
+  async getVendorList(@Param('id') id: string): Promise<any> {
+    const venue = await this.vendorsService.getVendorsWithRatings(
+      id,
+      '66d88166d003b4f05e5b9d44',
+    );
+    const planning = await this.vendorsService.getVendorsWithRatings(
+      id,
+      '66d88166d003b4f05e5b9d42',
+    );
+
+    const catering = await this.vendorsService.getVendorsWithRatings(
+      id,
+      '66d88166d003b4f05e5b9d45',
+    );
+
+    const photography = await this.vendorsService.getVendorsWithRatings(
+      id,
+      '66d88166d003b4f05e5b9d47',
+    );
+
+    const decorations = await this.vendorsService.getVendorsWithRatings(
+      id,
+      '66d88166d003b4f05e5b9d46',
+    );
+
+    const coordination = await this.vendorsService.getVendorsWithRatings(
+      id,
+      '66d88166d003b4f05e5b9d43',
+    );
+
+    const videography = await this.vendorsService.getVendorsWithRatings(
+      id,
+      '66d88166d003b4f05e5b9d48',
+    );
+
+
+    return {
+      venue,
+      planning,
+      catering,
+      decorations,
+      photography,
+      videography,
+      coordination,
+    };
+  }
 }
