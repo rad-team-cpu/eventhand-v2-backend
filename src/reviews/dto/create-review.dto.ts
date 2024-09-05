@@ -1,4 +1,12 @@
-import { IsMongoId, IsNumber, IsString, Max, Min } from 'class-validator';
+import {
+  IsMongoId,
+  IsNumber,
+  IsString,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator';
+import { EmbeddedPackageDto } from 'src/packages/dto/embedded-package.dto';
 
 export class CreateReviewDto {
   @IsMongoId()
@@ -11,6 +19,9 @@ export class CreateReviewDto {
   @Min(1)
   @Max(5)
   rating: number;
+
+  @ValidateNested()
+  package: EmbeddedPackageDto;
 
   @IsString()
   comment: string;
