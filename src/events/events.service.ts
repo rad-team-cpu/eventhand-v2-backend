@@ -84,11 +84,9 @@ export class EventsService {
           },
         },
         {
-          {
-            $unwind: {
-              path: '$bookings.vendor',
-              preserveNullAndEmptyArrays: true, // Include bookings without vendors
-            },
+          $unwind: {
+            path: '$bookings.vendor',
+            preserveNullAndEmptyArrays: true, // Include bookings without vendors
           },
         },
         {
@@ -162,6 +160,9 @@ export class EventsService {
         },
         { $skip: skip },
         { $limit: limit },
+        {
+          $sort: { date: 1 }, // Sort by date, dynamic sortOrder (1 for ascending, -1 for descending)
+        },
       ])
       .exec();
 
