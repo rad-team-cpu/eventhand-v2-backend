@@ -7,13 +7,9 @@ import { OmitType } from '@nestjs/swagger';
 
 export type BookingDocument = HydratedDocument<Booking>;
 
-export class EmbeddedPackage extends OmitType(Package, [
-  'vendorId',
-  'tags',
-  'price',
-]) {}
+export class EmbeddedPackage extends OmitType(Package, ['vendorId']) {}
 
-const EmbeddedPackageSchema = PackageSchema.omit(['vendorId', 'tags', 'price']);
+const EmbeddedPackageSchema = PackageSchema.omit(['vendorId']);
 
 @Schema({ timestamps: true })
 export class Booking {
