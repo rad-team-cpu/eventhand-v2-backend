@@ -70,11 +70,25 @@ export class EventsService {
           },
         },
         {
+          $unwind: {
+            path: '$bookings',
+            preserveNullAndEmptyArrays: true, // Include events without bookings
+          },
+        },
+        {
           $lookup: {
             from: 'vendors',
             localField: 'bookings.vendorId',
             foreignField: '_id',
             as: 'bookings.vendor',
+          },
+        },
+        {
+          {
+            $unwind: {
+              path: '$bookings.vendor',
+              preserveNullAndEmptyArrays: true, // Include bookings without vendors
+            },
           },
         },
         {
@@ -327,6 +341,12 @@ export class EventsService {
           },
         },
         {
+          $unwind: {
+            path: '$bookings',
+            preserveNullAndEmptyArrays: true, // Include events without bookings
+          },
+        },
+        {
           $lookup: {
             from: 'vendors',
             localField: 'bookings.vendorId',
@@ -334,7 +354,12 @@ export class EventsService {
             as: 'bookings.vendor',
           },
         },
-
+        {
+          $unwind: {
+            path: '$bookings.vendor',
+            preserveNullAndEmptyArrays: true, // Include bookings without vendors
+          },
+        },
         {
           $group: {
             _id: '$_id',
@@ -380,7 +405,6 @@ export class EventsService {
         },
       ])
       .exec();
-
 
     return event.length > 0 ? event[0] : null;
   }
