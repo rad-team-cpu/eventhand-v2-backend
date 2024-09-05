@@ -6,7 +6,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { EmbeddedPackageDto } from 'src/booking/dto/embedded-package.dto';
+import { EmbeddedPackageDto } from 'src/packages/dto/embedded-package.dto';
 
 export class CreateReviewDto {
   @IsMongoId()
