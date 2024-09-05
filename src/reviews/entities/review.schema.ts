@@ -1,5 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Type } from 'class-transformer';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import {
+  EmbeddedPackage,
+  EmbeddedPackageSchema,
+} from 'src/packages/entities/package.schema';
 import { User } from 'src/users/entities/user.schema';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 
@@ -22,6 +27,14 @@ export class Review {
     ref: Vendor.name,
   })
   vendorId: Vendor;
+
+  @Prop({
+    required: true,
+    immutable: true,
+    type: EmbeddedPackageSchema,
+  })
+  @Type(() => EmbeddedPackage)
+  package: EmbeddedPackage;
 
   @Prop({ required: true })
   rating: number;

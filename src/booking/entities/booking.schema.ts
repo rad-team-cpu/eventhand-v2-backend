@@ -1,15 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { Package, PackageSchema } from 'src/packages/entities/package.schema';
+import {
+  EmbeddedPackage,
+  EmbeddedPackageSchema,
+} from 'src/packages/entities/package.schema';
 import { BookingStatus } from './booking-status.enum';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
-import { OmitType } from '@nestjs/swagger';
 
 export type BookingDocument = HydratedDocument<Booking>;
-
-export class EmbeddedPackage extends OmitType(Package, ['vendorId']) {}
-
-const EmbeddedPackageSchema = PackageSchema.omit(['vendorId']);
 
 @Schema({ timestamps: true })
 export class Booking {
