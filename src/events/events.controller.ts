@@ -74,6 +74,13 @@ export class EventsController {
     return await this.eventsService.findOne({ _id: id });
   }
 
+  @Get(':eventId/bookings')
+  async getEventWithBookings(
+    @Param('eventId') eventId: string,
+  ): Promise<Event> {
+    return await this.eventsService.getEventWithBookings(eventId);
+  }
+
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
   //   return this.eventsService.update(id, updateEventDto);
