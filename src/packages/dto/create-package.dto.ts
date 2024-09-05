@@ -55,7 +55,7 @@ export class CreatePackageDto {
 
   @IsString()
   @IsNotEmpty()
-  pictureURL: string;
+  imageURL: string;
 
   @IsDefined()
   @IsArray()

@@ -29,7 +29,7 @@ export class Package {
   price: number;
 
   @Prop({ required: true })
-  pictureURL: string;
+  imageURL: string;
 
   @Prop({ type: [{ type: OrderType }] })
   @Type(() => OrderType)
