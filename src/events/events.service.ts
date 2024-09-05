@@ -70,9 +70,6 @@ export class EventsService {
           },
         },
         {
-          $unwind: '$bookings',
-        },
-        {
           $lookup: {
             from: 'vendors',
             localField: 'bookings.vendorId',
@@ -103,9 +100,6 @@ export class EventsService {
             'bookings.vendor.contactNum': 1,
             'bookings.vendor.email': 1,
           },
-        },
-        {
-          $unwind: '$bookings.vendor',
         },
         {
           $group: {
@@ -333,9 +327,6 @@ export class EventsService {
           },
         },
         {
-          $unwind: '$bookings',
-        },
-        {
           $lookup: {
             from: 'vendors',
             localField: 'bookings.vendorId',
@@ -343,9 +334,7 @@ export class EventsService {
             as: 'bookings.vendor',
           },
         },
-        {
-          $unwind: '$bookings.vendor',
-        },
+
         {
           $group: {
             _id: '$_id',
