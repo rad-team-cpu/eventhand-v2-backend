@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { OmitType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Tag } from 'src/tags/entities/tag.schema';
@@ -28,7 +29,7 @@ export class Package {
   price: number;
 
   @Prop({ required: true })
-  pictureURL: string;
+  imageURL: string;
 
   @Prop({ type: [{ type: OrderType }] })
   @Type(() => OrderType)
@@ -67,3 +68,7 @@ export class Package {
 }
 
 export const PackageSchema = SchemaFactory.createForClass(Package);
+
+export class EmbeddedPackage extends OmitType(Package, ['vendorId']) {}
+
+export const EmbeddedPackageSchema = PackageSchema.omit(['vendorId']);
