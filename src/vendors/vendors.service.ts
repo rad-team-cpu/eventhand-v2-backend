@@ -45,9 +45,7 @@ export class VendorsService {
 
   async findAllByTags(selectedTagsDto: SelectedTagsDto): Promise<Vendor[]> {
     const { tags = [], selection } = selectedTagsDto;
-    console.log(tags);
     const tagObjectIds = tags.map((tag) => new Types.ObjectId(tag));
-    console.log(tagObjectIds);
 
     let query;
 
@@ -59,7 +57,6 @@ export class VendorsService {
             $all: tagObjectIds,
           },
         };
-        console.log(query);
         break;
 
       case Selection.Or:
@@ -67,7 +64,6 @@ export class VendorsService {
         query = {
           tags: { $in: tagObjectIds },
         };
-        console.log(query);
         break;
 
       case Selection.Exclusive:
@@ -76,7 +72,6 @@ export class VendorsService {
           tags: tagObjectIds,
           $expr: { $eq: [{ $size: '$tags' }, tagObjectIds.length] },
         };
-        console.log(query);
         break;
 
       default:
@@ -207,7 +202,6 @@ export class VendorsService {
   async getVendorsWithRatings(clerkId: string, tagId: string) {
     const today = format(new Date(), 'eeee').toUpperCase(); // Get current day of the week in uppercase
     const tagObjectId = new Types.ObjectId(tagId);
-    console.log(today)
 
     const vendors = await this.vendorModel
       .aggregate([
@@ -231,9 +225,7 @@ export class VendorsService {
         {
           $unwind: {
             path: '$packages',
-            preserveNullAndEmptyArrays: true, // Preserve vendors even if they have no packages
           },
-  
         },
         {
           // Filter packages by tagId
@@ -267,6 +259,93 @@ export class VendorsService {
                 },
               },
             },
+          },
+        },
+        {
+          // Group by vendor ID to avoid duplicates
+          $group: {
+            _id: '$_id', // Group by vendor ID
+            name: { $first: '$name' }, // Take the first name for each group
+            logo: { $first: '$logo' }, // Take the first logo for each group
+            averageRating: { $first: '$averageRating' }, // Take the first average rating
+          },
+        },
+        {
+          // Group to return vendor id, name, logo, and average rating
+          $project: {
+            _id: 1,
+            name: 1,
+            logo: 1,
+            averageRating: 1,
+          },
+        },
+      ])
+      .exec();
+
+    return vendors;
+  }
+
+  async getRealVendors() {
+    const regex = new RegExp(`^user_`);
+
+    const vendors = await this.vendorModel
+      .aggregate([
+        {
+          // Filter vendors by clerkId and ensure they are not blocked on the current day
+          $match: {
+            clerkId: { $regex: regex, $options: 'i' },
+          },
+        },
+        {
+          // Lookup VendorPackages by vendorId and filter by package tag
+          $lookup: {
+            from: 'vendorPackages',
+            localField: '_id',
+            foreignField: 'vendorId',
+            as: 'packages',
+          },
+        },
+        {
+          $unwind: {
+            path: '$packages',
+            preserveNullAndEmptyArrays: true, // Preserve vendors even if they have no packages
+          },
+        },
+        {
+          // Lookup reviews for the vendor
+          $lookup: {
+            from: 'vendorReviews',
+            localField: '_id',
+            foreignField: 'vendorId',
+            as: 'reviews',
+          },
+        },
+        {
+          $addFields: {
+            // Calculate the average rating from reviews (1-5 only)
+            averageRating: {
+              $avg: {
+                $filter: {
+                  input: '$reviews.rating',
+                  as: 'rating',
+                  cond: {
+                    $and: [
+                      { $gte: ['$$rating', 1] },
+                      { $lte: ['$$rating', 5] },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          // Group by vendor ID to avoid duplicates
+          $group: {
+            _id: '$_id', // Group by vendor ID
+            name: { $first: '$name' }, // Take the first name for each group
+            logo: { $first: '$logo' }, // Take the first logo for each group
+            averageRating: { $first: '$averageRating' }, // Take the first average rating
           },
         },
         {

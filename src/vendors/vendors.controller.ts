@@ -108,6 +108,8 @@ export class VendorsController {
       '66d88166d003b4f05e5b9d48',
     );
 
+    const realVendors = await this.vendorsService.getRealVendors()
+    console.log(realVendors)
 
     return {
       venue,
@@ -117,6 +119,7 @@ export class VendorsController {
       photography,
       videography,
       coordination,
+      realVendors
     };
   }
 }
