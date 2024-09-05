@@ -72,6 +72,7 @@ export type PaginatedClientEvent = {
   };
   pending: Booking[];
   confirmed: Booking[];
+  cancelledOrDeclinedBookings: Booking[];
   createdAt: Date;
   updatedAt: Date;
 };
