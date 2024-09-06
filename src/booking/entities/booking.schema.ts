@@ -53,7 +53,7 @@ export class Booking {
   event: Event;
 
   @Prop({ required: true, default: BookingStatus.Pending })
-  bookingStatus: BookingStatus;
+  status: BookingStatus;
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking);

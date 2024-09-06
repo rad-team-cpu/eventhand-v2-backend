@@ -27,5 +27,5 @@ export class CreateBookingDto {
   event: string;
 
   @IsEnum(BookingStatus)
-  bookingStatus: BookingStatus;
+  status: BookingStatus;
 }

@@ -41,7 +41,7 @@ export class BookingService {
         _id: { $ne: bookingId },
         date,
       },
-      { bookingStatus: BookingStatus.Cancelled },
+      { status: BookingStatus.Cancelled },
     );
   }
 
@@ -63,7 +63,7 @@ export class BookingService {
     return await this.bookingModel
       .findById(id)
       .populate('vendorId', 'name logo tags')
-      .populate('event')
+      .populate('event', '-budget -bookings')
       .populate('client', 'firstName lastName contactNumber')
       .populate('packageId', '-createdAt -updatedAt -__v')
       .exec();
