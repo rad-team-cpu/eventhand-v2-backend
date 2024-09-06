@@ -83,11 +83,11 @@ export class BookingService {
       .exec();
 
     if (updateBookingDto?.status === BookingStatus.Confirmed) {
-      // this.cancelBookingsExcept(
-      //   result._id,
-      //   result.vendorId._id.toString(),
-      //   result.date,
-      // );
+      this.cancelBookingsExcept(
+        result._id,
+        result.vendorId?._id.toString(),
+        result.date,
+      );
     }
 
     return result;
