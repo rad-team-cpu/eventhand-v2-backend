@@ -2,16 +2,29 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event } from 'src/events/entities/event.schema';
-import { Vendor } from 'src/vendors/entities/vendor.schema';
+import { Package } from 'src/packages/entities/package.schema';
+import { Vendor, VendorDocument } from 'src/vendors/entities/vendor.schema';
 
 @Injectable()
 export class MatchmakerService {
   constructor(
     @InjectModel(Event.name) private readonly eventModel: Model<Event>,
     @InjectModel(Vendor.name) private readonly vendorModel: Model<Vendor>,
+    @InjectModel(Package.name) private readonly packageModel: Model<Package>,
   ) {}
 
   // async knapsackSearch(eventId: string): Promise<Vendor[]> {}
+
+  // async searchForAvailableVendors(eventId: string): Promise<VendorDocument[]> {
+  //   const event = await this.eventModel.findById(eventId);
+
+  //   const listOfVendors = await this.vendorModel.aggregate([
+  //     {
+  //       $match: { visibility: true, blockedDays:  },
+  //     }
+  //   ])
+
+  // }
 
   async bruteforceSearch(eventId: string): Promise<Vendor[]> {
     const event = await this.eventModel.findById(eventId);

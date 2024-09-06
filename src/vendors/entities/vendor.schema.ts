@@ -8,7 +8,7 @@ export type VendorDocument = HydratedDocument<Vendor>;
 export type AddressDocument = HydratedDocument<Address>;
 export type CredentialDocument = HydratedDocument<Credential>;
 
-@Schema()
+@Schema({ _id: false })
 class Address {
   @Prop({ required: true })
   street: string;
