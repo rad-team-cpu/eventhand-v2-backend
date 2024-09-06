@@ -12,6 +12,10 @@ import {
 } from 'class-validator';
 
 class InclusionsDto {
+  @IsOptional()
+  @IsMongoId()
+  _id: string;
+
   @IsString()
   @IsNotEmpty()
   name: string;
