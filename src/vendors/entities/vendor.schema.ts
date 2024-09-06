@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, ObjectId } from 'mongoose';
 import { Package } from 'src/packages/entities/package.schema';
 import { Tag } from 'src/tags/entities/tag.schema';
 
@@ -48,6 +48,8 @@ const CredentialSchema = SchemaFactory.createForClass(Credential);
   toObject: { virtuals: true },
 })
 export class Vendor {
+  _id: ObjectId;
+
   @Prop({ required: true, unique: true, immutable: true })
   clerkId: string;
 
