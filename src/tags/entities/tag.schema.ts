@@ -9,7 +9,13 @@ export class Tag {
   @Transform(({ value }) => value.toString())
   _id: ObjectId;
 
-  @Prop({ required: true, unique: true, immutable: true, index: true })
+  @Prop({
+    required: true,
+    unique: true,
+    immutable: true,
+    index: true,
+    text: true,
+  })
   name: string;
 
   @Prop()

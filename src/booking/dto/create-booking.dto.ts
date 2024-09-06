@@ -7,7 +7,6 @@ import {
 import { BookingStatus } from '../entities/booking-status.enum';
 import { EmbeddedPackageDto } from '../../packages/dto/embedded-package.dto';
 import { Type } from 'class-transformer';
-import { EmbeddedPackage } from 'src/packages/entities/package.schema';
 
 export class CreateBookingDto {
   @IsMongoId()
@@ -17,7 +16,7 @@ export class CreateBookingDto {
   clientId: string;
 
   @ValidateNested()
-  @Type(() => EmbeddedPackage)
+  @Type(() => EmbeddedPackageDto)
   package: EmbeddedPackageDto;
 
   @IsDateString()

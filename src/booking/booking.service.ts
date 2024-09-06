@@ -7,6 +7,7 @@ import { Booking } from './entities/booking.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Event } from 'src/events/entities/event.schema';
 import { BookingStatus } from './entities/booking-status.enum';
+import { startOfDay, endOfDay } from 'date-fns';
 
 @Injectable()
 export class BookingService {
@@ -37,9 +38,9 @@ export class BookingService {
   ): void {
     this.updateMany(
       {
-        vendorId,
+        vendorId: vendorId,
         _id: { $ne: bookingId },
-        date,
+        date: { $gte: startOfDay(date), $lte: endOfDay(date) },
       },
       { status: BookingStatus.Cancelled },
     );
@@ -81,8 +82,12 @@ export class BookingService {
       .populate('package', '-createdAt -updatedAt -__v')
       .exec();
 
-    if (result.isModified('bookingStatus')) {
-      console.log('yup');
+    if (updateBookingDto?.status === BookingStatus.Confirmed) {
+      // this.cancelBookingsExcept(
+      //   result._id,
+      //   result.vendorId._id.toString(),
+      //   result.date,
+      // );
     }
 
     return result;
