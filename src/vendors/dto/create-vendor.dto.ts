@@ -5,7 +5,7 @@ import {
   IsEmail,
   IsMongoId,
   IsNotEmpty,
-  IsNumberString,
+  IsNumber,
   IsOptional,
   IsString,
   Length,
@@ -26,7 +26,7 @@ export class CreateAddressDto {
   @IsNotEmpty()
   region: string;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   postalCode: number;
 }
