@@ -1,15 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
+import mongoose, { FilterQuery, Model, Types } from 'mongoose';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { FactorType } from './entities/factor.types';
 import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
 import { Tag } from 'src/tags/entities/tag.schema';
 import { SelectedTagsDto, Selection } from './dto/selected-vendor-tags.dto';
 import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
+import { format } from 'date-fns';
 
 @Injectable()
 export class VendorsService {
@@ -44,9 +49,7 @@ export class VendorsService {
 
   async findAllByTags(selectedTagsDto: SelectedTagsDto): Promise<Vendor[]> {
     const { tags = [], selection } = selectedTagsDto;
-    console.log(tags);
     const tagObjectIds = tags.map((tag) => new Types.ObjectId(tag));
-    console.log(tagObjectIds);
 
     let query;
 
@@ -58,7 +61,6 @@ export class VendorsService {
             $all: tagObjectIds,
           },
         };
-        console.log(query);
         break;
 
       case Selection.Or:
@@ -66,7 +68,6 @@ export class VendorsService {
         query = {
           tags: { $in: tagObjectIds },
         };
-        console.log(query);
         break;
 
       case Selection.Exclusive:
@@ -75,7 +76,6 @@ export class VendorsService {
           tags: tagObjectIds,
           $expr: { $eq: [{ $size: '$tags' }, tagObjectIds.length] },
         };
-        console.log(query);
         break;
 
       default:
@@ -202,4 +202,392 @@ export class VendorsService {
   // vendor.save();
   //   return;
   // }
+
+  async getVendorsWithRatings(clerkId: string, tagId: string) {
+    const today = format(new Date(), 'eeee').toUpperCase(); // Get current day of the week in uppercase
+    const tagObjectId = new Types.ObjectId(tagId);
+
+    const vendors = await this.vendorModel
+      .aggregate([
+        {
+          // Filter vendors by clerkId and ensure they are not blocked on the current day
+          $match: {
+            clerkId: { $ne: clerkId },
+            visibility: true,
+            blockedDays: { $nin: [today] },
+          },
+        },
+        {
+          // Lookup VendorPackages by vendorId and filter by package tag
+          $lookup: {
+            from: 'vendorPackages',
+            localField: '_id',
+            foreignField: 'vendorId',
+            as: 'packages',
+          },
+        },
+        {
+          $unwind: {
+            path: '$packages',
+          },
+        },
+        {
+          // Filter packages by tagId
+          $match: {
+            'packages.tags': tagObjectId,
+          },
+        },
+        {
+          // Lookup reviews for the vendor
+          $lookup: {
+            from: 'vendorReviews',
+            localField: '_id',
+            foreignField: 'vendorId',
+            as: 'reviews',
+          },
+        },
+        {
+          $addFields: {
+            // Calculate the average rating from reviews (1-5 only)
+            averageRating: {
+              $avg: {
+                $filter: {
+                  input: '$reviews.rating',
+                  as: 'rating',
+                  cond: {
+                    $and: [
+                      { $gte: ['$$rating', 1] },
+                      { $lte: ['$$rating', 5] },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          // Group by vendor ID to avoid duplicates
+          $group: {
+            _id: '$_id', // Group by vendor ID
+            name: { $first: '$name' }, // Take the first name for each group
+            logo: { $first: '$logo' }, // Take the first logo for each group
+            averageRating: { $first: '$averageRating' }, // Take the first average rating
+          },
+        },
+        {
+          // Group to return vendor id, name, logo, and average rating
+          $project: {
+            _id: 1,
+            name: 1,
+            logo: 1,
+            averageRating: 1,
+          },
+        },
+      ])
+      .exec();
+
+    return vendors;
+  }
+
+  async getRealVendors() {
+    const regex = new RegExp(`^user_`);
+
+    const vendors = await this.vendorModel
+      .aggregate([
+        {
+          // Filter vendors by clerkId and ensure they are not blocked on the current day
+          $match: {
+            clerkId: { $regex: regex, $options: 'i' },
+          },
+        },
+        {
+          // Lookup VendorPackages by vendorId and filter by package tag
+          $lookup: {
+            from: 'vendorPackages',
+            localField: '_id',
+            foreignField: 'vendorId',
+            as: 'packages',
+          },
+        },
+        {
+          $unwind: {
+            path: '$packages',
+            preserveNullAndEmptyArrays: true, // Preserve vendors even if they have no packages
+          },
+        },
+        {
+          // Lookup reviews for the vendor
+          $lookup: {
+            from: 'vendorReviews',
+            localField: '_id',
+            foreignField: 'vendorId',
+            as: 'reviews',
+          },
+        },
+        {
+          $addFields: {
+            // Calculate the average rating from reviews (1-5 only)
+            averageRating: {
+              $avg: {
+                $filter: {
+                  input: '$reviews.rating',
+                  as: 'rating',
+                  cond: {
+                    $and: [
+                      { $gte: ['$$rating', 1] },
+                      { $lte: ['$$rating', 5] },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          // Group by vendor ID to avoid duplicates
+          $group: {
+            _id: '$_id', // Group by vendor ID
+            name: { $first: '$name' }, // Take the first name for each group
+            logo: { $first: '$logo' }, // Take the first logo for each group
+            averageRating: { $first: '$averageRating' }, // Take the first average rating
+          },
+        },
+        {
+          // Group to return vendor id, name, logo, and average rating
+          $project: {
+            _id: 1,
+            name: 1,
+            logo: 1,
+            averageRating: 1,
+          },
+        },
+      ])
+      .exec();
+
+    return vendors;
+  }
+
+  async getVendorWithPackagesAndTags(vendorId: string) {
+    try {
+      const vendor = await this.vendorModel
+        .aggregate([
+          {
+            $match: { _id: new Types.ObjectId(vendorId) }, // Filter the specific vendor by ID
+          },
+          {
+            // Lookup the vendor packages
+            $lookup: {
+              from: 'vendorPackages',
+              localField: '_id',
+              foreignField: 'vendorId',
+              as: 'packages',
+            },
+          },
+          {
+            // Lookup associated reviews for the vendor
+            $lookup: {
+              from: 'vendorReviews',
+              localField: '_id',
+              foreignField: 'vendorId',
+              as: 'reviews',
+            },
+          },
+          {
+            // Lookup associated clients for each review
+            $lookup: {
+              from: 'users',
+              localField: 'reviews.clientId',
+              foreignField: '_id',
+              as: 'clients',
+            },
+          },
+          {
+            // Add a field with all tag IDs from packages
+            $addFields: {
+              allTagIds: {
+                $reduce: {
+                  input: {
+                    $map: {
+                      input: '$packages',
+                      as: 'package',
+                      in: { $ifNull: ['$$package.tags', []] },
+                    },
+                  },
+                  initialValue: [],
+                  in: { $concatArrays: ['$$value', '$$this'] },
+                },
+              },
+            },
+          },
+          {
+            // Ensure allTagIds is an array and remove duplicates
+            $addFields: {
+              allTagIds: {
+                $cond: {
+                  if: { $isArray: '$allTagIds' },
+                  then: { $setUnion: ['$allTagIds', []] },
+                  else: [],
+                },
+              },
+            },
+          },
+          {
+            // Lookup tag details using the collected tag IDs
+            $lookup: {
+              from: 'tags',
+              let: { tagIds: '$allTagIds' }, // Use the tag IDs array
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $in: ['$_id', '$$tagIds'] },
+                  },
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    name: 1,
+                  },
+                },
+              ],
+              as: 'tagDetails',
+            },
+          },
+          {
+            // Add unique tags to the main document
+            $addFields: {
+              tags: {
+                $map: {
+                  input: '$allTagIds',
+                  as: 'tagId',
+                  in: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: '$tagDetails',
+                          as: 'tag',
+                          cond: { $eq: ['$$tag._id', '$$tagId'] },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          {
+            // Calculate the average rating and total bookings
+            $addFields: {
+              averageRatings: {
+                $avg: {
+                  $filter: {
+                    input: '$reviews.rating',
+                    as: 'rating',
+                    cond: {
+                      $and: [
+                        { $gte: ['$$rating', 1] },
+                        { $lte: ['$$rating', 5] },
+                      ],
+                    },
+                  },
+                },
+              },
+              totalBookings: {
+                $size: {
+                  $ifNull: [
+                    {
+                      $filter: {
+                        input: '$bookings',
+                        as: 'booking',
+                        cond: { $eq: ['$$booking.status', 'CONFIRMED'] },
+                      },
+                    },
+                    [], // If no bookings or bookings is null, use an empty array
+                  ],
+                },
+              },
+              reviews: {
+                $map: {
+                  input: '$reviews',
+                  as: 'review',
+                  in: {
+                    id: '$$review._id',
+                    client: {
+                      id: '$$review.clientId',
+                      name: {
+                        $let: {
+                          vars: {
+                            clientData: {
+                              $arrayElemAt: [
+                                {
+                                  $filter: {
+                                    input: '$clients',
+                                    as: 'client',
+                                    cond: {
+                                      $eq: [
+                                        '$$client._id',
+                                        '$$review.clientId',
+                                      ],
+                                    },
+                                  },
+                                },
+                                0,
+                              ],
+                            },
+                          },
+                          in: {
+                            $concat: [
+                              '$$clientData.firstName',
+                              ' ',
+                              '$$clientData.lastName',
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    comment: '$$review.comment',
+                    rating: '$$review.rating',
+                    package: '$$review.package',
+                  },
+                },
+              },
+            },
+          },
+          {
+            // Project the final result with all associated packages
+            $project: {
+              _id: 1,
+              name: 1,
+              logo: 1,
+              bio: 1,
+              address: 1,
+              email: 1,
+              tags: 1,
+              packages: 1, // Include all associated packages
+              reviews: 1,
+              averageRatings: 1,
+              totalBookings: 1,
+            },
+          },
+        ])
+        .exec();
+
+      // Error handling for vendor not found
+      console.log(vendor[0].tags);
+      if (!vendor || vendor.length === 0) {
+        throw new NotFoundException(`Vendor with ID ${vendorId} not found`);
+      }
+
+      return vendor[0]; // Return the first result since it's expected to be unique
+    } catch (error) {
+      // Handle specific mongoose errors or throw generic internal error
+      console.log(error);
+      // if (error instanceof mongoose.Error.CastError) {
+      //   throw new NotFoundException(`Invalid vendor ID format`);
+      // }
+      // throw new InternalServerErrorException(
+      //   'An error occurred while retrieving the vendor',
+      // );
+    }
+  }
 }
