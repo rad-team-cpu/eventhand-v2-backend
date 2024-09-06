@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
+import mongoose, { FilterQuery, Model, Types } from 'mongoose';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { FactorType } from './entities/factor.types';
 import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
@@ -361,5 +365,229 @@ export class VendorsService {
       .exec();
 
     return vendors;
+  }
+
+  async getVendorWithPackagesAndTags(vendorId: string) {
+    try {
+      const vendor = await this.vendorModel
+        .aggregate([
+          {
+            $match: { _id: new Types.ObjectId(vendorId) }, // Filter the specific vendor by ID
+          },
+          {
+            // Lookup the vendor packages
+            $lookup: {
+              from: 'vendorPackages',
+              localField: '_id',
+              foreignField: 'vendorId',
+              as: 'packages',
+            },
+          },
+          {
+            // Lookup associated reviews for the vendor
+            $lookup: {
+              from: 'vendorReviews',
+              localField: '_id',
+              foreignField: 'vendorId',
+              as: 'reviews',
+            },
+          },
+          {
+            // Lookup associated clients for each review
+            $lookup: {
+              from: 'users',
+              localField: 'reviews.clientId',
+              foreignField: '_id',
+              as: 'clients',
+            },
+          },
+          {
+            // Add a field with all tag IDs from packages
+            $addFields: {
+              allTagIds: {
+                $reduce: {
+                  input: {
+                    $map: {
+                      input: '$packages',
+                      as: 'package',
+                      in: { $ifNull: ['$$package.tags', []] },
+                    },
+                  },
+                  initialValue: [],
+                  in: { $concatArrays: ['$$value', '$$this'] },
+                },
+              },
+            },
+          },
+          {
+            // Ensure allTagIds is an array and remove duplicates
+            $addFields: {
+              allTagIds: {
+                $cond: {
+                  if: { $isArray: '$allTagIds' },
+                  then: { $setUnion: ['$allTagIds', []] },
+                  else: [],
+                },
+              },
+            },
+          },
+          {
+            // Lookup tag details using the collected tag IDs
+            $lookup: {
+              from: 'tags',
+              let: { tagIds: '$allTagIds' }, // Use the tag IDs array
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $in: ['$_id', '$$tagIds'] },
+                  },
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    name: 1,
+                  },
+                },
+              ],
+              as: 'tagDetails',
+            },
+          },
+          {
+            // Add unique tags to the main document
+            $addFields: {
+              tags: {
+                $map: {
+                  input: '$allTagIds',
+                  as: 'tagId',
+                  in: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: '$tagDetails',
+                          as: 'tag',
+                          cond: { $eq: ['$$tag._id', '$$tagId'] },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          {
+            // Calculate the average rating and total bookings
+            $addFields: {
+              averageRatings: {
+                $avg: {
+                  $filter: {
+                    input: '$reviews.rating',
+                    as: 'rating',
+                    cond: {
+                      $and: [
+                        { $gte: ['$$rating', 1] },
+                        { $lte: ['$$rating', 5] },
+                      ],
+                    },
+                  },
+                },
+              },
+              totalBookings: {
+                $size: {
+                  $ifNull: [
+                    {
+                      $filter: {
+                        input: '$bookings',
+                        as: 'booking',
+                        cond: { $eq: ['$$booking.status', 'CONFIRMED'] },
+                      },
+                    },
+                    [], // If no bookings or bookings is null, use an empty array
+                  ],
+                },
+              },
+              reviews: {
+                $map: {
+                  input: '$reviews',
+                  as: 'review',
+                  in: {
+                    id: '$$review._id',
+                    client: {
+                      id: '$$review.clientId',
+                      name: {
+                        $let: {
+                          vars: {
+                            clientData: {
+                              $arrayElemAt: [
+                                {
+                                  $filter: {
+                                    input: '$clients',
+                                    as: 'client',
+                                    cond: {
+                                      $eq: [
+                                        '$$client._id',
+                                        '$$review.clientId',
+                                      ],
+                                    },
+                                  },
+                                },
+                                0,
+                              ],
+                            },
+                          },
+                          in: {
+                            $concat: [
+                              '$$clientData.firstName',
+                              ' ',
+                              '$$clientData.lastName',
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    comment: '$$review.comment',
+                    rating: '$$review.rating',
+                    package: '$$review.package',
+                  },
+                },
+              },
+            },
+          },
+          {
+            // Project the final result with all associated packages
+            $project: {
+              _id: 1,
+              name: 1,
+              logo: 1,
+              bio: 1,
+              address: 1,
+              email: 1,
+              tags: 1,
+              packages: 1, // Include all associated packages
+              reviews: 1,
+              averageRatings: 1,
+              totalBookings: 1,
+            },
+          },
+        ])
+        .exec();
+
+      // Error handling for vendor not found
+      console.log(vendor[0].tags);
+      if (!vendor || vendor.length === 0) {
+        throw new NotFoundException(`Vendor with ID ${vendorId} not found`);
+      }
+
+      return vendor[0]; // Return the first result since it's expected to be unique
+    } catch (error) {
+      // Handle specific mongoose errors or throw generic internal error
+      console.log(error);
+      // if (error instanceof mongoose.Error.CastError) {
+      //   throw new NotFoundException(`Invalid vendor ID format`);
+      // }
+      // throw new InternalServerErrorException(
+      //   'An error occurred while retrieving the vendor',
+      // );
+    }
   }
 }
