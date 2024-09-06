@@ -20,7 +20,7 @@ class Address {
   region: string;
 
   @Prop({ required: true })
-  postalCode: string;
+  postalCode: number;
 }
 
 const AddressSchema = SchemaFactory.createForClass(Address);
