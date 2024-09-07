@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -29,6 +29,23 @@ export class BookingService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async completeBooking(bookingId: string): Promise<Booking> {
+    const updatedBooking = await this.bookingModel.findByIdAndUpdate(
+      bookingId,
+      {
+        status: 'COMPLETED',
+        completedAt: new Date(), // Set the completion timestamp
+      },
+      { new: true },
+    );
+
+    if (!updatedBooking) {
+      throw new NotFoundException(`Booking with id ${bookingId} not found`);
+    }
+
+    return updatedBooking;
   }
 
   cancelBookingsExcept(

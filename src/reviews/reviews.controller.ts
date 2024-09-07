@@ -20,7 +20,13 @@ export class ReviewsController {
 
   @Post()
   async create(@Body() createReviewDto: CreateReviewDto): Promise<Review> {
-    return await this.reviewsService.create(createReviewDto);
+    console.log(createReviewDto)
+    try {
+      return await this.reviewsService.create(createReviewDto);
+
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   @Get()

@@ -5,17 +5,21 @@ import { Review } from './entities/review.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { BookingService } from 'src/booking/booking.service';
 
 @Injectable()
 export class ReviewsService {
   constructor(
     @InjectModel(Review.name) private readonly reviewModel: Model<Review>,
     private readonly eventEmitter: EventEmitter2,
+    private readonly bookingService: BookingService,
   ) {}
 
   async create(createReviewDto: CreateReviewDto): Promise<Review> {
     try {
       const review = await this.reviewModel.create(createReviewDto);
+
+      await this.bookingService.completeBooking(createReviewDto.bookingId);
 
       this.calculateRating(createReviewDto.vendorId);
 
@@ -43,7 +47,6 @@ export class ReviewsService {
 
   async findAll(filter?: FilterQuery<Review>): Promise<Review[]> {
     const result = await this.reviewModel.find(filter).exec();
-    console.log(result);
     return result;
   }
 

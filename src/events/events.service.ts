@@ -126,7 +126,16 @@ export class EventsService {
             confirmedBookings: {
               $push: {
                 $cond: [
-                  { $eq: ['$bookings.status', 'CONFIRMED'] },
+                  { $eq: ['$bookings.status', ['CONFIRMED', 'COMPLETED']] },
+                  '$bookings',
+                  '$$REMOVE',
+                ],
+              },
+            },
+            completedBookings: {
+              $push: {
+                $cond: [
+                  { $eq: ['$bookings.status', 'COMPLETED'] },
                   '$bookings',
                   '$$REMOVE',
                 ],
@@ -370,6 +379,15 @@ export class EventsService {
               $push: {
                 $cond: [
                   { $eq: ['$bookings.status', 'CONFIRMED'] },
+                  '$bookings',
+                  '$$REMOVE',
+                ],
+              },
+            },
+            completedBookings: {
+              $push: {
+                $cond: [
+                  { $eq: ['$bookings.status', 'COMPLETED'] },
                   '$bookings',
                   '$$REMOVE',
                 ],

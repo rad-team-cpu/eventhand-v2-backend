@@ -10,7 +10,7 @@ import { Vendor } from 'src/vendors/entities/vendor.schema';
 
 export type ReviewDocument = HydratedDocument<Review>;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: 'vendorReviews' })
 export class Review {
   @Prop({
     required: true,
@@ -18,7 +18,7 @@ export class Review {
     type: MongooseSchema.Types.ObjectId,
     ref: User.name,
   })
-  userId: User;
+  clientId: User;
 
   @Prop({
     required: true,
@@ -39,7 +39,7 @@ export class Review {
   @Prop({ required: true })
   rating: number;
 
-  @Prop({ required: true })
+  @Prop()
   comment: string;
 }
 
