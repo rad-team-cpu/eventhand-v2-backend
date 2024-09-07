@@ -5,6 +5,14 @@ import { Event } from 'src/events/entities/event.schema';
 import { Package } from 'src/packages/entities/package.schema';
 import { Vendor, VendorDocument } from 'src/vendors/entities/vendor.schema';
 
+// interface KnapsackItem {
+//   id: string;
+//   weight: number;
+//   value: number;
+//   vendorId: string;
+//   packageName: string;
+// }
+
 @Injectable()
 export class MatchmakerService {
   constructor(
