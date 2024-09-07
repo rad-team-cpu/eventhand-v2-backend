@@ -6,6 +6,9 @@ import {
 } from 'src/packages/entities/package.schema';
 import { BookingStatus } from './booking-status.enum';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
+import { User } from 'src/users/entities/user.schema';
+import { Event } from 'src/events/entities/event.schema';
+import { Type } from 'class-transformer';
 
 export type BookingDocument = HydratedDocument<Booking>;
 
@@ -17,7 +20,8 @@ export class Booking {
     ref: Vendor.name,
     immutable: false,
   })
-  vendorId: MongooseSchema.Types.ObjectId;
+  @Type(() => Vendor)
+  vendorId: Vendor;
 
   @Prop({
     required: true,
@@ -25,13 +29,15 @@ export class Booking {
     ref: 'User',
     immutable: false,
   })
-  clientId: MongooseSchema.Types.ObjectId;
+  @Type(() => User)
+  clientId: User;
 
   @Prop({
     required: true,
     type: EmbeddedPackageSchema,
     immutable: true,
   })
+  @Type(() => EmbeddedPackage)
   package: EmbeddedPackage;
 
   @Prop({ required: true })
@@ -43,10 +49,11 @@ export class Booking {
     ref: 'Event',
     immutable: false,
   })
-  event: MongooseSchema.Types.ObjectId;
+  @Type(() => Event)
+  event: Event;
 
   @Prop({ required: true, default: BookingStatus.Pending })
-  bookingStatus: BookingStatus;
+  status: BookingStatus;
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking);

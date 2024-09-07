@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
-// import { UpdateEventDto } from './dto/update-event.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
-import mongoose, {
+import {
   FilterQuery,
   Model,
   ObjectId,
