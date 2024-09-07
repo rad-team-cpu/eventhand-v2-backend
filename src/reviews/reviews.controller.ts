@@ -20,7 +20,12 @@ export class ReviewsController {
 
   @Post()
   async create(@Body() createReviewDto: CreateReviewDto): Promise<Review> {
-    return await this.reviewsService.create(createReviewDto);
+    console.log(createReviewDto);
+    try {
+      return await this.reviewsService.create(createReviewDto);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   @Get()
@@ -31,6 +36,20 @@ export class ReviewsController {
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Review> {
     return await this.reviewsService.findOne(id);
+  }
+
+  @Get(':id/list')
+  async getAverageRating(
+    @Param('id') id: string,
+  ): Promise<{ reviews: Review[]; averageRating: number }> {
+    try {
+      const averageRating = await this.reviewsService.getAverageRating(id);
+      const reviews = await this.reviewsService.getVendorReviews(id);
+
+      return { reviews, averageRating };
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   @Patch(':id')

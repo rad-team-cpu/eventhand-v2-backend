@@ -13,7 +13,6 @@ import {
 import { EventsService } from './events.service';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
 import { CreateEventDto } from './dto/create-event.dto';
-import { Schema } from 'mongoose';
 import {
   UpdateEventAddressDto,
   UpdateEventAttendeesDto,
@@ -51,15 +50,10 @@ export class EventsController {
       throw new BadRequestException('UserId is required');
     }
 
-    const userObjectId = new Schema.Types.ObjectId(userId);
-
     try {
-      return await this.eventsService.findAllClientEvents(
-        userObjectId,
-        page,
-        limit,
-      );
+      return await this.eventsService.findAllClientEvents(userId, page, limit);
     } catch (error) {
+
       // Handle specific error types if needed
       if (error instanceof BadRequestException) {
         throw error;

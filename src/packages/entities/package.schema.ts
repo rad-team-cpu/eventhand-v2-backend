@@ -12,7 +12,7 @@ class OrderType {
   disabled: boolean;
 }
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: 'vendorPackages' })
 export class Package {
   @Prop({
     required: true,
@@ -29,7 +29,7 @@ export class Package {
   price: number;
 
   @Prop({ required: true })
-  imageURL: string;
+  imageUrl: string;
 
   @Prop({ type: [{ type: OrderType }] })
   @Type(() => OrderType)
@@ -54,14 +54,14 @@ export class Package {
       {
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
-        imageURL: { type: String, required: true },
+        imageUrl: { type: String, required: true },
         description: { type: String, required: true },
       },
     ],
   })
   inclusions: {
     name: string;
-    imageURL: string;
+    imageUrl: string;
     quantity: number;
     description: string;
   }[];
