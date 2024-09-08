@@ -18,7 +18,7 @@ export class MatchmakerService {
 
   async findMatchingVendorsAndPackages(
     eventId: string,
-  ): Promise<{ vendors: VendorDocument[]; packages: PackageDocument[] }> {
+  ): Promise<PackageDocument[]> {
     const event = await this.eventModel.findById(eventId).lean();
 
     if (!event) {
@@ -42,10 +42,7 @@ export class MatchmakerService {
       event.budget,
     );
 
-    return {
-      vendors: availableVendors,
-      packages: matchingPackages,
-    };
+    return matchingPackages;
   }
 
   private async findAvailableVendors(
