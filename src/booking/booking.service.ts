@@ -48,6 +48,24 @@ export class BookingService {
     return updatedBooking;
   }
 
+  async cancelBooking(bookingId: string): Promise<Booking> {
+    const updatedBooking = await this.bookingModel.findByIdAndUpdate(
+      bookingId,
+      {
+        status: BookingStatus.Cancelled,
+        cancelledAt: new Date(), // Set the completion timestamp
+      },
+      { new: true },
+    );
+
+    if (!updatedBooking) {
+      throw new NotFoundException(`Booking with id ${bookingId} not found`);
+    }
+
+    return updatedBooking;
+  }
+
+
   cancelBookingsExcept(
     bookingId: Types.ObjectId,
     vendorId: string,

@@ -33,6 +33,7 @@ export class VendorsService {
 
     const result = await this.vendorModel.create({
       ...vendor,
+      visibility: false,
       tags: [...tags, ...createdTags.map((tag) => tag._id)],
     });
 
