@@ -14,7 +14,7 @@ import { PackagesService } from './packages.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import { Package } from './entities/package.schema';
-import { FilterQuery, Schema, Types } from 'mongoose';
+import mongoose, { FilterQuery, Schema, Types } from 'mongoose';
 
 @Controller('packages')
 export class PackagesController {
@@ -48,11 +48,10 @@ export class PackagesController {
     return this.packagesService.remove(id);
   }
 
-  @Get(':eventId/available')
-  async getAvailablePackages(@Param(':eventId') eventId: string) {
+  @Get(':id/available')
+  async getAvailablePackages(@Param('id') eventId: string) {
     try {
-      const _id = new Types.ObjectId('66dc881e40e01edb1e32d871');
-      console.log(_id);
+      const _id = new Types.ObjectId(eventId);
       const result =
         await this.packagesService.findAvailablePackagesWithRating(_id);
       return result;

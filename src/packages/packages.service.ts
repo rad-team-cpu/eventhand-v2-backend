@@ -48,44 +48,39 @@ export class PackagesService {
   }
 
   async findAvailablePackagesWithRating(eventId: Types.ObjectId) {
-    // Fetch the event details using the eventId
+    // Fetch the event details using the eventId\
+    console.log(eventId)
     const event = await this.eventModel.findById(eventId).exec();
 
     if (!event) {
-      throw new NotFoundException('Event not found');
+      throw new NotFoundException(`Event not found ${eventId}`);
     }
 
     const { budget, date } = event;
 
-    // Get the day of the week for the event date (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
     const eventDay = format(date, 'eeee').toUpperCase();
 
-    // Map budget fields to their corresponding tagIds
     const budgetTagMapping: Record<string, Types.ObjectId> = {
-      eventPlanning: new Types.ObjectId('66d88166d003b4f05e5b9d42'), // Example tagId for EVENTPLANNING
-      eventCoordination: new Types.ObjectId('66d88166d003b4f05e5b9d43'), // Example tagId for EVENTCOORDINATION
-      venue: new Types.ObjectId('66d88166d003b4f05e5b9d44'), // Example tagId for VENUE
-      catering: new Types.ObjectId('66d88166d003b4f05e5b9d45'), // Example tagId for CATERING
-      decorations: new Types.ObjectId('66d88166d003b4f05e5b9d46'), // Example tagId for DECORATIONS
-      photography: new Types.ObjectId('66d88166d003b4f05e5b9d47'), // Example tagId for PHOTOGRAPHY
-      videography: new Types.ObjectId('66d88166d003b4f05e5b9d48'), // Example tagId for VIDEOGRAPHY
+      eventPlanning: new Types.ObjectId('66d88166d003b4f05e5b9d42'),
+      eventCoordination: new Types.ObjectId('66d88166d003b4f05e5b9d43'), 
+      venue: new Types.ObjectId('66d88166d003b4f05e5b9d44'), 
+      catering: new Types.ObjectId('66d88166d003b4f05e5b9d45'), 
+      decorations: new Types.ObjectId('66d88166d003b4f05e5b9d46'),
+      photography: new Types.ObjectId('66d88166d003b4f05e5b9d47'), 
+      videography: new Types.ObjectId('66d88166d003b4f05e5b9d48'), 
     };
 
-    // Determine the tagIds based on non-null budget fields
     const applicableTagIds = Object.keys(budget)
       .filter((key) => budget[key] !== null)
       .map((key) => budgetTagMapping[key]);
 
     if (applicableTagIds.length === 0) {
-      // If no valid tagId, return an empty array
       return [];
     }
 
-    // Start the aggregation pipeline for VendorPackages
     const packages = await this.packageModel
       .aggregate([
         {
-          // Step 1: Match packages that are less than or equal to the budget
           $match: {
             $and: [
               {
@@ -102,7 +97,7 @@ export class PackagesService {
                         ],
                       },
                     },
-                    { tags: tagId }, // Ensure the package has the corresponding tag
+                    { tags: tagId }, 
                   ],
                 })),
               },
@@ -110,7 +105,7 @@ export class PackagesService {
           },
         },
         {
-          // Step 2: Lookup the associated vendor for each package
+
           $lookup: {
             from: 'vendors',
             localField: 'vendorId',
@@ -119,18 +114,16 @@ export class PackagesService {
           },
         },
         {
-          // Step 3: Unwind the vendor array to simplify queries
+
           $unwind: '$vendor',
         },
         {
-          // Step 4: Filter vendors by visibility and blocked days
           $match: {
-            'vendor.visibility': true, // Vendor must be visible
-            [`vendor.blockedDays.${eventDay}`]: { $exists: false }, // The day of the event should not be blocked
+            'vendor.visibility': true, 
+            [`vendor.blockedDays.${eventDay}`]: { $exists: false },
           },
         },
         {
-          // Step 5: Check if the vendor has no booking on the event date
           $lookup: {
             from: 'bookings',
             localField: 'vendor._id',
@@ -145,16 +138,14 @@ export class PackagesService {
           },
         },
         {
-          // Step 6: Filter out packages where vendors have bookings on the event date
           $match: {
             $or: [
-              { bookings: { $eq: null } }, // Vendor has no bookings
-              { 'bookings.date': { $ne: date } }, // Vendor's bookings are not on the event date
+              { bookings: { $eq: null } },
+              { 'bookings.date': { $ne: date } }, 
             ],
           },
         },
         {
-          // Step 7: Lookup the vendor's reviews to calculate the average rating
           $lookup: {
             from: 'vendorreviews',
             localField: 'vendor._id',
@@ -169,7 +160,6 @@ export class PackagesService {
           },
         },
         {
-          // Step 8: Group by the vendor and calculate the average rating
           $group: {
             _id: '$vendor._id',
             vendorName: { $first: '$vendor.name' },
@@ -177,12 +167,11 @@ export class PackagesService {
             vendorContactNum: { $first: '$vendor.contactNum' },
             vendorAddress: { $first: '$vendor.address' },
             vendorBio: { $first: '$vendor.bio' },
-            vendorPackages: { $push: '$$ROOT' }, // Store all matching packages for the vendor
-            averageRating: { $avg: '$reviews.rating' }, // Calculate the average rating
+            vendorPackages: { $push: '$$ROOT' }, 
+            averageRating: { $avg: '$reviews.rating' },
           },
         },
         {
-          // Step 9: Project the final required fields
           $project: {
             _id: 1,
             vendorName: 1,
