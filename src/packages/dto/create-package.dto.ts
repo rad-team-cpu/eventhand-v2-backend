@@ -20,9 +20,10 @@ class InclusionsDto {
   @IsNotEmpty()
   name: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  imageURL: string;
+  imageUrl: string;
 
   @IsNumber()
   quantity: number;
@@ -57,9 +58,10 @@ export class CreatePackageDto {
   @IsNotEmpty()
   capacity: number;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  imageURL: string;
+  imageUrl: string;
 
   @IsDefined()
   @IsArray()
