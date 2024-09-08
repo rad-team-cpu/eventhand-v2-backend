@@ -8,6 +8,6 @@ export class MatchmakerController {
 
   @Get(':id')
   async match(@Param('id') eventId: string): Promise<Vendor[]> {
-    return await this.matchmakerService.bruteforceSearch(eventId);
+    return await this.matchmakerService.searchForAvailableVendors(eventId);
   }
 }
