@@ -51,14 +51,15 @@ export class EventsService {
     const skip = (pageNumber - 1) * pageSize;
     const limit = pageSize;
 
-    if (typeof clientId == 'string') {
-      clientId = new Schema.Types.ObjectId(clientId);
-    }
+    clientId =
+      typeof clientId == 'string'
+        ? new Schema.Types.ObjectId(clientId)
+        : clientId;
 
     const events: PaginatedClientEvent[] = await this.eventModel
       .aggregate([
         {
-          $match: { clientId },
+          $match: { clientId: clientId },
         },
         {
           $lookup: {
@@ -125,7 +126,16 @@ export class EventsService {
             confirmedBookings: {
               $push: {
                 $cond: [
-                  { $eq: ['$bookings.status', 'CONFIRMED'] },
+                  { $eq: ['$bookings.status', ['CONFIRMED', 'COMPLETED']] },
+                  '$bookings',
+                  '$$REMOVE',
+                ],
+              },
+            },
+            completedBookings: {
+              $push: {
+                $cond: [
+                  { $eq: ['$bookings.status', 'COMPLETED'] },
                   '$bookings',
                   '$$REMOVE',
                 ],
@@ -165,11 +175,8 @@ export class EventsService {
       ])
       .exec();
 
-    console.log(events);
-
     const total = await this.eventModel.countDocuments({ clientId }).exec();
     const totalPages = Math.ceil(total / pageSize);
-
     return {
       events,
       totalPages,
@@ -326,7 +333,7 @@ export class EventsService {
 
   async getEventWithBookings(eventId: string) {
     const _id = new Types.ObjectId(eventId);
-    console.log(_id);
+
     const event = await this.eventModel
       .aggregate([
         {
@@ -372,6 +379,15 @@ export class EventsService {
               $push: {
                 $cond: [
                   { $eq: ['$bookings.status', 'CONFIRMED'] },
+                  '$bookings',
+                  '$$REMOVE',
+                ],
+              },
+            },
+            completedBookings: {
+              $push: {
+                $cond: [
+                  { $eq: ['$bookings.status', 'COMPLETED'] },
                   '$bookings',
                   '$$REMOVE',
                 ],
