@@ -4,15 +4,8 @@ import { Model } from 'mongoose';
 import { Event } from 'src/events/entities/event.schema';
 import { Package, PackageDocument } from 'src/packages/entities/package.schema';
 import { Vendor, VendorDocument } from 'src/vendors/entities/vendor.schema';
+import { Tag } from 'src/tags/entities/tag.schema';
 import { format } from 'date-fns';
-
-// interface KnapsackItem {
-//   id: string;
-//   weight: number;
-//   value: number;
-//   vendorId: string;
-//   packageName: string;
-// }
 
 @Injectable()
 export class MatchmakerService {
@@ -20,25 +13,50 @@ export class MatchmakerService {
     @InjectModel(Event.name) private readonly eventModel: Model<Event>,
     @InjectModel(Vendor.name) private readonly vendorModel: Model<Vendor>,
     @InjectModel(Package.name) private readonly packageModel: Model<Package>,
+    @InjectModel(Tag.name) private readonly tagModel: Model<Tag>,
   ) {}
 
-  async searchForAvailableVendors(eventId: string): Promise<VendorDocument[]> {
-    // Fetch the event data
+  async findMatchingVendorsAndPackages(
+    eventId: string,
+  ): Promise<{ vendors: VendorDocument[]; packages: PackageDocument[] }> {
     const event = await this.eventModel.findById(eventId).lean();
 
     if (!event) {
       throw new Error('Event not found');
     }
 
-    // Convert event date to the day of the week (e.g., 'MONDAY')
     const eventDayName = format(event.date, 'EEEE').toUpperCase();
+    const budgetCategories = Object.entries(event.budget)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .filter(([_, value]) => value !== null)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .map(([key, _]) => key);
 
-    // Filter vendors who are visible and whose blockedDays do not include the event day
-    const availableVendors = await this.vendorModel.aggregate([
+    const availableVendors = await this.findAvailableVendors(
+      eventDayName,
+      event.date,
+    );
+    const matchingPackages = await this.findMatchingPackages(
+      availableVendors,
+      budgetCategories,
+      event.budget,
+    );
+
+    return {
+      vendors: availableVendors,
+      packages: matchingPackages,
+    };
+  }
+
+  private async findAvailableVendors(
+    eventDayName: string,
+    eventDate: Date,
+  ): Promise<VendorDocument[]> {
+    return this.vendorModel.aggregate([
       {
         $match: {
-          visibility: true, // Only visible vendors
-          blockedDays: { $ne: eventDayName }, // Exclude vendors who block the event day
+          visibility: true,
+          blockedDays: { $ne: eventDayName },
         },
       },
       {
@@ -51,40 +69,31 @@ export class MatchmakerService {
       },
       {
         $match: {
-          'bookings.date': { $ne: event.date }, // Ensure no confirmed bookings on the event date
+          'bookings.date': { $ne: eventDate },
         },
       },
       {
         $project: {
-          bookings: 0, // Exclude the bookings field from the result
+          bookings: 0,
         },
       },
     ]);
-
-    return availableVendors;
   }
 
-  async getPackagesByTagsAndBudget(
-    eventId: string,
+  private async findMatchingPackages(
     availableVendors: VendorDocument[],
+    budgetCategories: string[],
+    budget: Record<string, number>,
   ): Promise<PackageDocument[]> {
-    // Fetch the event data
-    const event = await this.eventModel.findById(eventId).lean();
+    const budgetTagNames = await this.tagModel
+      .find({ name: { $in: budgetCategories } })
+      .distinct('_id');
 
-    if (!event) {
-      throw new Error('Event not found');
-    }
-
-    // Get all the budget categories that have a non-null value
-    const budgetCategories = Object.keys(event.budget).filter(
-      (key) => event.budget[key] !== null,
-    );
-
-    // Find packages from available vendors, filtering by tags that match budget categories
-    const packages = await this.packageModel.aggregate([
+    return this.packageModel.aggregate([
       {
         $match: {
-          vendorId: { $in: availableVendors.map((vendor) => vendor._id) }, // Only packages from available vendors
+          vendorId: { $in: availableVendors.map((vendor) => vendor._id) },
+          tags: { $in: budgetTagNames },
         },
       },
       {
@@ -97,121 +106,43 @@ export class MatchmakerService {
       },
       {
         $addFields: {
-          // Check if any of the package's tags match the budget categories
-          budgetMatch: {
-            $anyElementTrue: {
-              $map: {
-                input: '$packageTags',
-                as: 'tag',
-                in: {
-                  $in: ['$$tag.name', budgetCategories], // Check if tag name matches any budget category
-                },
-              },
+          matchingBudgetCategory: {
+            $filter: {
+              input: '$packageTags',
+              as: 'tag',
+              cond: { $in: ['$$tag.name', budgetCategories] },
             },
           },
         },
       },
       {
         $match: {
-          budgetMatch: true, // Only include packages where tags match budget categories
+          $expr: {
+            $and: [
+              { $gt: [{ $size: '$matchingBudgetCategory' }, 0] },
+              {
+                $lte: [
+                  '$price',
+                  {
+                    $getField: {
+                      field: {
+                        $arrayElemAt: ['$matchingBudgetCategory.name', 0],
+                      },
+                      input: budget,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
         },
       },
       {
         $project: {
-          packageTags: 0, // Exclude the tags from the result if not needed
+          packageTags: 0,
+          matchingBudgetCategory: 0,
         },
       },
     ]);
-
-    return packages;
   }
-
-  async bruteforceSearch() {}
-
-  // async bruteforceSearch(eventId: string): Promise<Vendor[]> {
-  //   const event = await this.eventModel.findById(eventId);
-
-  //   const suitableVendors = await this.vendorModel
-  //     .aggregate([
-  //       {
-  //         // look up all the packages for this vendor
-  //         $lookup: {
-  //           from: 'packages',
-  //           localField: '_id',
-  //           foreignField: 'vendorId',
-  //           as: 'packages',
-  //         },
-  //       }, // check if there's at least a package that's within the budget
-  //       {
-  //         $match: {
-  //           packages: { $elemMatch: { price: { $lte: event.budget } } },
-  //         },
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: 'bookings', // look up bookings.
-  //           let: { vendorId: '$_id' }, // reference vendorId to $_id
-  //           pipeline: [
-  //             //mini aggregation to only match the bookings that are on date.
-  //             {
-  //               $match: {
-  //                 $expr: {
-  //                   $and: [
-  //                     { $eq: ['$vendorId', '$$vendorId'] },
-  //                     { $eq: ['$date', event.date] },
-  //                   ],
-  //                 },
-  //               },
-  //             },
-  //           ],
-  //           as: 'bookings',
-  //         },
-  //       }, // Only include vendors with no bookings for the event date
-  //       {
-  //         $match: {
-  //           bookings: { $size: 0 },
-  //         },
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: 'tags',
-  //           localField: 'tags',
-  //           foreignField: '_id',
-  //           as: 'tags',
-  //         }, // add the tags too.
-  //       },
-  //       {
-  //         $project: {
-  //           _id: 1, // finally structure the result
-  //           name: 1,
-  //           email: 1,
-  //           contactNumber: 1,
-  //           bio: 1,
-  //           logo: 1,
-  //           banner: 1,
-  //           visibility: 1,
-  //           tags: {
-  //             $map: {
-  //               input: '$tags',
-  //               as: 'tag',
-  //               in: { _id: '$$tag._id', name: '$$tag.name' },
-  //             },
-  //           },
-  //           packages: {
-  //             $filter: {
-  //               input: '$packages',
-  //               as: 'package',
-  //               cond: { $lte: ['$$package.price', event.budget] },
-  //             },
-  //           },
-  //         },
-  //       },
-  //       {
-  //         $sort: { 'packages.price': -1 },
-  //       }, //add credibility check here
-  //     ])
-  //     .exec();
-
-  //   return suitableVendors;
-  // }
 }
