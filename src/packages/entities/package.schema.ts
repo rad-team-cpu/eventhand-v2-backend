@@ -40,6 +40,7 @@ export class Package {
       {
         type: MongooseSchema.Types.ObjectId,
         ref: Tag.name,
+        required: true,
       },
     ],
   })
