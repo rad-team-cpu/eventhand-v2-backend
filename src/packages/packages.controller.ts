@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   Query,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { PackagesService } from './packages.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import { Package } from './entities/package.schema';
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, Schema, Types } from 'mongoose';
 
 @Controller('packages')
 export class PackagesController {
@@ -44,5 +46,22 @@ export class PackagesController {
   @Delete(':id')
   remove(@Param('id') id: string): Promise<void> {
     return this.packagesService.remove(id);
+  }
+
+  @Get(':eventId/available')
+  async getAvailablePackages(@Param(':eventId') eventId: string) {
+    try {
+      const _id = new Types.ObjectId('66dc881e40e01edb1e32d871');
+      console.log(_id);
+      const result =
+        await this.packagesService.findAvailablePackagesWithRating(_id);
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw new HttpException(
+        'Failed to get available packages',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
