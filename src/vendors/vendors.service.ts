@@ -298,6 +298,7 @@ export class VendorsService {
           // Filter vendors by clerkId and ensure they are not blocked on the current day
           $match: {
             clerkId: { $regex: regex, $options: 'i' },
+            visibility: true
           },
         },
         {
