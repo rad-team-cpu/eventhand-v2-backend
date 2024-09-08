@@ -29,7 +29,7 @@ export class Package {
   price: number;
 
   @Prop()
-  imageUrl: string;
+  imageUrl?: string;
 
   @Prop({ type: [{ type: OrderType }] })
   @Type(() => OrderType)
@@ -61,8 +61,7 @@ export class Package {
   })
   inclusions: {
     name: string;
-    imageUrl: string;
-    gi;
+    imageUrl?: string;
     quantity: number;
     description: string;
   }[];
