@@ -22,13 +22,13 @@ export class Package {
   })
   vendorId: Vendor;
 
-  @Prop({ required: true })
+  @Prop({ required: true, text: true })
   name: string;
 
   @Prop({ required: true })
   price: number;
 
-  @Prop({ required: true })
+  @Prop()
   imageUrl: string;
 
   @Prop({ type: [{ type: OrderType }] })
@@ -54,7 +54,7 @@ export class Package {
       {
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
-        imageUrl: { type: String, required: true },
+        imageUrl: { type: String },
         description: { type: String, required: true },
       },
     ],
@@ -62,6 +62,7 @@ export class Package {
   inclusions: {
     name: string;
     imageUrl: string;
+    gi;
     quantity: number;
     description: string;
   }[];
