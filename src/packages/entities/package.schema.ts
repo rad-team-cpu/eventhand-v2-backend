@@ -62,6 +62,7 @@ export class Package {
   inclusions: {
     name: string;
     imageUrl: string;
+    gi;
     quantity: number;
     description: string;
   }[];
