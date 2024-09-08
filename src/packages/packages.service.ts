@@ -175,6 +175,7 @@ export class PackagesService {
             vendorName: { $first: '$vendor.name' },
             vendorLogo: { $first: '$vendor.logo' },
             vendorContactNum: { $first: '$vendor.contactNum' },
+            vendorAddress: { $first: '$vendor.address' },
             vendorBio: { $first: '$vendor.bio' },
             vendorPackages: { $push: '$$ROOT' }, // Store all matching packages for the vendor
             averageRating: { $avg: '$reviews.rating' }, // Calculate the average rating
@@ -187,6 +188,7 @@ export class PackagesService {
             vendorName: 1,
             vendorLogo: 1,
             vendorContactNum: 1,
+            vendorAddress: 1,
             vendorBio: 1,
             vendorPackages: {
               _id: 1,
@@ -197,6 +199,7 @@ export class PackagesService {
               orderTypes: 1,
               tags: 1,
               inclusions: 1,
+              imageUrl: 1,
             },
             averageRating: { $ifNull: ['$averageRating', 0] }, // If no rating exists, return 0
           },
