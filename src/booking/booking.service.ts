@@ -20,7 +20,8 @@ export class BookingService {
     try {
       const result = await this.bookingModel.create(createBookingDto);
 
-      await this.EventModel.updateOne(
+      this.eventEmitter.emit(
+        'booking.created',
         { _id: createBookingDto.eventId },
         { $push: result._id },
       );

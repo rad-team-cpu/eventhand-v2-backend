@@ -177,7 +177,7 @@ export class EventsService {
 
     const total = await this.eventModel.countDocuments({ clientId }).exec();
     const totalPages = Math.ceil(total / pageSize);
-      console.log(events.length)
+    console.log(events.length);
     return {
       events,
       totalPages,
