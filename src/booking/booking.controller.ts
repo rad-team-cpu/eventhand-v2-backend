@@ -51,8 +51,8 @@ export class BookingController {
   //   return await this.bookingService.update(id, updateBookingDto);
   // }
 
-  // @Delete(':id')
-  // async remove(@Param('id') id: string): Promise<Booking> {
-  //   return await this.bookingService.remove(id);
-  // }
+  @Delete(':id')
+  async remove(@Param('id') id: string): Promise<Booking> {
+    return await this.bookingService.remove(id);
+  }
 }

@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDefined,
   IsMongoId,
   IsNotEmpty,
@@ -32,14 +33,14 @@ class InclusionsDto {
   description: string;
 }
 
-// class OrderTypeDto {
-//   @IsString()
-//   @IsNotEmpty()
-//   name: string;
+class OrderTypeDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-//   @IsBoolean()
-//   disabled: boolean;
-// }
+  @IsBoolean()
+  disabled: boolean;
+}
 
 export class CreatePackageDto {
   @IsMongoId()
@@ -72,13 +73,11 @@ export class CreatePackageDto {
   @Type(() => InclusionsDto)
   inclusions: Array<InclusionsDto>;
 
-  // @IsDefined()
-  // @IsArray()
-  // @ValidateNested()
-  // @Type(() => OrderTypeDto)
-  @IsString()
-  @IsNotEmpty()
-  orderTypes: string;
+  @IsDefined()
+  @IsArray()
+  @ValidateNested()
+  @Type(() => OrderTypeDto)
+  orderTypes: Array<OrderTypeDto>;
 
   @IsOptional()
   @IsArray()
