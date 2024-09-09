@@ -5,6 +5,7 @@ import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Tag } from 'src/tags/entities/tag.schema';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 
+
 export type PackageDocument = HydratedDocument<Package>;
 
 class OrderType {
@@ -18,7 +19,7 @@ export class Package {
     required: true,
     immutable: true,
     type: MongooseSchema.Types.ObjectId,
-    ref: Vendor.name,
+    ref: 'Vendor',
   })
   vendorId: Vendor;
 
