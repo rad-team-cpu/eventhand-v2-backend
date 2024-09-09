@@ -6,14 +6,16 @@ import {
   IsArray,
   IsNumber,
   ValidateNested,
+  IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class InclusionDto {
   @IsMongoId()
-  id: string;
+  _id: string;
 
   @IsString()
+  @IsOptional()
   imageUrl: string;
 
   @IsString()
@@ -30,13 +32,14 @@ class InclusionDto {
 
 class PackageDto {
   @IsMongoId()
-  id: string;
+  _id: string;
 
   @IsString()
   @IsNotEmpty()
   name: string;
 
   @IsString()
+  @IsOptional()
   imageUrl: string;
 
   @IsNumber()
