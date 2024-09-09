@@ -49,7 +49,6 @@ export class EventsController {
     if (!userId) {
       throw new BadRequestException('UserId is required');
     }
-
     try {
       return await this.eventsService.findAllClientEvents(userId, page, limit);
     } catch (error) {

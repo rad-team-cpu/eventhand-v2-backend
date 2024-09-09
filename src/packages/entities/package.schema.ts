@@ -18,7 +18,7 @@ export class Package {
     required: true,
     immutable: true,
     type: MongooseSchema.Types.ObjectId,
-    ref: Vendor.name,
+    ref: 'Vendor',
   })
   vendorId: Vendor;
 
@@ -28,10 +28,13 @@ export class Package {
   @Prop({ required: true })
   price: number;
 
+  @Prop({ required: true })
+  description: string;
+
   @Prop()
   imageUrl?: string;
 
-  @Prop({ type: [{ type: OrderType }] })
+  @Prop({ type: [{ type: OrderType }], required: true })
   @Type(() => OrderType)
   orderTypes: OrderType[];
 
@@ -70,6 +73,56 @@ export class Package {
 
 export const PackageSchema = SchemaFactory.createForClass(Package);
 
-export class EmbeddedPackage extends OmitType(Package, ['vendorId']) {}
+@Schema()
+export class EmbeddedPackage extends OmitType(Package, ['vendorId']) {
+  @Prop({ required: true })
+  orderType: string;
 
-export const EmbeddedPackageSchema = PackageSchema.omit(['vendorId']);
+  @Prop({ required: true, text: true })
+  name: string;
+
+  @Prop({ required: true })
+  price: number;
+
+  @Prop({ required: true })
+  description: string;
+
+  @Prop()
+  imageUrl?: string;
+
+  @Prop({
+    type: [
+      {
+        type: MongooseSchema.Types.ObjectId,
+        ref: Tag.name,
+        required: true,
+      },
+    ],
+  })
+  @Type(() => Tag)
+  tags: Tag[];
+
+  @Prop({ required: true })
+  capacity: number;
+
+  @Prop({
+    type: [
+      {
+        name: { type: String, required: true },
+        quantity: { type: Number, required: true },
+        imageUrl: { type: String },
+        description: { type: String, required: true },
+      },
+    ],
+  })
+  inclusions: {
+    name: string;
+    imageUrl?: string;
+    quantity: number;
+    description: string;
+  }[];
+}
+
+const EmbeddedPackageSchema = SchemaFactory.createForClass(EmbeddedPackage);
+
+export { EmbeddedPackageSchema };

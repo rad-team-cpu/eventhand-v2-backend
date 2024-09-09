@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
-import { UpdateBookingDto } from './dto/update-booking.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
+import { FilterQuery, Model, ObjectId, Types, UpdateQuery } from 'mongoose';
 import { Booking } from './entities/booking.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Event } from 'src/events/entities/event.schema';
@@ -13,6 +12,7 @@ import { startOfDay, endOfDay } from 'date-fns';
 export class BookingService {
   constructor(
     @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
+    @InjectModel(Event.name) private readonly EventModel: Model<Event>,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -20,10 +20,10 @@ export class BookingService {
     try {
       const result = await this.bookingModel.create(createBookingDto);
 
-      //pushes this to event
-      this.eventEmitter.emit('booking.created', result.event, {
-        $push: { bookings: result },
-      });
+      await this.EventModel.updateOne(
+        { _id: createBookingDto.eventId },
+        { $push: result._id },
+      );
 
       return result;
     } catch (error) {
@@ -37,6 +37,23 @@ export class BookingService {
       {
         status: 'COMPLETED',
         completedAt: new Date(), // Set the completion timestamp
+      },
+      { new: true },
+    );
+
+    if (!updatedBooking) {
+      throw new NotFoundException(`Booking with id ${bookingId} not found`);
+    }
+
+    return updatedBooking;
+  }
+
+  async cancelBooking(bookingId: string): Promise<Booking> {
+    const updatedBooking = await this.bookingModel.findByIdAndUpdate(
+      bookingId,
+      {
+        status: BookingStatus.Cancelled,
+        cancelledAt: new Date(), // Set the completion timestamp
       },
       { new: true },
     );
@@ -71,9 +88,7 @@ export class BookingService {
     return await this.bookingModel
       .find(filter)
       .populate('vendorId', 'name logo')
-      .populate('package', '-createdAt -updatedAt -__v -vendorId')
-      .populate('event', '-budget -bookings')
-      .populate('clientId', 'firstName lastName contactNumber')
+      .populate('eventId', '-budget -bookings')
       .exec();
   }
 
@@ -81,41 +96,70 @@ export class BookingService {
     return await this.bookingModel
       .findById(id)
       .populate('vendorId', 'name logo tags')
-      .populate('event', '-budget -bookings')
-      .populate('client', 'firstName lastName contactNumber')
-      .populate('packageId', '-createdAt -updatedAt -__v')
+      .populate('eventId', '-budget -bookings')
       .exec();
   }
 
-  async update(
-    id: string,
-    updateBookingDto: UpdateBookingDto,
-  ): Promise<Booking> {
-    const result = await this.bookingModel
-      .findByIdAndUpdate(id, updateBookingDto, { new: true })
-      .populate('vendorId', 'name logo tags')
-      .populate('event')
-      .populate('clientId', 'firstName lastName contactNumber')
-      .populate('package', '-createdAt -updatedAt -__v')
-      .exec();
+  async updateBookingStatus(bookingId: string): Promise<Booking> {
+    const booking = await this.bookingModel.findById(bookingId).exec();
 
-    if (updateBookingDto?.status === BookingStatus.Confirmed) {
-      this.cancelBookingsExcept(
-        result._id,
-        result.vendorId?._id.toString(),
-        result.date,
-      );
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
     }
 
-    return result;
+    // Update the booking status
+    booking.status = BookingStatus.Confirmed;
+
+    const updatedBooking = await booking.save();
+
+    // If the booking status is COMPLETED, update other bookings
+
+    await this.declineOtherBookings(booking.vendorId._id, booking.date);
+
+    return updatedBooking;
   }
+
+  // Function to update other bookings to "DECLINED"
+  async declineOtherBookings(vendorId: ObjectId, date: Date): Promise<void> {
+    await this.bookingModel.updateMany(
+      {
+        vendorId,
+        date,
+        status: { $ne: 'COMPLETED' }, // Don't decline bookings that are already completed
+      },
+      { $set: { status: 'DECLINED' } },
+    );
+  }
+
+  // async update(
+  //   id: string,
+  //   updateBookingDto: UpdateBookingDto,
+  // ): Promise<Booking> {
+  //   const result = await this.bookingModel
+  //     .findByIdAndUpdate(id, updateBookingDto, { new: true })
+  //     .populate('vendorId', 'name logo tags')
+  //     .populate('event')
+  //     .populate('clientId', 'firstName lastName contactNumber')
+  //     .populate('package', '-createdAt -updatedAt -__v')
+  //     .exec();
+
+  //   if (updateBookingDto?.status === BookingStatus.Confirmed) {
+  //     this.cancelBookingsExcept(
+  //       result._id,
+  //       result.vendorId?._id.toString(),
+  //       result.date,
+  //     );
+  //   }
+
+  //   return result;
+  // }
 
   async remove(id: string): Promise<Booking> {
     try {
       const result = await this.bookingModel.findByIdAndDelete(id).exec();
 
       //pops this to event
-      this.eventEmitter.emit('booking.deleted', result.event, {
+      this.eventEmitter.emit('booking.deleted', result.eventId, {
         $pull: { booking: { _id: id } } as UpdateQuery<Event>,
       });
 
