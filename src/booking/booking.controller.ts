@@ -38,6 +38,11 @@ export class BookingController {
     return await this.bookingService.cancelBooking(id);
   }
 
+  @Patch(':id/status')
+  async updateStatus(@Param('id') bookingId: string) {
+    return await this.bookingService.updateBookingStatus(bookingId);
+  }
+
   // @Patch(':id')
   // async update(
   //   @Param('id') id: string,

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
+import { FilterQuery, Model, ObjectId, Types, UpdateQuery } from 'mongoose';
 import { Booking } from './entities/booking.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Event } from 'src/events/entities/event.schema';
@@ -103,6 +103,37 @@ export class BookingService {
       .populate('client', 'firstName lastName contactNumber')
       .populate('packageId', '-createdAt -updatedAt -__v')
       .exec();
+  }
+
+  async updateBookingStatus(bookingId: string): Promise<Booking> {
+    const booking = await this.bookingModel.findById(bookingId).exec();
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    // Update the booking status
+    booking.status = BookingStatus.Confirmed;
+
+    const updatedBooking = await booking.save();
+
+    // If the booking status is COMPLETED, update other bookings
+
+    await this.declineOtherBookings(booking.vendorId._id, booking.date);
+
+    return updatedBooking;
+  }
+
+  // Function to update other bookings to "DECLINED"
+  async declineOtherBookings(vendorId: ObjectId, date: Date): Promise<void> {
+    await this.bookingModel.updateMany(
+      {
+        vendorId,
+        date,
+        status: { $ne: 'COMPLETED' }, // Don't decline bookings that are already completed
+      },
+      { $set: { status: 'DECLINED' } },
+    );
   }
 
   // async update(
