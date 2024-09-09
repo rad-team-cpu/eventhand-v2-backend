@@ -14,7 +14,6 @@ class InclusionDto {
   id: string;
 
   @IsString()
-  @IsNotEmpty()
   imageUrl: string;
 
   @IsString()
@@ -38,7 +37,6 @@ class PackageDto {
   name: string;
 
   @IsString()
-  @IsNotEmpty()
   imageUrl: string;
 
   @IsNumber()
