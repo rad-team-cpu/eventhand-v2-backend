@@ -5,7 +5,8 @@ import { Event } from 'src/events/entities/event.schema';
 import { Package, PackageDocument } from 'src/packages/entities/package.schema';
 import { Vendor, VendorDocument } from 'src/vendors/entities/vendor.schema';
 import { Tag } from 'src/tags/entities/tag.schema';
-import { format } from 'date-fns';
+import { endOfDay, format, startOfDay } from 'date-fns';
+import { BookingStatus } from 'src/booking/entities/booking-status.enum';
 
 @Injectable()
 export class MatchmakerService {
@@ -50,14 +51,16 @@ export class MatchmakerService {
     eventDate: Date,
   ): Promise<VendorDocument[]> {
     return this.vendorModel.aggregate([
+      //aggrgate for vendors.
       {
         $match: {
-          visibility: true,
-          blockedDays: { $ne: eventDayName },
+          visibility: true, //the vendor needs to be visible
+          blockedDays: { $ne: eventDayName.toUpperCase() }, // the vendor hasn't blocked the day of the week.
         },
       },
       {
         $lookup: {
+          // we join the bookings referenced as vendor
           from: 'bookings',
           localField: '_id',
           foreignField: 'vendor',
@@ -66,7 +69,20 @@ export class MatchmakerService {
       },
       {
         $match: {
-          'bookings.date': { $ne: eventDate },
+          $or: [
+            { bookings: { $size: 0 } }, // Include vendors with no bookings
+            {
+              $and: [
+                {
+                  'bookings.date': {
+                    $gte: startOfDay(eventDate),
+                    $lt: endOfDay(eventDate),
+                  },
+                }, // Ensure no booking on the event date
+                { 'bookings.status': { $ne: BookingStatus.Confirmed } }, // Or, ensure the booking isn't confirmed
+              ],
+            },
+          ],
         },
       },
       {
@@ -83,7 +99,9 @@ export class MatchmakerService {
     budget: Record<string, number>,
   ): Promise<PackageDocument[]> {
     const budgetTagNames = await this.tagModel
-      .find({ name: { $in: budgetCategories } })
+      .find({
+        name: { $in: budgetCategories.map((each) => each.toUpperCase()) },
+      })
       .distinct('_id');
 
     return this.packageModel.aggregate([
