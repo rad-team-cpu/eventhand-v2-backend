@@ -25,15 +25,6 @@ export class Booking {
 
   @Prop({
     required: true,
-    type: MongooseSchema.Types.ObjectId,
-    ref: 'User',
-    immutable: false,
-  })
-  @Type(() => User)
-  clientId: User;
-
-  @Prop({
-    required: true,
     type: EmbeddedPackageSchema,
     immutable: true,
   })
@@ -50,7 +41,7 @@ export class Booking {
     immutable: false,
   })
   @Type(() => Event)
-  event: Event;
+  eventId: Event;
 
   @Prop({ required: true, default: BookingStatus.Pending })
   status: BookingStatus;
