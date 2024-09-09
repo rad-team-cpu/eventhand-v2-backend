@@ -1,30 +1,86 @@
 import {
+  IsString,
+  IsNotEmpty,
   IsDateString,
-  IsEnum,
   IsMongoId,
+  IsArray,
+  IsNumber,
   ValidateNested,
 } from 'class-validator';
-import { BookingStatus } from '../entities/booking-status.enum';
-import { EmbeddedPackageDto } from '../../packages/dto/embedded-package.dto';
 import { Type } from 'class-transformer';
+
+class InclusionDto {
+  @IsMongoId()
+  id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  imageUrl: string;
+
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @IsNumber()
+  quantity: number;
+}
+
+class PackageDto {
+  @IsMongoId()
+  id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  imageUrl: string;
+
+  @IsNumber()
+  capacity: number;
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  tags: string[];
+
+  @IsString()
+  @IsNotEmpty()
+  orderType: string;
+
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @IsNumber()
+  price: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => InclusionDto)
+  inclusions: InclusionDto[];
+}
 
 export class CreateBookingDto {
   @IsMongoId()
   vendorId: string;
 
   @IsMongoId()
-  clientId: string;
-
-  @ValidateNested()
-  @Type(() => EmbeddedPackageDto)
-  package: EmbeddedPackageDto;
+  eventId: string;
 
   @IsDateString()
-  date: Date;
+  @IsNotEmpty()
+  date: string;
 
-  @IsMongoId()
-  event: string;
+  @IsString()
+  @IsNotEmpty()
+  status: string;
 
-  @IsEnum(BookingStatus)
-  status: BookingStatus;
+  @ValidateNested()
+  @Type(() => PackageDto)
+  package: PackageDto;
 }
