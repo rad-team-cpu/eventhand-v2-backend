@@ -12,10 +12,10 @@ export type BookingDocument = HydratedDocument<Booking>;
 
 @Schema({ timestamps: true })
 export class Booking {
-  @Prop({ type: MongooseSchema.Types.ObjectId, required: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Vendor' })
   vendorId: Vendor;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, required: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Event' })
   eventId: Event;
 
   @Prop({ type: Date, required: true })
