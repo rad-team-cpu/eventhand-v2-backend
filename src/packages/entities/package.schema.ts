@@ -5,7 +5,6 @@ import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Tag } from 'src/tags/entities/tag.schema';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
 
-
 export type PackageDocument = HydratedDocument<Package>;
 
 class OrderType {
@@ -28,6 +27,9 @@ export class Package {
 
   @Prop({ required: true })
   price: number;
+
+  @Prop({ required: true })
+  description: string;
 
   @Prop()
   imageUrl?: string;

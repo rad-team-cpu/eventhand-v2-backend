@@ -118,7 +118,7 @@ export class BookingService {
 
     // If the booking status is COMPLETED, update other bookings
 
-    await this.declineOtherBookings(booking.vendorId, booking.date);
+    await this.declineOtherBookings(booking.vendorId._id, booking.date);
 
     return updatedBooking;
   }

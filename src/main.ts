@@ -18,13 +18,6 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
-      exceptionFactory: (errors) => {
-        // Log validation errors
-        console.error('Validation Errors:', errors);
-  
-        // Optionally, customize the exception response
-        return new BadRequestException('Validation failed');
-      },
     }),
   );
   app.enableCors();
