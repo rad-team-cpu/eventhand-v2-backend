@@ -88,9 +88,7 @@ export class BookingService {
     return await this.bookingModel
       .find(filter)
       .populate('vendorId', 'name logo')
-      .populate('package', '-createdAt -updatedAt -__v -vendorId')
-      .populate('event', '-budget -bookings')
-      .populate('clientId', 'firstName lastName contactNumber')
+      .populate('eventId', '-budget -bookings')
       .exec();
   }
 
@@ -98,9 +96,7 @@ export class BookingService {
     return await this.bookingModel
       .findById(id)
       .populate('vendorId', 'name logo tags')
-      .populate('event', '-budget -bookings')
-      .populate('client', 'firstName lastName contactNumber')
-      .populate('packageId', '-createdAt -updatedAt -__v')
+      .populate('eventId', '-budget -bookings')
       .exec();
   }
 
@@ -158,18 +154,18 @@ export class BookingService {
   //   return result;
   // }
 
-  // async remove(id: string): Promise<Booking> {
-  //   try {
-  //     const result = await this.bookingModel.findByIdAndDelete(id).exec();
+  async remove(id: string): Promise<Booking> {
+    try {
+      const result = await this.bookingModel.findByIdAndDelete(id).exec();
 
-  //     //pops this to event
-  //     this.eventEmitter.emit('booking.deleted', result.event, {
-  //       $pull: { booking: { _id: id } } as UpdateQuery<Event>,
-  //     });
+      //pops this to event
+      this.eventEmitter.emit('booking.deleted', result.eventId, {
+        $pull: { booking: { _id: id } } as UpdateQuery<Event>,
+      });
 
-  //     return result;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

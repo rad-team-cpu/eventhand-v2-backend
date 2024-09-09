@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Type } from 'class-transformer';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Event } from 'src/events/entities/event.schema';
 import {
@@ -11,10 +12,10 @@ export type BookingDocument = HydratedDocument<Booking>;
 
 @Schema({ timestamps: true })
 export class Booking {
-  @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Vendor' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, required: true })
   vendorId: Vendor;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Event' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, required: true })
   eventId: Event;
 
   @Prop({ type: Date, required: true })
@@ -24,6 +25,7 @@ export class Booking {
   status: string;
 
   @Prop({ type: EmbeddedPackageSchema, required: true })
+  @Type(() => EmbeddedPackage)
   package: EmbeddedPackage;
 }
 
