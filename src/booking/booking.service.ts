@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
-import { UpdateBookingDto } from './dto/update-booking.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, ObjectId, Types, UpdateQuery } from 'mongoose';
 import { Booking } from './entities/booking.schema';

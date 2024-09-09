@@ -78,7 +78,7 @@ export class CreateBookingDto {
   date: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   status: string;
 
   @ValidateNested()
