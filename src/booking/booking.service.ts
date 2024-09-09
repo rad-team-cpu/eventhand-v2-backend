@@ -13,6 +13,7 @@ import { startOfDay, endOfDay } from 'date-fns';
 export class BookingService {
   constructor(
     @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
+    @InjectModel(Event.name) private readonly EventModel: Model<Event>,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -20,10 +21,10 @@ export class BookingService {
     try {
       const result = await this.bookingModel.create(createBookingDto);
 
-      //pushes this to event
-      this.eventEmitter.emit('booking.created', result.event, {
-        $push: { bookings: result },
-      });
+      await this.EventModel.updateOne(
+        { _id: createBookingDto.eventId },
+        { $push: result._id },
+      );
 
       return result;
     } catch (error) {
@@ -65,7 +66,6 @@ export class BookingService {
     return updatedBooking;
   }
 
-
   cancelBookingsExcept(
     bookingId: Types.ObjectId,
     vendorId: string,
@@ -105,41 +105,41 @@ export class BookingService {
       .exec();
   }
 
-  async update(
-    id: string,
-    updateBookingDto: UpdateBookingDto,
-  ): Promise<Booking> {
-    const result = await this.bookingModel
-      .findByIdAndUpdate(id, updateBookingDto, { new: true })
-      .populate('vendorId', 'name logo tags')
-      .populate('event')
-      .populate('clientId', 'firstName lastName contactNumber')
-      .populate('package', '-createdAt -updatedAt -__v')
-      .exec();
+  // async update(
+  //   id: string,
+  //   updateBookingDto: UpdateBookingDto,
+  // ): Promise<Booking> {
+  //   const result = await this.bookingModel
+  //     .findByIdAndUpdate(id, updateBookingDto, { new: true })
+  //     .populate('vendorId', 'name logo tags')
+  //     .populate('event')
+  //     .populate('clientId', 'firstName lastName contactNumber')
+  //     .populate('package', '-createdAt -updatedAt -__v')
+  //     .exec();
 
-    if (updateBookingDto?.status === BookingStatus.Confirmed) {
-      this.cancelBookingsExcept(
-        result._id,
-        result.vendorId?._id.toString(),
-        result.date,
-      );
-    }
+  //   if (updateBookingDto?.status === BookingStatus.Confirmed) {
+  //     this.cancelBookingsExcept(
+  //       result._id,
+  //       result.vendorId?._id.toString(),
+  //       result.date,
+  //     );
+  //   }
 
-    return result;
-  }
+  //   return result;
+  // }
 
-  async remove(id: string): Promise<Booking> {
-    try {
-      const result = await this.bookingModel.findByIdAndDelete(id).exec();
+  // async remove(id: string): Promise<Booking> {
+  //   try {
+  //     const result = await this.bookingModel.findByIdAndDelete(id).exec();
 
-      //pops this to event
-      this.eventEmitter.emit('booking.deleted', result.event, {
-        $pull: { booking: { _id: id } } as UpdateQuery<Event>,
-      });
+  //     //pops this to event
+  //     this.eventEmitter.emit('booking.deleted', result.event, {
+  //       $pull: { booking: { _id: id } } as UpdateQuery<Event>,
+  //     });
 
-      return result;
-    } catch (error) {
-      throw error;
-    }
-  }
+  //     return result;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 }

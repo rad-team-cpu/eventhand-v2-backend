@@ -38,16 +38,16 @@ export class BookingController {
     return await this.bookingService.cancelBooking(id);
   }
 
-  @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateBookingDto: UpdateBookingDto,
-  ): Promise<Booking> {
-    return await this.bookingService.update(id, updateBookingDto);
-  }
+  // @Patch(':id')
+  // async update(
+  //   @Param('id') id: string,
+  //   @Body() updateBookingDto: UpdateBookingDto,
+  // ): Promise<Booking> {
+  //   return await this.bookingService.update(id, updateBookingDto);
+  // }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<Booking> {
-    return await this.bookingService.remove(id);
-  }
+  // @Delete(':id')
+  // async remove(@Param('id') id: string): Promise<Booking> {
+  //   return await this.bookingService.remove(id);
+  // }
 }
