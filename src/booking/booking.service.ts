@@ -7,12 +7,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Event } from 'src/events/entities/event.schema';
 import { BookingStatus } from './entities/booking-status.enum';
 import { startOfDay, endOfDay } from 'date-fns';
+import { UpdateBookingDto } from './dto/update-booking.dto';
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
-    @InjectModel(Event.name) private readonly EventModel: Model<Event>,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -64,25 +64,6 @@ export class BookingService {
     return updatedBooking;
   }
 
-  cancelBookingsExcept(
-    bookingId: Types.ObjectId,
-    vendorId: string,
-    date: Date,
-  ): void {
-    this.updateMany(
-      {
-        vendorId: vendorId,
-        _id: { $ne: bookingId },
-        date: { $gte: startOfDay(date), $lte: endOfDay(date) },
-      },
-      { status: BookingStatus.Cancelled },
-    );
-  }
-
-  updateMany(filter: FilterQuery<Booking>, update: UpdateQuery<Booking>): void {
-    this.bookingModel.updateMany(filter, update);
-  }
-
   async findAll(filter: FilterQuery<Booking>): Promise<Booking[]> {
     return await this.bookingModel
       .find(filter)
@@ -130,28 +111,50 @@ export class BookingService {
     );
   }
 
-  // async update(
-  //   id: string,
-  //   updateBookingDto: UpdateBookingDto,
-  // ): Promise<Booking> {
-  //   const result = await this.bookingModel
-  //     .findByIdAndUpdate(id, updateBookingDto, { new: true })
-  //     .populate('vendorId', 'name logo tags')
-  //     .populate('event')
-  //     .populate('clientId', 'firstName lastName contactNumber')
-  //     .populate('package', '-createdAt -updatedAt -__v')
-  //     .exec();
+  async update(
+    id: string,
+    updateBookingDto: UpdateBookingDto,
+  ): Promise<Booking> {
+    const result = await this.bookingModel
+      .findByIdAndUpdate(id, updateBookingDto, { new: true })
+      .populate('vendorId', 'name logo tags')
+      .populate('event')
+      .populate('clientId', 'firstName lastName contactNumber')
+      .populate('package', '-createdAt -updatedAt -__v')
+      .exec();
 
-  //   if (updateBookingDto?.status === BookingStatus.Confirmed) {
-  //     this.cancelBookingsExcept(
-  //       result._id,
-  //       result.vendorId?._id.toString(),
-  //       result.date,
-  //     );
-  //   }
+    if (updateBookingDto?.status === BookingStatus.Confirmed) {
+      this.cancelBookingsExcept(
+        result._id,
+        result.vendorId?._id.toString(),
+        result.date,
+      );
+    }
 
-  //   return result;
-  // }
+    return result;
+  }
+
+  async updateMany(
+    filter: FilterQuery<Booking>,
+    update: UpdateQuery<Booking>,
+  ): Promise<void> {
+    this.bookingModel.updateMany(filter, update);
+  }
+
+  private cancelBookingsExcept(
+    bookingId: Types.ObjectId,
+    vendorId: string,
+    date: Date,
+  ): void {
+    this.updateMany(
+      {
+        vendorId: vendorId,
+        _id: { $ne: bookingId },
+        date: { $gte: startOfDay(date), $lte: endOfDay(date) },
+      },
+      { status: BookingStatus.Cancelled },
+    );
+  }
 
   async remove(id: string): Promise<Booking> {
     try {
