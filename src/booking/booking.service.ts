@@ -20,10 +20,9 @@ export class BookingService {
     try {
       const result = await this.bookingModel.create(createBookingDto);
 
-      await this.EventModel.updateOne(
-        { _id: createBookingDto.eventId },
-        { $push: result._id },
-      );
+      this.eventEmitter.emit('booking.created', createBookingDto.eventId, {
+        $push: { bookings: result._id } as UpdateQuery<Event>,
+      });
 
       return result;
     } catch (error) {
