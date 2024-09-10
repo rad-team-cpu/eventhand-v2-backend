@@ -8,6 +8,8 @@ export class MatchmakerController {
 
   @Get(':id')
   async match(@Param('id') eventId: string): Promise<Package[]> {
-    return await this.matchmakerService.findMatchingVendorsAndPackages(eventId);
+    return await this.matchmakerService.findAvailablePackagesWithRating(
+      eventId,
+    );
   }
 }

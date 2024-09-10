@@ -7,10 +7,13 @@ import { Event, EventSchema } from 'src/events/entities/event.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Booking.name, schema: BookingSchema }, { name: Event.name, schema: EventSchema }]),
+    MongooseModule.forFeature([
+      { name: Booking.name, schema: BookingSchema },
+      { name: Event.name, schema: EventSchema },
+    ]),
   ],
   controllers: [BookingController],
   providers: [BookingService],
-  exports: [BookingService]
+  exports: [BookingService],
 })
 export class BookingModule {}

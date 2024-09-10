@@ -52,7 +52,6 @@ export class EventsController {
     try {
       return await this.eventsService.findAllClientEvents(userId, page, limit);
     } catch (error) {
-
       // Handle specific error types if needed
       if (error instanceof BadRequestException) {
         throw error;

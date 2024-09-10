@@ -8,7 +8,7 @@ import { BookingModule } from 'src/booking/booking.module';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Review.name, schema: ReviewSchema }]),
-    BookingModule
+    BookingModule,
   ],
   controllers: [ReviewsController],
   providers: [ReviewsService],

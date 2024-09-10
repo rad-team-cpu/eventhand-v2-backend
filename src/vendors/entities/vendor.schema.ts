@@ -45,7 +45,7 @@ const CredentialSchema = SchemaFactory.createForClass(Credential);
 @Schema({
   timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 })
 export class Vendor {
   _id: ObjectId;
