@@ -54,7 +54,7 @@ export class UsersController {
     const events = await this.eventsService.findAllClientEvents(
       user._id,
       1,
-      10,
+      50,
     );
     return {
       user,
