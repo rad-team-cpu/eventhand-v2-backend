@@ -7,6 +7,7 @@ import {
   EmbeddedPackageSchema,
 } from 'src/packages/entities/package.schema';
 import { Vendor } from 'src/vendors/entities/vendor.schema';
+import { BookingStatus } from './booking-status.enum';
 
 export type BookingDocument = HydratedDocument<Booking>;
 
@@ -30,3 +31,24 @@ export class Booking {
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking);
+
+export type VendorBookingListItem = {
+  _id: string;
+  client: {
+    _id: string;
+    name: string;
+  };
+  event: {
+    _id: string;
+    date: Date;
+  };
+  status: BookingStatus;
+  packageName: string
+}
+
+export type VendorBookingList = {
+  bookings: VendorBookingListItem[];
+  currentPage: number;
+  totalPages: number;
+  hasMore: boolean;
+}

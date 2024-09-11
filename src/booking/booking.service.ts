@@ -1,8 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, ObjectId, Types, UpdateQuery } from 'mongoose';
-import { Booking } from './entities/booking.schema';
+import {
+  Booking,
+  VendorBookingList,
+  VendorBookingListItem,
+} from './entities/booking.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Event } from 'src/events/entities/event.schema';
 import { BookingStatus } from './entities/booking-status.enum';
@@ -130,6 +138,163 @@ export class BookingService {
     );
   }
 
+  async findPaginatedVendorBookingsByStatus(
+    vendorId: string,
+    status: BookingStatus,
+    pageNumber: number,
+    pageSize: number,
+  ): Promise<VendorBookingList> {
+    if (!vendorId) {
+      throw new BadRequestException('Vendor ID is required');
+    }
+
+    const vendorObjectId = new Types.ObjectId(vendorId);
+    const skip = (pageNumber - 1) * pageSize;
+    const limit = pageSize;
+
+    const bookings: VendorBookingListItem[] = await this.bookingModel
+      .aggregate([
+        {
+          $match: {
+            vendorId: vendorObjectId,
+            status: status,
+          },
+        },
+        {
+          $lookup: {
+            from: 'events', // Event collection
+            localField: 'eventId',
+            foreignField: '_id',
+            as: 'event',
+          },
+        },
+        { $unwind: '$event' },
+        {
+          $lookup: {
+            from: 'users', // Client collection
+            localField: 'event.clientId',
+            foreignField: '_id',
+            as: 'client',
+          },
+        },
+        { $unwind: '$client' },
+        {
+          $project: {
+            _id: 1,
+            'client._id': 1,
+            'client.name': {
+              $concat: ['$client.firstName', ' ', '$client.lastName'],
+            },
+            'event._id': 1,
+            'event.date': 1,
+            status: 1,
+            packageName: '$package.name',
+          },
+        },
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $sort: { date: 1 }, // Sort by date, dynamic sortOrder (1 for ascending, -1 for descending)
+        },
+      ])
+      .exec();
+
+    const total = await this.bookingModel
+      .countDocuments({ vendorId: vendorObjectId, status: status })
+      .exec();
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      bookings,
+      totalPages,
+      currentPage: pageNumber,
+      hasMore: pageNumber < totalPages,
+    };
+  }
+
+  async findPaginatedCancelledOrDeclinedVendorBookings(
+    vendorId: string,
+    pageNumber: number,
+    pageSize: number,
+  ): Promise<VendorBookingList> {
+    if (!vendorId) {
+      throw new BadRequestException('Vendor ID is required');
+    }
+
+    const vendorObjectId = new Types.ObjectId(vendorId);
+    const skip = (pageNumber - 1) * pageSize;
+    const limit = pageSize;
+
+    try {
+      const bookings: VendorBookingListItem[] = await this.bookingModel
+        .aggregate([
+          {
+            $match: {
+              vendorId: vendorObjectId,
+              status: {
+                $in: ['CANCELLED', 'DECLINED'],
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: 'events', // Event collection
+              localField: 'eventId',
+              foreignField: '_id',
+              as: 'event',
+            },
+          },
+          { $unwind: '$event' },
+          {
+            $lookup: {
+              from: 'users', // Client collection
+              localField: 'event.clientId',
+              foreignField: '_id',
+              as: 'client',
+            },
+          },
+          { $unwind: '$client' },
+          {
+            $project: {
+              _id: 1,
+              'client._id': 1,
+              'client.name': {
+                $concat: ['$client.firstName', ' ', '$client.lastName'],
+              },
+              'event._id': 1,
+              'event.date': 1,
+              status: 1,
+              packageName: '$package.name',
+            },
+          },
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $sort: { date: 1 }, // Sort by date, dynamic sortOrder (1 for ascending, -1 for descending)
+          },
+        ])
+        .exec();
+
+      const total = await this.bookingModel
+        .countDocuments({
+          vendorId: vendorObjectId,
+          status: {
+            $in: ['CANCELLED', 'DECLINED'],
+          },
+        })
+        .exec();
+      const totalPages = Math.ceil(total / pageSize);
+
+      return {
+        bookings,
+        totalPages,
+        currentPage: pageNumber,
+        hasMore: pageNumber < totalPages,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
   // async update(
   //   id: string,
   //   updateBookingDto: UpdateBookingDto,
