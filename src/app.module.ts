@@ -38,14 +38,6 @@ import config from './config/config';
     PortfolioModule,
     MatchmakerModule,
     BookingModule,
-    // ClerkModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   useFactory: async (configService: ConfigService) => ({
-    //     secretKey: configService.get<string>('clerk.secret'),
-    //     publishableKey: configService.get<string>('clerk.publishable'),
-    //   }),
-    //   inject: [ConfigService],
-    // }),
   ],
   controllers: [AppController],
   providers: [AppService],
