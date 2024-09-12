@@ -30,6 +30,13 @@ export class VendorsController {
     return await this.vendorsService.findAll({ visibility: true });
   }
 
+  @Get('search')
+  async search(@Query('query') query: string): Promise<Vendor[]> {
+    return await this.vendorsService.findAll({
+      $text: { $search: query },
+    });
+  }
+
   @Get('all')
   async findAll(): Promise<Vendor[]> {
     return await this.vendorsService.findAll();

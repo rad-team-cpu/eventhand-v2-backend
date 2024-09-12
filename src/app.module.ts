@@ -15,7 +15,6 @@ import { PortfolioModule } from './portfolio/portfolio.module';
 import { MatchmakerModule } from './matchmaker/matchmaker.module';
 import { BookingModule } from './booking/booking.module';
 import config from './config/config';
-// import { ClerkModule } from './clerk/clerk.module';
 
 @Module({
   imports: [
