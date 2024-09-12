@@ -10,6 +10,7 @@ import {
   Booking,
   VendorBookingList,
   VendorBookingListItem,
+  VendorBookingType,
 } from './entities/booking.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Event } from 'src/events/entities/event.schema';
@@ -295,6 +296,68 @@ export class BookingService {
       console.log(error);
     }
   }
+
+  async getVendorBooking(bookingId: string): Promise<VendorBookingType[]> {
+    if (!Types.ObjectId.isValid(bookingId)) {
+      throw new NotFoundException('Invalid Vendor ID');
+    }
+
+    const _id = new Types.ObjectId(bookingId);
+
+    try {
+      const bookings = await this.bookingModel.aggregate([
+        {
+          $match: { _id },
+        },
+        {
+          $lookup: {
+            from: 'events',
+            localField: 'eventId',
+            foreignField: '_id',
+            as: 'event',
+          },
+        },
+        { $unwind: '$event' },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'event.clientId',
+            foreignField: '_id',
+            as: 'client',
+          },
+        },
+        { $unwind: '$client' },
+        {
+          $project: {
+            _id: 1,
+            event: {
+              _id: '$event._id',
+              date: '$event.date',
+            },
+            client: {
+              _id: '$client._id',
+              name: { $concat: ['$client.firstName', ' ', '$client.lastName'] },
+              profilePicture: '$client.profilePicture',
+              contactNumber: '$client.contactNumber',
+              email: '$client.email',
+            },
+            status: '$status',
+            date: '$date',
+            package: '$package',
+          },
+        },
+      ]);
+
+      if (!bookings || bookings.length === 0) {
+        throw new NotFoundException('No bookings found for this vendor');
+      }
+
+      return bookings[0];
+    } catch (error) {
+      throw new Error(`Error fetching vendor bookings: ${error}`);
+    }
+  }
+
   // async update(
   //   id: string,
   //   updateBookingDto: UpdateBookingDto,

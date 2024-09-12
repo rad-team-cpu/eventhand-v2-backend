@@ -13,7 +13,11 @@ import {
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 // import { UpdateBookingDto } from './dto/update-booking.dto';
-import { Booking, VendorBookingList } from './entities/booking.schema';
+import {
+  Booking,
+  VendorBookingList,
+  VendorBookingType,
+} from './entities/booking.schema';
 import { FilterQuery } from 'mongoose';
 import { BookingStatus } from './entities/booking-status.enum';
 
@@ -93,6 +97,13 @@ export class BookingController {
   // ): Promise<Booking> {
   //   return await this.bookingService.update(id, updateBookingDto);
   // }
+
+  @Get('vendor/:vendorId/view')
+  async getVendorBookings(
+    @Param('vendorId') vendorId: string,
+  ): Promise<VendorBookingType[]> {
+    return this.bookingService.getVendorBooking(vendorId);
+  }
 
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Booking> {
