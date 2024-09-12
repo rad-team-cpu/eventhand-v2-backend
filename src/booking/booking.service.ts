@@ -20,9 +20,13 @@ export class BookingService {
     try {
       const result = await this.bookingModel.create(createBookingDto);
 
-      this.eventEmitter.emit('booking.created', createBookingDto.eventId, {
-        $push: { bookings: result._id } as UpdateQuery<Event>,
-      });
+      await this.eventEmitter.emitAsync(
+        'booking.created',
+        createBookingDto.eventId,
+        {
+          $push: { bookings: result._id } as UpdateQuery<Event>,
+        },
+      );
 
       return result;
     } catch (error) {
@@ -161,7 +165,7 @@ export class BookingService {
       const result = await this.bookingModel.findByIdAndDelete(id).exec();
 
       //pops this to event
-      this.eventEmitter.emit('booking.deleted', result.eventId, {
+      await this.eventEmitter.emitAsync('booking.deleted', result.eventId, {
         $pull: { booking: { _id: id } } as UpdateQuery<Event>,
       });
 
