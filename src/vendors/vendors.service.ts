@@ -7,7 +7,7 @@ import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { Vendor } from './entities/vendor.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { FilterQuery, Model, Types } from 'mongoose';
+import mongoose, { FilterQuery, Model, PipelineStage, Types } from 'mongoose';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { FactorType } from './entities/factor.types';
 import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
@@ -100,6 +100,28 @@ export class VendorsService {
     return vendor;
   }
 
+  private async aggregate(pipelines: PipelineStage[]): Promise<any> {
+    const result = await this.vendorModel.aggregate(pipelines);
+    return result;
+  }
+
+  async search(query: string): Promise<any> {
+    const result = await this.aggregate([
+      {
+        $search: {
+          index: 'default',
+          text: {
+            query: query,
+            path: {
+              wildcard: '*',
+            },
+          },
+        },
+      },
+    ]);
+    return result;
+  }
+
   async findOneWithPackages(vendorId: string): Promise<Vendor> {
     const result = await this.vendorModel
       .findById(vendorId)
@@ -175,117 +197,83 @@ export class VendorsService {
     // await this.calculateCredibility(vendorId);
   }
 
-  // calculate credibility of vendor
-  // we need to calculate credibility based on the following:
-  // On a scale of 0 - 100, we weigh different
-  // Branding: has a Logo, has a banner, has a bio
-  // async calculateCredibility(id: string): Promise<void> {
-  //   const vendor = await this.vendorModel.findById(id).exec();
-
-  // Branding Present
-  // const hasLogo = Number(Boolean(vendor.logo));
-  // const hasBanner = Number(Boolean(vendor.banner));
-  // const hasBio = Number(Boolean(vendor.bio));
-
-  // const brandingScore = (hasLogo + hasBanner + hasBio) * 0.2; // Weighs 20%
-
-  // Contact Details
-  // const contactNumberValidated = false; // TBA
-  // const emailIsValidated = false; // TBA
-  // TBA;
-
-  // Reviews
-  // const reviews = await this.reviewsService.findSome({
-  //   vendorId: vendor._id,
-  // });
-
-  // vendor.credibilityFactor;
-  // vendor.save();
-  //   return;
-  // }
-
   async getVendorsWithRatings(clerkId: string, tagId: string) {
     const today = format(new Date(), 'eeee').toUpperCase(); // Get current day of the week in uppercase
     const tagObjectId = new Types.ObjectId(tagId);
 
-    const vendors = await this.vendorModel
-      .aggregate([
-        {
-          // Filter vendors by clerkId and ensure they are not blocked on the current day
-          $match: {
-            clerkId: { $ne: clerkId },
-            visibility: true,
-            blockedDays: { $nin: [today] },
-          },
+    const vendors = await this.aggregate([
+      {
+        // Filter vendors by clerkId and ensure they are not blocked on the current day
+        $match: {
+          clerkId: { $ne: clerkId },
+          visibility: true,
+          blockedDays: { $nin: [today] },
         },
-        {
-          // Lookup VendorPackages by vendorId and filter by package tag
-          $lookup: {
-            from: 'vendorPackages',
-            localField: '_id',
-            foreignField: 'vendorId',
-            as: 'packages',
-          },
+      },
+      {
+        // Lookup VendorPackages by vendorId and filter by package tag
+        $lookup: {
+          from: 'vendorPackages',
+          localField: '_id',
+          foreignField: 'vendorId',
+          as: 'packages',
         },
-        {
-          $unwind: {
-            path: '$packages',
-          },
+      },
+      {
+        $unwind: {
+          path: '$packages',
         },
-        {
-          // Filter packages by tagId
-          $match: {
-            'packages.tags': tagObjectId,
-          },
+      },
+      {
+        // Filter packages by tagId
+        $match: {
+          'packages.tags': tagObjectId,
         },
-        {
-          // Lookup reviews for the vendor
-          $lookup: {
-            from: 'vendorReviews',
-            localField: '_id',
-            foreignField: 'vendorId',
-            as: 'reviews',
-          },
+      },
+      {
+        // Lookup reviews for the vendor
+        $lookup: {
+          from: 'vendorReviews',
+          localField: '_id',
+          foreignField: 'vendorId',
+          as: 'reviews',
         },
-        {
-          $addFields: {
-            // Calculate the average rating from reviews (1-5 only)
-            averageRating: {
-              $avg: {
-                $filter: {
-                  input: '$reviews.rating',
-                  as: 'rating',
-                  cond: {
-                    $and: [
-                      { $gte: ['$$rating', 1] },
-                      { $lte: ['$$rating', 5] },
-                    ],
-                  },
+      },
+      {
+        $addFields: {
+          // Calculate the average rating from reviews (1-5 only)
+          averageRating: {
+            $avg: {
+              $filter: {
+                input: '$reviews.rating',
+                as: 'rating',
+                cond: {
+                  $and: [{ $gte: ['$$rating', 1] }, { $lte: ['$$rating', 5] }],
                 },
               },
             },
           },
         },
-        {
-          // Group by vendor ID to avoid duplicates
-          $group: {
-            _id: '$_id', // Group by vendor ID
-            name: { $first: '$name' }, // Take the first name for each group
-            logo: { $first: '$logo' }, // Take the first logo for each group
-            averageRating: { $first: '$averageRating' }, // Take the first average rating
-          },
+      },
+      {
+        // Group by vendor ID to avoid duplicates
+        $group: {
+          _id: '$_id', // Group by vendor ID
+          name: { $first: '$name' }, // Take the first name for each group
+          logo: { $first: '$logo' }, // Take the first logo for each group
+          averageRating: { $first: '$averageRating' }, // Take the first average rating
         },
-        {
-          // Group to return vendor id, name, logo, and average rating
-          $project: {
-            _id: 1,
-            name: 1,
-            logo: 1,
-            averageRating: 1,
-          },
+      },
+      {
+        // Group to return vendor id, name, logo, and average rating
+        $project: {
+          _id: 1,
+          name: 1,
+          logo: 1,
+          averageRating: 1,
         },
-      ])
-      .exec();
+      },
+    ]);
 
     return vendors;
   }

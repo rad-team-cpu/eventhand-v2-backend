@@ -32,9 +32,7 @@ export class VendorsController {
 
   @Get('search')
   async search(@Query('query') query: string): Promise<Vendor[]> {
-    return await this.vendorsService.findAll({
-      $text: { $search: query },
-    });
+    return await this.vendorsService.search(query);
   }
 
   @Get('all')
