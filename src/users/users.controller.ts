@@ -52,9 +52,9 @@ export class UsersController {
     console.log(`GET REQUEST: findClient: ${clerkId}`);
     const user = await this.usersService.findClient(clerkId);
     const events = await this.eventsService.findAllClientEvents(
-      user._id,
+      String(user._id),
       1,
-      10,
+      50,
     );
     return {
       user,
