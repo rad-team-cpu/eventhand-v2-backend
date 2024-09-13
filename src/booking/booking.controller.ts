@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
-// import { UpdateBookingDto } from './dto/update-booking.dto';
+import { UpdateBookingDto } from './dto/update-booking.dto';
 import { Booking } from './entities/booking.schema';
 import { FilterQuery } from 'mongoose';
 
@@ -43,13 +43,13 @@ export class BookingController {
     return await this.bookingService.updateBookingStatus(bookingId);
   }
 
-  // @Patch(':id')
-  // async update(
-  //   @Param('id') id: string,
-  //   @Body() updateBookingDto: UpdateBookingDto,
-  // ): Promise<Booking> {
-  //   return await this.bookingService.update(id, updateBookingDto);
-  // }
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateBookingDto: UpdateBookingDto,
+  ): Promise<Booking> {
+    return await this.bookingService.update(id, updateBookingDto);
+  }
 
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Booking> {
