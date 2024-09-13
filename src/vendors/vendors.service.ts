@@ -118,6 +118,14 @@ export class VendorsService {
           },
         },
       },
+      {
+        $lookup: {
+          from: 'vendorPackages',
+          localField: '_id',
+          foreignField: 'vendorId',
+          as: 'packages',
+        },
+      },
     ]);
     return result;
   }
