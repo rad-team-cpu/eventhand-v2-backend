@@ -61,6 +61,11 @@ export class BookingController {
     try {
       let bookings: VendorBookingList;
 
+      const result =
+        await this.bookingService.cancelPastVendorPendingBookings(vendorId);
+
+      console.log(result);
+
       if (status === 'CANCELLED') {
         bookings =
           await this.bookingService.findPaginatedCancelledOrDeclinedVendorBookings(
@@ -88,6 +93,12 @@ export class BookingController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  @Patch(':id/confirm')
+  async confirmBooking(@Param('id') id: string): Promise<{ message: string }> {
+    await this.bookingService.confirmBooking(id);
+    return { message: 'Booking confirmed and other bookings declined' };
   }
 
   // @Patch(':id')

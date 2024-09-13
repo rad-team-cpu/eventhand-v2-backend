@@ -358,6 +358,83 @@ export class BookingService {
     }
   }
 
+  async confirmBooking(bookingId: string): Promise<void> {
+    const bookingObjectId = new Types.ObjectId(bookingId);
+
+    // Find the booking to confirm
+    const bookingToConfirm = await this.bookingModel.findById(bookingObjectId);
+    if (!bookingToConfirm) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    // Update the status of the selected booking to CONFIRMED
+    bookingToConfirm.status = 'CONFIRMED';
+    await bookingToConfirm.save();
+
+    // Find and update other bookings with the same eventId and event date to DECLINED
+    await this.bookingModel.updateMany(
+      {
+        eventId: bookingToConfirm.eventId,
+        _id: { $ne: bookingObjectId }, // Exclude the confirmed booking
+        date: bookingToConfirm.date, // Ensure same event date
+      },
+      { $set: { status: 'DECLINED' } },
+    );
+  }
+
+  async cancelPastVendorPendingBookings(vendorId: string): Promise<string> {
+    if (!vendorId) {
+      throw new BadRequestException('Vendor ID is required');
+    }
+
+    const vendorObjectId = new Types.ObjectId(vendorId);
+    const currentDate = new Date();
+    const startOfToday = new Date(currentDate.setHours(0, 0, 0, 0));
+
+    try {
+      // Find all pending bookings for the vendor where the event date has passed
+      const bookingsToUpdate = await this.bookingModel.aggregate([
+        {
+          $match: {
+            vendorId: vendorObjectId,
+            status: 'PENDING',
+          },
+        },
+        {
+          $lookup: {
+            from: 'events',
+            localField: 'eventId',
+            foreignField: '_id',
+            as: 'event',
+          },
+        },
+        { $unwind: '$event' },
+        {
+          $match: {
+            'event.date': { $lt: startOfToday }, // Event date is in the past
+          },
+        },
+      ]);
+
+      // Check if there are bookings to update
+      if (bookingsToUpdate.length === 0) {
+        return 'No pending bookings to update';
+      }
+
+      const bookingIds = bookingsToUpdate.map((booking) => booking._id);
+
+      // Update the status of the pending bookings to CANCELLED
+      await this.bookingModel.updateMany(
+        { _id: { $in: bookingIds } },
+        { $set: { status: 'CANCELLED', updatedAt: currentDate } },
+      );
+
+      return `${bookingIds.length} bookings have been updated to CANCELLED.`;
+    } catch (error) {
+      throw new Error('Failed to update bookings: ' + error);
+    }
+  }
+
   // async update(
   //   id: string,
   //   updateBookingDto: UpdateBookingDto,
