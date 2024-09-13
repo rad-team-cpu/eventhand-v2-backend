@@ -123,6 +123,23 @@ export class VendorsService {
           from: 'vendorPackages',
           localField: '_id',
           foreignField: 'vendorId',
+          pipeline: [
+            {
+              $lookup: {
+                from: 'tags',
+                localField: 'tags',
+                foreignField: '_id',
+                pipeline: [
+                  {
+                    $project: {
+                      name: 1,
+                    },
+                  },
+                ],
+                as: 'tags',
+              },
+            },
+          ],
           as: 'packages',
         },
       },
