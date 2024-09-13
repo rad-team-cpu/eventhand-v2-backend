@@ -15,7 +15,6 @@ import { PortfolioModule } from './portfolio/portfolio.module';
 import { MatchmakerModule } from './matchmaker/matchmaker.module';
 import { BookingModule } from './booking/booking.module';
 import config from './config/config';
-// import { ClerkModule } from './clerk/clerk.module';
 
 @Module({
   imports: [
@@ -38,14 +37,6 @@ import config from './config/config';
     PortfolioModule,
     MatchmakerModule,
     BookingModule,
-    // ClerkModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   useFactory: async (configService: ConfigService) => ({
-    //     secretKey: configService.get<string>('clerk.secret'),
-    //     publishableKey: configService.get<string>('clerk.publishable'),
-    //   }),
-    //   inject: [ConfigService],
-    // }),
   ],
   controllers: [AppController],
   providers: [AppService],

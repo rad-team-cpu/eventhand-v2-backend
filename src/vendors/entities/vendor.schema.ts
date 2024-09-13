@@ -13,7 +13,7 @@ class Address {
   @Prop({ required: true })
   street: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, text: true })
   city: string;
 
   @Prop({ required: true })
@@ -45,7 +45,7 @@ const CredentialSchema = SchemaFactory.createForClass(Credential);
 @Schema({
   timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 })
 export class Vendor {
   _id: ObjectId;
@@ -53,10 +53,10 @@ export class Vendor {
   @Prop({ required: true, unique: true, immutable: true })
   clerkId: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, text: true })
   name: string;
 
-  @Prop({ type: AddressSchema })
+  @Prop({ type: AddressSchema, text: true })
   @Type(() => Address)
   address: Address;
 
@@ -76,7 +76,7 @@ export class Vendor {
   @Type(() => Credential)
   credential: Credential[];
 
-  @Prop({ default: 'Add a new bio' })
+  @Prop({ default: 'Add a new bio', text: true })
   bio: string;
 
   @Prop({

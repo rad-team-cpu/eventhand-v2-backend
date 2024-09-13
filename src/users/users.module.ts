@@ -10,7 +10,7 @@ import { EventsModule } from 'src/events/events.module';
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     EventEmitterModule.forRoot(),
-    EventsModule
+    EventsModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],
