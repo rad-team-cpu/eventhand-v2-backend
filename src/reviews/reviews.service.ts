@@ -76,32 +76,32 @@ export class ReviewsService {
     }
   }
 
-  // Function to retrieve reviews with client details
+
   async getVendorReviews(vendorId: string) {
     const reviews = await this.reviewModel.aggregate([
       {
         $match: {
-          vendorId: new Types.ObjectId(vendorId), // Match by vendorId
+          vendorId: new Types.ObjectId(vendorId),
         },
       },
       {
         $lookup: {
-          from: 'users', // Collection name for Clients
-          localField: 'clientId', // Local field to match
-          foreignField: '_id', // Field in Clients collection
-          as: 'clientInfo', // Alias for joined client data
+          from: 'users', 
+          localField: 'clientId', 
+          foreignField: '_id', 
+          as: 'clientInfo', 
         },
       },
       {
         $unwind: {
-          path: '$clientInfo', // Unwind the clientInfo array to get a single object
-          preserveNullAndEmptyArrays: true, // Keep records with no matching client data
+          path: '$clientInfo', 
+          preserveNullAndEmptyArrays: true, 
         },
       },
       {
         $addFields: {
           clientFullName: {
-            $concat: ['$clientInfo.firstName', ' ', '$clientInfo.lastName'], // Concatenate first and last name
+            $concat: ['$clientInfo.firstName', ' ', '$clientInfo.lastName'], 
           },
           profilePicture: '$clientInfo.profilePicture',
           contactNumber: '$clientInfo.contactNumber',
@@ -110,13 +110,13 @@ export class ReviewsService {
       {
         $project: {
           _id: 1,
-          clientId: 1, // Keep the original clientId
-          clientFullName: 1, // Include the concatenated full name
-          profilePicture: 1, // Include profile picture
-          contactNumber: 1, // Include contact number
-          package: 1, // Include the package data
-          rating: 1, // Include the rating
-          comment: 1, // Include the comment, which can be null
+          clientId: 1,
+          clientFullName: 1, 
+          profilePicture: 1, 
+          contactNumber: 1, 
+          package: 1, 
+          rating: 1, 
+          comment: 1, 
         },
       },
     ]);

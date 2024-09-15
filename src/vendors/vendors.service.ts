@@ -292,14 +292,13 @@ export class VendorsService {
     const vendors = await this.vendorModel
       .aggregate([
         {
-          // Filter vendors by clerkId and ensure they are not blocked on the current day
+
           $match: {
             clerkId: { $regex: regex, $options: 'i' },
             visibility: true,
           },
         },
         {
-          // Lookup VendorPackages by vendorId and filter by package tag
           $lookup: {
             from: 'vendorPackages',
             localField: '_id',
@@ -310,11 +309,11 @@ export class VendorsService {
         {
           $unwind: {
             path: '$packages',
-            preserveNullAndEmptyArrays: true, // Preserve vendors even if they have no packages
+            preserveNullAndEmptyArrays: true, 
           },
         },
         {
-          // Lookup reviews for the vendor
+
           $lookup: {
             from: 'vendorReviews',
             localField: '_id',
@@ -324,7 +323,6 @@ export class VendorsService {
         },
         {
           $addFields: {
-            // Calculate the average rating from reviews (1-5 only)
             averageRating: {
               $avg: {
                 $filter: {
@@ -342,16 +340,15 @@ export class VendorsService {
           },
         },
         {
-          // Group by vendor ID to avoid duplicates
+
           $group: {
-            _id: '$_id', // Group by vendor ID
-            name: { $first: '$name' }, // Take the first name for each group
-            logo: { $first: '$logo' }, // Take the first logo for each group
-            averageRating: { $first: '$averageRating' }, // Take the first average rating
+            _id: '$_id',
+            name: { $first: '$name' }, 
+            logo: { $first: '$logo' }, 
+            averageRating: { $first: '$averageRating' }, 
           },
         },
         {
-          // Group to return vendor id, name, logo, and average rating
           $project: {
             _id: 1,
             name: 1,
@@ -370,10 +367,9 @@ export class VendorsService {
       const vendor = await this.vendorModel
         .aggregate([
           {
-            $match: { _id: new Types.ObjectId(vendorId) }, // Filter the specific vendor by ID
+            $match: { _id: new Types.ObjectId(vendorId) }, 
           },
           {
-            // Lookup the vendor packages
             $lookup: {
               from: 'vendorPackages',
               localField: '_id',
@@ -382,7 +378,6 @@ export class VendorsService {
             },
           },
           {
-            // Lookup associated reviews for the vendor
             $lookup: {
               from: 'vendorReviews',
               localField: '_id',
@@ -391,7 +386,6 @@ export class VendorsService {
             },
           },
           {
-            // Lookup associated clients for each review
             $lookup: {
               from: 'users',
               localField: 'reviews.clientId',
@@ -400,7 +394,6 @@ export class VendorsService {
             },
           },
           {
-            // Add a field with all tag IDs from packages
             $addFields: {
               allTagIds: {
                 $reduce: {
@@ -418,7 +411,6 @@ export class VendorsService {
             },
           },
           {
-            // Ensure allTagIds is an array and remove duplicates
             $addFields: {
               allTagIds: {
                 $cond: {
@@ -430,10 +422,9 @@ export class VendorsService {
             },
           },
           {
-            // Lookup tag details using the collected tag IDs
             $lookup: {
               from: 'tags',
-              let: { tagIds: '$allTagIds' }, // Use the tag IDs array
+              let: { tagIds: '$allTagIds' },
               pipeline: [
                 {
                   $match: {
@@ -451,7 +442,6 @@ export class VendorsService {
             },
           },
           {
-            // Add unique tags to the main document
             $addFields: {
               tags: {
                 $map: {
@@ -474,7 +464,6 @@ export class VendorsService {
             },
           },
           {
-            // Calculate the average rating and total bookings
             $addFields: {
               averageRatings: {
                 $avg: {
@@ -500,7 +489,7 @@ export class VendorsService {
                         cond: { $eq: ['$$booking.status', 'CONFIRMED'] },
                       },
                     },
-                    [], // If no bookings or bookings is null, use an empty array
+                    [], 
                   ],
                 },
               },
@@ -552,7 +541,6 @@ export class VendorsService {
             },
           },
           {
-            // Project the final result with all associated packages
             $project: {
               _id: 1,
               name: 1,
@@ -561,7 +549,7 @@ export class VendorsService {
               address: 1,
               email: 1,
               tags: 1,
-              packages: 1, // Include all associated packages
+              packages: 1, 
               reviews: 1,
               averageRatings: 1,
               totalBookings: 1,
