@@ -106,7 +106,7 @@ export class VendorsService {
   }
 
   async search(query: string): Promise<any> {
-    const result = await this.aggregate([
+    const lookupWithSearch: PipelineStage[] = [
       {
         $search: {
           index: 'default',
@@ -118,32 +118,70 @@ export class VendorsService {
           },
         },
       },
+      // {
+      //   $lookup: {
+      //     from: 'tags',
+      //     localField: 'tags',
+      //     foreignField: '_id',
+      //     as: 'tags',
+      //     pipeline: [
+      //       {
+      //         $search: {
+      //           index: 'default',
+      //           path: {
+      //             wildcard: '*',
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: 'vendorPackages',
+      //     localField: '_id',
+      //     foreignField: 'vendorId',
+      //     as: 'packages',
+      //     pipeline: [
+      //       {
+      //         $search: {
+      //           index: 'default',
+      //           text: {
+      //             query: query,
+      //             path: {
+      //               wildcard: '*',
+      //             },
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+    ];
+
+    const stuff = [
       {
         $lookup: {
-          from: 'vendorPackages',
-          localField: '_id',
-          foreignField: 'vendorId',
-          pipeline: [
-            {
-              $lookup: {
-                from: 'tags',
-                localField: 'tags',
-                foreignField: '_id',
-                pipeline: [
-                  {
-                    $project: {
-                      name: 1,
-                    },
-                  },
-                ],
-                as: 'tags',
-              },
-            },
-          ],
-          as: 'packages',
+          from: 'tags',
+          localField: 'tags',
+          foreignField: '_id',
+          pipeline: 'tags',
         },
       },
-    ]);
+      {
+        $search: {
+          index: 'default',
+          text: {
+            query: query,
+            path: {
+              wildcard: '*',
+            },
+          },
+        },
+      },
+    ];
+
+    const result = await this.aggregate(lookupWithSearch);
     return result;
   }
 
