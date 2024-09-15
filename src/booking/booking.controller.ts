@@ -9,6 +9,7 @@ import {
   Query,
   HttpException,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
@@ -20,7 +21,9 @@ import {
 } from './entities/booking.schema';
 import { FilterQuery } from 'mongoose';
 import { BookingStatus } from './entities/booking-status.enum';
+import { AuthenticationGuard } from 'src/authentication/authentication.guard';
 
+@UseGuards(AuthenticationGuard)
 @Controller('booking')
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}

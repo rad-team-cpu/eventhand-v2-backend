@@ -105,78 +105,44 @@ export class VendorsService {
     return result;
   }
 
-  async search(query: string): Promise<any> {
+  async search(query: string = ''): Promise<any> {
     const lookupWithSearch: PipelineStage[] = [
-      {
-        $search: {
-          index: 'default',
-          text: {
-            query: query,
-            path: {
-              wildcard: '*',
-            },
-          },
-        },
-      },
-      // {
-      //   $lookup: {
-      //     from: 'tags',
-      //     localField: 'tags',
-      //     foreignField: '_id',
-      //     as: 'tags',
-      //     pipeline: [
-      //       {
-      //         $search: {
-      //           index: 'default',
-      //           path: {
-      //             wildcard: '*',
-      //           },
-      //         },
-      //       },
-      //     ],
-      //   },
-      // },
-      // {
-      //   $lookup: {
-      //     from: 'vendorPackages',
-      //     localField: '_id',
-      //     foreignField: 'vendorId',
-      //     as: 'packages',
-      //     pipeline: [
-      //       {
-      //         $search: {
-      //           index: 'default',
-      //           text: {
-      //             query: query,
-      //             path: {
-      //               wildcard: '*',
-      //             },
-      //           },
-      //         },
-      //       },
-      //     ],
-      //   },
-      // },
-    ];
-
-    const stuff = [
       {
         $lookup: {
           from: 'tags',
           localField: 'tags',
           foreignField: '_id',
-          pipeline: 'tags',
+          as: 'tags',
+          pipeline: [
+            {
+              $search: {
+                index: 'default',
+                text: {
+                  query: query,
+                  path: ['name'],
+                },
+              },
+            },
+          ],
         },
       },
       {
-        $search: {
-          index: 'default',
-          text: {
-            query: query,
-            path: {
-              wildcard: '*',
+        $lookup: {
+          from: 'vendorPackages',
+          localField: '_id',
+          foreignField: 'vendorId',
+          pipeline: [
+            {
+              $search: {
+                index: 'packages',
+                text: {
+                  query: query,
+                  path: ['name'],
+                },
+              },
             },
-          },
+          ],
+          as: 'packages',
         },
       },
     ];
@@ -347,7 +313,6 @@ export class VendorsService {
     const vendors = await this.vendorModel
       .aggregate([
         {
-
           $match: {
             clerkId: { $regex: regex, $options: 'i' },
             visibility: true,
@@ -364,11 +329,10 @@ export class VendorsService {
         {
           $unwind: {
             path: '$packages',
-            preserveNullAndEmptyArrays: true, 
+            preserveNullAndEmptyArrays: true,
           },
         },
         {
-
           $lookup: {
             from: 'vendorReviews',
             localField: '_id',
@@ -395,12 +359,11 @@ export class VendorsService {
           },
         },
         {
-
           $group: {
             _id: '$_id',
-            name: { $first: '$name' }, 
-            logo: { $first: '$logo' }, 
-            averageRating: { $first: '$averageRating' }, 
+            name: { $first: '$name' },
+            logo: { $first: '$logo' },
+            averageRating: { $first: '$averageRating' },
           },
         },
         {
@@ -422,7 +385,7 @@ export class VendorsService {
       const vendor = await this.vendorModel
         .aggregate([
           {
-            $match: { _id: new Types.ObjectId(vendorId) }, 
+            $match: { _id: new Types.ObjectId(vendorId) },
           },
           {
             $lookup: {
@@ -544,7 +507,7 @@ export class VendorsService {
                         cond: { $eq: ['$$booking.status', 'CONFIRMED'] },
                       },
                     },
-                    [], 
+                    [],
                   ],
                 },
               },
@@ -604,7 +567,7 @@ export class VendorsService {
               address: 1,
               email: 1,
               tags: 1,
-              packages: 1, 
+              packages: 1,
               reviews: 1,
               averageRatings: 1,
               totalBookings: 1,

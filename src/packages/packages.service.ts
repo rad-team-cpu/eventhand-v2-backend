@@ -4,13 +4,11 @@ import { UpdatePackageDto } from './dto/update-package.dto';
 import { Package } from './entities/package.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
-import { Event } from 'src/events/entities/event.schema';
 
 @Injectable()
 export class PackagesService {
   constructor(
     @InjectModel(Package.name) private readonly packageModel: Model<Package>,
-    @InjectModel(Event.name) private readonly eventModel: Model<Event>,
   ) {}
 
   async create(createPackageDto: CreatePackageDto): Promise<Package> {

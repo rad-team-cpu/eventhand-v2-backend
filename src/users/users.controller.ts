@@ -6,6 +6,7 @@ import {
   // Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,6 +15,7 @@ import { User } from './entities/user.schema';
 import { isValidObjectId } from 'mongoose';
 import { PaginatedClientEvent } from 'src/events/entities/event.schema';
 import { EventsService } from 'src/events/events.service';
+import { AuthenticationGuard } from 'src/authentication/authentication.guard';
 
 @Controller('users')
 export class UsersController {
@@ -27,11 +29,13 @@ export class UsersController {
     return await this.usersService.create(createUserDto);
   }
 
+  @UseGuards(AuthenticationGuard)
   @Get()
   async findAll(): Promise<User[]> {
     return await this.usersService.findAll();
   }
 
+  @UseGuards(AuthenticationGuard)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<User> {
     const filter = isValidObjectId(id) ? { _id: id } : { clerkId: id };
@@ -39,6 +43,7 @@ export class UsersController {
     return user;
   }
 
+  @UseGuards(AuthenticationGuard)
   @Get(':clerkId/events')
   async findClient(@Param('clerkId') clerkId: string): Promise<{
     user: User;
@@ -89,6 +94,7 @@ export class UsersController {
   //   return this.usersService.update(+id, updateUserDto);
   // }
 
+  @UseGuards(AuthenticationGuard)
   @Delete('clerk=:clerkId')
   async remove(@Param('clerkId') clerkId: string): Promise<User> {
     return await this.usersService.remove(clerkId);
