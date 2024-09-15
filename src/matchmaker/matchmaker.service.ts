@@ -271,11 +271,13 @@ export class MatchmakerService {
         $project: {
           _id: 1,
           vendor: {
+            _id: '$vendor._id',
             name: '$vendor.name',
             logo: '$vendor.logo',
             contactNumber: '$vendor.contactNum',
             address: '$vendor.address',
             bio: '$vendor.bio',
+            averageRating: '$averageRating'
           },
           vendorTags: 1,
             name: '$package.name',
@@ -293,7 +295,6 @@ export class MatchmakerService {
               },
             },
     
-          averageRating: 1,
         },
       },
     ];
