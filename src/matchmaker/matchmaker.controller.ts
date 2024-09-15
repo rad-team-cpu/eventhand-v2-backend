@@ -7,8 +7,8 @@ export class MatchmakerController {
   constructor(private readonly matchmakerService: MatchmakerService) {}
 
   @Get(':id')
-  async match(@Param('id') eventId: string): Promise<Package[]> {
-    return await this.matchmakerService.findAvailablePackagesWithRating(
+  async match(@Param('id') eventId: string) {
+    return await this.matchmakerService.findAvailablePackages(
       eventId,
     );
   }

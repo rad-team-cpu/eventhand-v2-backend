@@ -160,154 +160,180 @@ export class MatchmakerService {
       },
     ]);
   }
+  
+  async findPackagesByBudgetAndEventDate(
+    budget: number,
+    eventDate: Date,
+    tagName: string,
+  ) {
+    const tag = await this.tagModel.findOne({ name: tagName });
+    if (!tag) {
+      throw new Error(`Tag with name "${tagName}" not found`);
+    }
 
-  async findAvailablePackagesWithRating(eventId: string) {
-    // Fetch the event details using the eventId\
-    const id = new Types.ObjectId(eventId);
-    const event = await this.eventModel.findById(id).exec();
+    const tagObjectId = tag._id;
+
+
+    const eventDay = format(eventDate, 'eeee').toUpperCase();
+    console.log(eventDay)
+
+    const pipeline = [
+      {
+        $match: {
+          price: { $lte: budget }, 
+          tags: tagObjectId,    
+        },
+      },
+      {
+        $lookup: {
+          from: 'vendors',
+          localField: 'vendorId',
+          foreignField: '_id',
+          as: 'vendor',
+        },
+      },
+      { $unwind: '$vendor' }, 
+      {
+        $match: {
+          'vendor.visibility': { $ne: false }, 
+          'vendor.blockedDays': { $ne: eventDay }, 
+        },
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: 'vendorId',
+          foreignField: 'vendorId',
+          as: 'bookings',
+        },
+      },
+      {
+        $match: {
+          'bookings.date': { $ne: eventDate }, 
+        },
+      },
+      {
+        $lookup: {
+          from: 'vendorReviews',
+          localField: 'vendorId',
+          foreignField: 'vendorId',
+          as: 'reviews',
+        },
+      },
+      {
+        $addFields: {
+          averageRating: { $avg: '$reviews.rating' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'tags',
+          localField: 'tags',
+          foreignField: '_id',
+          as: 'tags',
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          vendor: { $first: '$vendor' },
+          package: { $first: '$$ROOT' }, 
+          averageRating: { $first: '$averageRating' },
+          tags: { $first: '$tags' }, 
+        },
+      },
+      {
+        $lookup: {
+          from: 'vendorPackages',
+          localField: 'vendor._id',
+          foreignField: 'vendorId',
+          as: 'vendorPackages',
+        },
+      },
+      {
+        $lookup: {
+          from: 'tags',
+          localField: 'vendorPackages.tags',
+          foreignField: '_id',
+          as: 'vendorPackageTags',
+        },
+      },
+      {
+        $addFields: {
+          vendorTags: {
+            $setUnion: [
+              '$vendorPackageTags.name',
+            ],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          vendor: {
+            name: '$vendor.name',
+            logo: '$vendor.logo',
+            contactNumber: '$vendor.contactNum',
+            address: '$vendor.address',
+            bio: '$vendor.bio',
+          },
+          vendorTags: 1,
+            name: '$package.name',
+            imageUrl: '$package.imageUrl',
+            capacity: '$package.capacity',
+            description: '$package.description',
+            price: '$package.price',
+            orderTypes: '$package.orderTypes',
+            inclusions: '$package.inclusions',
+            tags: {
+              $map: {
+                input: '$tags',
+                as: 'tag',
+                in: '$$tag.name', 
+              },
+            },
+    
+          averageRating: 1,
+        },
+      },
+    ];
+
+
+
+    const results = await this.packageModel.aggregate(pipeline).exec();
+    return results;
+
+  }
+
+  async findAvailablePackages(eventId: string){
+    const eventObjectId = new Types.ObjectId(eventId)
+
+    const event = await this.eventModel.findById(eventObjectId).exec();
 
     if (!event) {
-      throw new NotFoundException(`Event not found ${id}`);
+      throw new NotFoundException(`Event not found ${eventObjectId}}`);
     }
 
     const { budget, date } = event;
 
-    const eventDay = format(date, 'eeee').toUpperCase();
+    const eventPlanning = (budget.eventPlanning !== null)?  await this.findPackagesByBudgetAndEventDate(budget.eventPlanning, date, "EVENTPLANNING"): null;
+    const eventCoordination = (budget.eventCoordination !== null)? await this.findPackagesByBudgetAndEventDate(budget.eventCoordination, date, "EVENTCOORDINATION"): null;
+    const decorations = (budget.decorations !== null)?await this.findPackagesByBudgetAndEventDate(budget.decorations, date, "DECORATIONS"): null;
+    const venue = (budget.venue !== null)? await this.findPackagesByBudgetAndEventDate(budget.venue, date, "VENUE"): null;
+    const catering = (budget.catering !== null)? await this.findPackagesByBudgetAndEventDate(budget.catering, date, "CATERING"): null;
+    const photography = (budget.photography !== null)? await this.findPackagesByBudgetAndEventDate(budget.photography, date, "PHOTOGRAPHY"): null;
+    const videography = (budget.videography !== null)? await this.findPackagesByBudgetAndEventDate(budget.videography, date, "VIDEOGRAPHY"): null;
 
-    const budgetTagMapping: Record<string, Types.ObjectId> = {
-      eventPlanning: new Types.ObjectId('66d88166d003b4f05e5b9d42'),
-      eventCoordination: new Types.ObjectId('66d88166d003b4f05e5b9d43'),
-      venue: new Types.ObjectId('66d88166d003b4f05e5b9d44'),
-      catering: new Types.ObjectId('66d88166d003b4f05e5b9d45'),
-      decorations: new Types.ObjectId('66d88166d003b4f05e5b9d46'),
-      photography: new Types.ObjectId('66d88166d003b4f05e5b9d47'),
-      videography: new Types.ObjectId('66d88166d003b4f05e5b9d48'),
-    };
-
-    const applicableTagIds = Object.keys(budget)
-      .filter((key) => budget[key] !== null)
-      .map((key) => budgetTagMapping[key]);
-
-    if (applicableTagIds.length === 0) {
-      return [];
+    return {
+      eventPlanning,
+      eventCoordination,
+      decorations,
+      venue,
+      catering,
+      photography,
+      videography
     }
 
-    const packages = await this.packageModel
-      .aggregate([
-        {
-          $match: {
-            $and: [
-              {
-                $or: applicableTagIds.map((tagId) => ({
-                  $and: [
-                    {
-                      price: {
-                        $lte: budget[
-                          Object.keys(budget).find(
-                            (key) =>
-                              budgetTagMapping[key].toString() ===
-                              tagId.toString(),
-                          )
-                        ],
-                      },
-                    },
-                    { tags: tagId },
-                  ],
-                })),
-              },
-            ],
-          },
-        },
-        {
-          $lookup: {
-            from: 'vendors',
-            localField: 'vendorId',
-            foreignField: '_id',
-            as: 'vendor',
-          },
-        },
-        {
-          $unwind: '$vendor',
-        },
-        {
-          $match: {
-            'vendor.visibility': true,
-            [`vendor.blockedDays.${eventDay}`]: { $exists: false },
-          },
-        },
-        {
-          $lookup: {
-            from: 'bookings',
-            localField: 'vendor._id',
-            foreignField: 'vendorId',
-            as: 'bookings',
-          },
-        },
-        {
-          $unwind: {
-            path: '$bookings',
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $match: {
-            $or: [
-              { bookings: { $eq: null } },
-              { 'bookings.date': { $ne: date } },
-            ],
-          },
-        },
-        {
-          $lookup: {
-            from: 'vendorreviews',
-            localField: 'vendor._id',
-            foreignField: 'vendorId',
-            as: 'reviews',
-          },
-        },
-        {
-          $unwind: {
-            path: '$reviews',
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $group: {
-            _id: '$vendor._id',
-            vendorName: { $first: '$vendor.name' },
-            vendorLogo: { $first: '$vendor.logo' },
-            vendorContactNum: { $first: '$vendor.contactNum' },
-            vendorAddress: { $first: '$vendor.address' },
-            vendorBio: { $first: '$vendor.bio' },
-            vendorPackages: { $push: '$$ROOT' },
-            averageRating: { $avg: '$reviews.rating' },
-          },
-        },
-        {
-          $project: {
-            _id: 1,
-            vendorName: 1,
-            vendorLogo: 1,
-            vendorContactNum: 1,
-            vendorAddress: 1,
-            vendorBio: 1,
-            vendorPackages: {
-              _id: 1,
-              name: 1,
-              capacity: 1,
-              description: 1,
-              price: 1,
-              orderTypes: 1,
-              tags: 1,
-              inclusions: 1,
-              imageUrl: 1,
-            },
-            averageRating: { $ifNull: ['$averageRating', 0] }, // If no rating exists, return 0
-          },
-        },
-      ])
-      .exec();
-
-    return packages;
   }
+
 }
