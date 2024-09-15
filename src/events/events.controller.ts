@@ -9,6 +9,7 @@ import {
   BadRequestException,
   Query,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { Event, PaginatedClientEvent } from './entities/event.schema';
@@ -20,7 +21,9 @@ import {
   UpdateEventDateDto,
   UpdateEventNameDto,
 } from './dto/update-event.dto';
+import { AuthenticationGuard } from 'src/authentication/authentication.guard';
 
+@UseGuards(AuthenticationGuard)
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}

@@ -7,13 +7,16 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { PackagesService } from './packages.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import { Package } from './entities/package.schema';
 import { FilterQuery } from 'mongoose';
+import { AuthenticationGuard } from 'src/authentication/authentication.guard';
 
+@UseGuards(AuthenticationGuard)
 @Controller('packages')
 export class PackagesController {
   constructor(private readonly packagesService: PackagesService) {}
