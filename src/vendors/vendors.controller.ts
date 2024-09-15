@@ -7,6 +7,7 @@ import {
   Delete,
   Patch,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { VendorsService } from './vendors.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
@@ -15,7 +16,9 @@ import { isValidObjectId } from 'mongoose';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
 import { SelectedTagsDto } from './dto/selected-vendor-tags.dto';
+import { AuthenticationGuard } from 'src/authentication/authentication.guard';
 
+@UseGuards(AuthenticationGuard)
 @Controller('vendors')
 export class VendorsController {
   constructor(private readonly vendorsService: VendorsService) {}

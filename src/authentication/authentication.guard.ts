@@ -9,8 +9,8 @@ export class AuthenticationGuard implements CanActivate {
 
     try {
       const verifiedToken = await clerkClient.verifyToken(bearerToken);
-      console.log(verifiedToken);
     } catch (err) {
+      console.log(err);
       return false;
     }
 
