@@ -22,6 +22,7 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 export class BookingService {
   constructor(
     @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
+    @InjectModel(Event.name) private readonly eventModel: Model<Event>,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -29,13 +30,20 @@ export class BookingService {
     try {
       const result = await this.bookingModel.create(createBookingDto);
 
-      await this.eventEmitter.emitAsync(
-        'booking.created',
-        createBookingDto.eventId,
+      await this.eventModel.updateMany(
         {
-          $push: { bookings: result._id } as UpdateQuery<Event>,
+          _id: createBookingDto.eventId,
+        },
+        {
+          $push: { bookings: result._id }
         },
       );
+
+      // await this.eventEmitter.emitAsync(
+      //   'booking.created',
+      //   createBookingDto.eventId,
+
+      // );
 
       return result;
     } catch (error) {
