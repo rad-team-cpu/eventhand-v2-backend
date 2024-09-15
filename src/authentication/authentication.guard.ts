@@ -6,7 +6,7 @@ export class AuthenticationGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     const bearerToken = req.headers.authorization?.replace('Bearer ', '');
-
+    console.log(bearerToken);
     try {
       const verifiedToken = await clerkClient.verifyToken(bearerToken);
     } catch (err) {
