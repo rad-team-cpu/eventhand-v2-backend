@@ -51,16 +51,16 @@ export class MatchmakerService {
     eventDate: Date,
   ): Promise<VendorDocument[]> {
     return this.vendorModel.aggregate([
-      //aggrgate for vendors.
+
       {
         $match: {
-          visibility: true, //the vendor needs to be visible
-          blockedDays: { $ne: eventDayName.toUpperCase() }, // the vendor hasn't blocked the day of the week.
+          visibility: true,
+          blockedDays: { $ne: eventDayName.toUpperCase() }, 
         },
       },
       {
         $lookup: {
-          // we join the bookings referenced as vendor
+
           from: 'bookings',
           localField: '_id',
           foreignField: 'vendor',
@@ -70,7 +70,7 @@ export class MatchmakerService {
       {
         $match: {
           $or: [
-            { bookings: { $size: 0 } }, // Include vendors with no bookings
+            { bookings: { $size: 0 } },
             {
               $and: [
                 {
@@ -78,8 +78,8 @@ export class MatchmakerService {
                     $gte: startOfDay(eventDate),
                     $lt: endOfDay(eventDate),
                   },
-                }, // Ensure no booking on the event date
-                { 'bookings.status': { $ne: BookingStatus.Confirmed } }, // Or, ensure the booking isn't confirmed
+                }, 
+                { 'bookings.status': { $ne: BookingStatus.Confirmed } }, 
               ],
             },
           ],

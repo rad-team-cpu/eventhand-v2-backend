@@ -70,7 +70,7 @@ export class EventsService {
           {
             $unwind: {
               path: '$bookings',
-              preserveNullAndEmptyArrays: true, // Include events without bookings
+              preserveNullAndEmptyArrays: true, 
             },
           },
           {
@@ -84,7 +84,7 @@ export class EventsService {
           {
             $unwind: {
               path: '$bookings.vendor',
-              preserveNullAndEmptyArrays: true, // Include bookings without vendors
+              preserveNullAndEmptyArrays: true, 
             },
           },
           {
@@ -168,7 +168,7 @@ export class EventsService {
           { $skip: skip },
           { $limit: limit },
           {
-            $sort: { date: 1 }, // Sort by date, dynamic sortOrder (1 for ascending, -1 for descending)
+            $sort: { date: 1 },
           },
         ])
         .exec();
@@ -338,7 +338,7 @@ export class EventsService {
     const event = await this.eventModel
       .aggregate([
         {
-          $match: { _id }, // Match the event by eventId
+          $match: { _id }, 
         },
         {
           $lookup: {
@@ -351,7 +351,7 @@ export class EventsService {
         {
           $unwind: {
             path: '$bookings',
-            preserveNullAndEmptyArrays: true, // Include events without bookings
+            preserveNullAndEmptyArrays: true,
           },
         },
         {
@@ -365,7 +365,7 @@ export class EventsService {
         {
           $unwind: {
             path: '$bookings.vendor',
-            preserveNullAndEmptyArrays: true, // Include bookings without vendors
+            preserveNullAndEmptyArrays: true, 
           },
         },
         {

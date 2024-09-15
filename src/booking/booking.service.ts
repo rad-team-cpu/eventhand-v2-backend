@@ -48,7 +48,7 @@ export class BookingService {
       bookingId,
       {
         status: 'COMPLETED',
-        completedAt: new Date(), // Set the completion timestamp
+        completedAt: new Date(), 
       },
       { new: true },
     );
@@ -65,7 +65,7 @@ export class BookingService {
       bookingId,
       {
         status: BookingStatus.Cancelled,
-        cancelledAt: new Date(), // Set the completion timestamp
+        cancelledAt: new Date(), 
       },
       { new: true },
     );
@@ -100,25 +100,22 @@ export class BookingService {
       throw new NotFoundException('Booking not found');
     }
 
-    // Update the booking status
     booking.status = BookingStatus.Confirmed;
 
     const updatedBooking = await booking.save();
 
-    // If the booking status is COMPLETED, update other bookings
 
     await this.declineOtherBookings(booking.vendorId._id, booking.date);
 
     return updatedBooking;
   }
 
-  // Function to update other bookings to "DECLINED"
   async declineOtherBookings(vendorId: ObjectId, date: Date): Promise<void> {
     await this.bookingModel.updateMany(
       {
         vendorId,
         date,
-        status: { $ne: 'COMPLETED' }, // Don't decline bookings that are already completed
+        status: { $ne: 'COMPLETED' },
       },
       { $set: { status: 'DECLINED' } },
     );
@@ -148,7 +145,7 @@ export class BookingService {
         },
         {
           $lookup: {
-            from: 'events', // Event collection
+            from: 'events', 
             localField: 'eventId',
             foreignField: '_id',
             as: 'event',
@@ -157,7 +154,7 @@ export class BookingService {
         { $unwind: '$event' },
         {
           $lookup: {
-            from: 'users', // Client collection
+            from: 'users', 
             localField: 'event.clientId',
             foreignField: '_id',
             as: 'client',
@@ -180,7 +177,7 @@ export class BookingService {
         { $skip: skip },
         { $limit: limit },
         {
-          $sort: { date: 1 }, // Sort by date, dynamic sortOrder (1 for ascending, -1 for descending)
+          $sort: { date: 1 },
         },
       ])
       .exec();
@@ -224,7 +221,7 @@ export class BookingService {
           },
           {
             $lookup: {
-              from: 'events', // Event collection
+              from: 'events', 
               localField: 'eventId',
               foreignField: '_id',
               as: 'event',
@@ -233,7 +230,7 @@ export class BookingService {
           { $unwind: '$event' },
           {
             $lookup: {
-              from: 'users', // Client collection
+              from: 'users',
               localField: 'event.clientId',
               foreignField: '_id',
               as: 'client',
@@ -256,7 +253,7 @@ export class BookingService {
           { $skip: skip },
           { $limit: limit },
           {
-            $sort: { date: 1 }, // Sort by date, dynamic sortOrder (1 for ascending, -1 for descending)
+            $sort: { date: 1 }, 
           },
         ])
         .exec();
@@ -346,22 +343,21 @@ export class BookingService {
   async confirmBooking(bookingId: string): Promise<void> {
     const bookingObjectId = new Types.ObjectId(bookingId);
 
-    // Find the booking to confirm
+
     const bookingToConfirm = await this.bookingModel.findById(bookingObjectId);
     if (!bookingToConfirm) {
       throw new NotFoundException('Booking not found');
     }
 
-    // Update the status of the selected booking to CONFIRMED
+    
     bookingToConfirm.status = 'CONFIRMED';
     await bookingToConfirm.save();
 
-    // Find and update other bookings with the same eventId and event date to DECLINED
     await this.bookingModel.updateMany(
       {
         eventId: bookingToConfirm.eventId,
-        _id: { $ne: bookingObjectId }, // Exclude the confirmed booking
-        date: bookingToConfirm.date, // Ensure same event date
+        _id: { $ne: bookingObjectId }, 
+        date: bookingToConfirm.date, 
       },
       { $set: { status: 'DECLINED' } },
     );
@@ -396,19 +392,18 @@ export class BookingService {
         { $unwind: '$event' },
         {
           $match: {
-            'event.date': { $lt: startOfToday }, // Event date is in the past
+            'event.date': { $lt: startOfToday }, 
           },
         },
       ]);
 
-      // Check if there are bookings to update
       if (bookingsToUpdate.length === 0) {
         return 'No pending bookings to update';
       }
 
       const bookingIds = bookingsToUpdate.map((booking) => booking._id);
 
-      // Update the status of the pending bookings to CANCELLED
+      
       await this.bookingModel.updateMany(
         { _id: { $in: bookingIds } },
         { $set: { status: 'CANCELLED', updatedAt: currentDate } },
