@@ -7,13 +7,16 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { Review } from './entities/review.schema';
 import { FilterQuery } from 'mongoose';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { AuthenticationGuard } from 'src/authentication/authentication.guard';
 
+@UseGuards(AuthenticationGuard)
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
