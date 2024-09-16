@@ -12,6 +12,7 @@ import { TagsModule } from './tags/tags.module';
 import { PackagesModule } from './packages/packages.module';
 import { MatchmakerModule } from './matchmaker/matchmaker.module';
 import { BookingModule } from './booking/booking.module';
+import { OwnershipModule } from './ownership/ownership.module';
 import config from './config/config';
 
 @Module({
@@ -33,6 +34,7 @@ import config from './config/config';
     PackagesModule,
     MatchmakerModule,
     BookingModule,
+    OwnershipModule,
   ],
   controllers: [AppController],
   providers: [AppService],
