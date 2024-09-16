@@ -22,22 +22,28 @@ import {
   UpdateEventNameDto,
 } from './dto/update-event.dto';
 import { AuthenticationGuard } from 'src/authentication/authentication.guard';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { Role } from 'src/roles/roles.enum';
+import { Roles } from 'src/roles/roles.decorator';
 
-@UseGuards(AuthenticationGuard)
+@UseGuards(AuthenticationGuard, RolesGuard)
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(readonly eventsService: EventsService) {}
 
+  @Roles(Role.Client)
   @Post()
   async create(@Body() createEventDto: CreateEventDto): Promise<Event> {
     return await this.eventsService.create(createEventDto);
   }
 
+  @Roles(Role.Admin)
   @Get()
   async findAll(): Promise<Event[]> {
     return this.eventsService.findAll();
   }
 
+  @Roles(Role.Client)
   @Get('user/:userId')
   async findAllClientEvents(
     @Param('userId') userId: string,
@@ -81,11 +87,13 @@ export class EventsController {
   //   return this.eventsService.update(id, updateEventDto);
   // }
 
+  @Roles(Role.Client)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Event> {
     return await this.eventsService.remove(id);
   }
 
+  @Roles(Role.Client)
   @Patch(':id/name')
   async updateEventName(
     @Param('id') id: string,
@@ -94,6 +102,7 @@ export class EventsController {
     return this.eventsService.updateEventName(id, updateEventNameDto);
   }
 
+  @Roles(Role.Client)
   @Patch(':id/date')
   async updateEventDate(
     @Param('id') eventId: string,
@@ -102,6 +111,7 @@ export class EventsController {
     return this.eventsService.updateEventDate(eventId, updateEventDateDto);
   }
 
+  @Roles(Role.Client)
   @Patch(':id/address')
   async updateEventAddress(
     @Param('id') eventId: string,
@@ -113,6 +123,7 @@ export class EventsController {
     );
   }
 
+  @Roles(Role.Client)
   @Patch(':id/attendees')
   async updateEventAttendees(
     @Param('id') eventId: string,
@@ -124,6 +135,7 @@ export class EventsController {
     );
   }
 
+  @Roles(Role.Client)
   @Patch(':id/budget')
   async updateEventBudget(
     @Param('id') eventId: string,

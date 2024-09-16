@@ -15,12 +15,16 @@ import { Review } from './entities/review.schema';
 import { FilterQuery } from 'mongoose';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { AuthenticationGuard } from 'src/authentication/authentication.guard';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { Roles } from 'src/roles/roles.decorator';
+import { Role } from 'src/roles/roles.enum';
 
-@UseGuards(AuthenticationGuard)
+@UseGuards(AuthenticationGuard, RolesGuard)
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
+  @Roles(Role.Client)
   @Post()
   async create(@Body() createReviewDto: CreateReviewDto): Promise<Review> {
     console.log(createReviewDto);
@@ -55,6 +59,7 @@ export class ReviewsController {
     }
   }
 
+  @Roles(Role.Client)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -63,6 +68,7 @@ export class ReviewsController {
     return this.reviewsService.update(id, updateReviewDto);
   }
 
+  @Roles(Role.Client)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Review> {
     return await this.reviewsService.remove(id);

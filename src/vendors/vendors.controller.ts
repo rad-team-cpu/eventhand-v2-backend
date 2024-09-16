@@ -17,22 +17,28 @@ import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { UpdateVendorTagsDto } from './dto/update-vendor-tags.dto';
 import { SelectedTagsDto } from './dto/selected-vendor-tags.dto';
 import { AuthenticationGuard } from 'src/authentication/authentication.guard';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { Roles } from 'src/roles/roles.decorator';
+import { Role } from 'src/roles/roles.enum';
 
-@UseGuards(AuthenticationGuard)
+@UseGuards(AuthenticationGuard, RolesGuard)
 @Controller('vendors')
 export class VendorsController {
   constructor(private readonly vendorsService: VendorsService) {}
 
+  @Roles(Role.Vendor)
   @Post()
   async create(@Body() createVendorDto: CreateVendorDto): Promise<Vendor> {
     return await this.vendorsService.create(createVendorDto);
   }
 
+  @Roles(Role.Client)
   @Get()
   async findAllVisible(): Promise<Vendor[]> {
     return await this.vendorsService.findAll({ visibility: true });
   }
 
+  @Roles(Role.Client)
   @Get('search')
   async search(@Query('query') query: string): Promise<Vendor[]> {
     return await this.vendorsService.search(query);
@@ -43,6 +49,7 @@ export class VendorsController {
     return await this.vendorsService.findAll();
   }
 
+  @Roles(Role.Client)
   @Get('tags')
   async findByTags(@Query() tags: SelectedTagsDto): Promise<Vendor[]> {
     return await this.vendorsService.findAllByTags(tags);
@@ -53,6 +60,7 @@ export class VendorsController {
     return await this.vendorsService.findOneWithPackages(id);
   }
 
+  @Roles(Role.Client)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Vendor> {
     const filter = isValidObjectId(id) ? { _id: id } : { clerkId: id };
@@ -60,6 +68,7 @@ export class VendorsController {
   }
 
   @Patch(':id')
+  @Roles(Role.Vendor)
   async update(
     @Param('id') id: string,
     @Body() updateVendorDto: UpdateVendorDto,
@@ -68,6 +77,7 @@ export class VendorsController {
   }
 
   @Patch(':id/tags')
+  @Roles(Role.Vendor)
   async updateTags(
     @Param('id') id: string,
     @Body() updateVendorTagsDto: UpdateVendorTagsDto,
@@ -76,11 +86,13 @@ export class VendorsController {
   }
 
   @Delete(':id')
+  @Roles(Role.Vendor)
   async remove(@Param('id') id: string): Promise<Vendor> {
     return await this.vendorsService.remove({ _id: id });
   }
 
   @Get(':id/list')
+  @Roles(Role.Client)
   async getVendorList(@Param('id') id: string): Promise<any> {
     const venue = await this.vendorsService.getVendorsWithRatings(
       id,
@@ -132,6 +144,7 @@ export class VendorsController {
   }
 
   @Get(':id/packagesandtags')
+  @Roles(Role.Client)
   async getVendorWithPackagesAndTags(@Param('id') id: string): Promise<Vendor> {
     return await this.vendorsService.getVendorWithPackagesAndTags(id);
   }
