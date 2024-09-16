@@ -22,17 +22,22 @@ import {
 import { FilterQuery } from 'mongoose';
 import { BookingStatus } from './entities/booking-status.enum';
 import { AuthenticationGuard } from 'src/authentication/authentication.guard';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { Roles } from 'src/roles/roles.decorator';
+import { Role } from 'src/roles/roles.enum';
 
-@UseGuards(AuthenticationGuard)
+@UseGuards(AuthenticationGuard, RolesGuard)
 @Controller('booking')
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
+  @Roles(Role.Client)
   @Post()
   async create(@Body() createBookingDto: CreateBookingDto): Promise<Booking> {
     return await this.bookingService.create(createBookingDto);
   }
 
+  @Roles(Role.Vendor)
   @Get()
   async findAll(@Query() filter?: FilterQuery<Booking>): Promise<Booking[]> {
     return await this.bookingService.findAll(filter);
@@ -112,6 +117,7 @@ export class BookingController {
     return await this.bookingService.update(id, updateBookingDto);
   }
 
+  @Roles(Role.Client)
   @Get('vendor/:vendorId/view')
   async getVendorBookings(
     @Param('vendorId') vendorId: string,
@@ -119,6 +125,7 @@ export class BookingController {
     return this.bookingService.getVendorBooking(vendorId);
   }
 
+  @Roles(Role.Client)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Booking> {
     return await this.bookingService.remove(id);

@@ -10,7 +10,6 @@ import { VendorsModule } from './vendors/vendors.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { TagsModule } from './tags/tags.module';
 import { PackagesModule } from './packages/packages.module';
-import { PortfolioModule } from './portfolio/portfolio.module';
 import { MatchmakerModule } from './matchmaker/matchmaker.module';
 import { BookingModule } from './booking/booking.module';
 import config from './config/config';
@@ -32,7 +31,6 @@ import config from './config/config';
     ReviewsModule,
     TagsModule,
     PackagesModule,
-    PortfolioModule,
     MatchmakerModule,
     BookingModule,
   ],
