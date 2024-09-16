@@ -25,6 +25,7 @@ import { AuthenticationGuard } from 'src/authentication/authentication.guard';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { Roles } from 'src/roles/roles.decorator';
 import { Role } from 'src/roles/roles.enum';
+import { BookingOwnershipGuard } from './booking-ownership.guard';
 
 @UseGuards(AuthenticationGuard, RolesGuard)
 @Controller('booking')
@@ -49,6 +50,7 @@ export class BookingController {
   }
 
   @Patch(':id/cancel')
+  @UseGuards(BookingOwnershipGuard)
   async cancelBooking(@Param('id') id: string): Promise<Booking> {
     return await this.bookingService.cancelBooking(id);
   }
@@ -57,7 +59,8 @@ export class BookingController {
   async updateStatus(@Param('id') bookingId: string) {
     return await this.bookingService.updateBookingStatus(bookingId);
   }
-
+  
+  @Roles(Role.Vendor)
   @Get('vendor/:vendorId')
   async findPaginatedVendorBookingsbyStatus(
     @Param('vendorId') vendorId: string,
@@ -65,7 +68,6 @@ export class BookingController {
     @Query('limit') limit: number,
     @Query('status') status: BookingStatus,
   ) {
-    console.log(vendorId);
     try {
       let bookings: VendorBookingList;
 
@@ -104,6 +106,7 @@ export class BookingController {
   }
 
   @Patch(':id/confirm')
+  @UseGuards(BookingOwnershipGuard)
   async confirmBooking(@Param('id') id: string): Promise<{ message: string }> {
     await this.bookingService.confirmBooking(id);
     return { message: 'Booking confirmed and other bookings declined' };
@@ -117,7 +120,7 @@ export class BookingController {
     return await this.bookingService.update(id, updateBookingDto);
   }
 
-  @Roles(Role.Client)
+  @Roles(Role.Vendor)
   @Get('vendor/:vendorId/view')
   async getVendorBookings(
     @Param('vendorId') vendorId: string,

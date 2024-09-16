@@ -17,12 +17,17 @@ import { Event } from 'src/events/entities/event.schema';
 import { BookingStatus } from './entities/booking-status.enum';
 import { startOfDay, endOfDay } from 'date-fns';
 import { UpdateBookingDto } from './dto/update-booking.dto';
+import { Vendor } from 'src/vendors/entities/vendor.schema';
+import { User } from 'src/users/entities/user.schema';
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
     @InjectModel(Event.name) private readonly eventModel: Model<Event>,
+    @InjectModel(Vendor.name) private readonly vendorModel: Model<Vendor>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -481,5 +486,35 @@ export class BookingService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async getClerkIds(bookingId: string): Promise<{ vendorClerkId: string, clientClerkId: string }> {
+    // Fetch booking
+    const booking = await this.bookingModel.findById(bookingId).exec();
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    // Fetch vendor
+    const vendor = await this.vendorModel.findById(booking.vendorId).exec();
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    // Fetch client (assuming clientId is derived from the eventId)
+    const event = await this.eventModel.findOne({_id: booking.eventId}); // Implement this method if not present
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+
+    const client = await this.userModel.findById(event.clientId).exec(); // Assuming event contains clientId
+    if (!client) {
+      throw new NotFoundException('Client not found');
+    }
+
+    return {
+      vendorClerkId: vendor.clerkId,
+      clientClerkId: client.clerkId,
+    };
   }
 }

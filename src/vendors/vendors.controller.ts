@@ -60,7 +60,7 @@ export class VendorsController {
     return await this.vendorsService.findOneWithPackages(id);
   }
 
-  @Roles(Role.Client)
+  @Roles(Role.Vendor)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Vendor> {
     const filter = isValidObjectId(id) ? { _id: id } : { clerkId: id };
